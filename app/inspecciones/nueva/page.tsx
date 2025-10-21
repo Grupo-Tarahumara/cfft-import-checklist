@@ -70,6 +70,16 @@ export default function NuevaInspeccionPage() {
     loadCatalogs();
   }, []);
 
+  // Auto-seleccionar el usuario actual como inspector si es usuario normal
+  useEffect(() => {
+    if (user && user.rol === 'user' && usuarios.length > 0) {
+      const usuarioActual = usuarios.find(u => u.username === user.username);
+      if (usuarioActual && formData.usuarioId === 0) {
+        setFormData({ ...formData, usuarioId: usuarioActual.id });
+      }
+    }
+  }, [user, usuarios]);
+
   const loadCatalogs = async () => {
     try {
       setLoading(true);
@@ -372,7 +382,10 @@ export default function NuevaInspeccionPage() {
                   value={formData.usuarioId}
                   onChange={(e) => setFormData({ ...formData, usuarioId: parseInt(e.target.value) })}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                  disabled={user?.rol === 'user'}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                    user?.rol === 'user' ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+                  }`}
                 >
                   <option value={0}>Seleccione un inspector</option>
                   {usuarios.map((usuario) => (
@@ -381,6 +394,9 @@ export default function NuevaInspeccionPage() {
                     </option>
                   ))}
                 </select>
+                {user?.rol === 'user' && (
+                  <p className="text-xs text-gray-500 mt-1">Se ha seleccionado automáticamente tu usuario</p>
+                )}
               </div>
             </div>
           </div>
@@ -531,7 +547,7 @@ export default function NuevaInspeccionPage() {
                         <button
                           type="button"
                           onClick={() => handleFotoRequeridaChange(index, null)}
-                          className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full shadow-lg transition-all lg:opacity-0 lg:group-hover:opacity-100"
                         >
                           <XMarkIcon className="h-4 w-4" />
                         </button>
@@ -600,7 +616,7 @@ export default function NuevaInspeccionPage() {
                     <button
                       type="button"
                       onClick={() => handleRemoveFotoOpcional(index)}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full shadow-lg transition-all lg:opacity-0 lg:group-hover:opacity-100"
                     >
                       <XMarkIcon className="h-4 w-4" />
                     </button>

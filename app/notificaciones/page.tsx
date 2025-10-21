@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { authApi } from '@/lib/api-auth';
 import { Notificacion, Usuario } from '@/types';
+import { toast } from 'sonner';
 
 export default function NotificacionesPage() {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
@@ -33,6 +34,9 @@ export default function NotificacionesPage() {
       setUsuarios(usuariosData);
     } catch (error) {
       console.error('Error loading data:', error);
+      toast.error('Error al cargar notificaciones', {
+        description: 'Por favor, intente recargar la página',
+      });
     } finally {
       setLoading(false);
     }
@@ -61,10 +65,25 @@ export default function NotificacionesPage() {
   const handleMarcarEnviada = async (id: number) => {
     try {
       await authApi.patch(`/notificaciones/${id}/marcar-enviada`, {});
-      await loadData();
+
+      // Actualizar solo la notificación en el estado local sin recargar
+      setNotificaciones(prevNotificaciones =>
+        prevNotificaciones.map(notif =>
+          notif.id === id
+            ? { ...notif, enviada: true, fechaEnvio: new Date().toISOString() }
+            : notif
+        )
+      );
+
+      toast.success('Notificación marcada como enviada', {
+        description: 'El estado se ha actualizado correctamente',
+        duration: 3000,
+      });
     } catch (error) {
       console.error('Error marking as sent:', error);
-      alert('Error al marcar la notificación como enviada');
+      toast.error('Error al marcar como enviada', {
+        description: 'Por favor, intente nuevamente',
+      });
     }
   };
 

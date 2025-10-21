@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { LoginDto, UserProfile } from '@/types';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -21,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const notifications = useNotifications();
 
   // Cargar el token del localStorage al iniciar
   useEffect(() => {
@@ -46,6 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const profile = await response.json();
         setUser(profile);
+
+        // Registrar notificaciones push si es admin
+        if (profile.rol === 'admin') {
+          setupPushNotifications();
+        }
       } else {
         // Token inválido, limpiar
         localStorage.removeItem('access_token');
@@ -59,6 +66,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const setupPushNotifications = async () => {
+    try {
+      // Solo intentar si las notificaciones están soportadas
+      if (!notifications.isSupported) {
+        console.log('Push notifications not supported');
+        return;
+      }
+
+      // Si ya tiene permiso, obtener el token directamente
+      if (notifications.permission === 'granted') {
+        const fcmToken = await notifications.getFCMToken();
+        if (fcmToken) {
+          await notifications.registerToken(fcmToken);
+        }
+      }
+      // Si no tiene permiso, no hacemos nada (el usuario puede habilitarlo después)
+    } catch (error) {
+      console.error('Error setting up push notifications:', error);
     }
   };
 
@@ -83,6 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const profile = await profileResponse.json();
         setUser(profile);
 
+        // Registrar notificaciones push si es admin
+        if (profile.rol === 'admin') {
+          setupPushNotifications();
+        }
+
         // Redirigir según el rol del usuario
         if (profile.rol === 'admin') {
           router.push('/dashboard');
@@ -99,7 +132,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Desregistrar token de notificaciones si existe
+    if (notifications.token) {
+      await notifications.unregisterToken(notifications.token);
+    }
+
     localStorage.removeItem('access_token');
     setToken(null);
     setUser(null);

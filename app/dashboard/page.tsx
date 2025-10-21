@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
+import { NotificationPermission } from '@/components/NotificationPermission';
 import { authApi } from '@/lib/api-auth';
 import { Inspeccion, Alerta } from '@/types';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { 
+import {
   ClipboardDocumentListIcon,
   ExclamationTriangleIcon,
   BellAlertIcon,
@@ -132,6 +133,15 @@ export default function DashboardPage() {
           <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-lg">
             Resumen general de inspecciones y alertas del sistema
           </p>
+        </motion.div>
+
+        {/* Notificaciones Push */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <NotificationPermission />
         </motion.div>
 
         {/* Estadísticas */}

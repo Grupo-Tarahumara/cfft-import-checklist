@@ -79,8 +79,6 @@ export default function Sidebar() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const sidebarWidth = isCollapsed ? '80px' : '16rem';
-
   return (
     <>
       {/* Mobile Overlay */}
@@ -98,11 +96,12 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <motion.aside
-        style={{
-          width: sidebarWidth
+        animate={{
+          width: isMobile ? '280px' : (isCollapsed ? '80px' : '16rem')
         }}
+        transition={{ duration: 0.3 }}
         className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white h-screen shadow-2xl border-r border-slate-700/50 flex flex-col
-                   fixed left-0 top-0 z-50 transition-all duration-300 ease-in-out
+                   fixed left-0 top-0 z-50 transition-transform duration-300 ease-in-out
                    pt-16 lg:pt-0 lg:sticky lg:left-auto lg:top-0
                    ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
@@ -120,21 +119,25 @@ export default function Sidebar() {
 
       <nav className={`flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 lg:px-4 lg:py-6 ${isCollapsed ? 'lg:px-2 lg:py-4' : ''}`}>
         {/* Logo y Header Section */}
-        <div className={`pb-3 lg:pb-4 border-b border-slate-700/50 mb-4 lg:mb-6 ${isCollapsed ? 'lg:mb-3' : ''}`}>
+        <div className={`pb-3 lg:pb-4 border-b border-slate-700/50 mb-4 lg:mb-6 ${isCollapsed ? 'lg:mb-4' : ''}`}>
           <div className="flex flex-col items-center">
-            <div className={`relative mb-3 lg:mb-4 ${isCollapsed ? 'lg:mb-0' : ''}`}>
-              <div className={`absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl blur-md opacity-30`}></div>
-              <div className={`relative bg-gradient-to-br from-slate-800 to-slate-700 rounded-2xl shadow-xl border border-slate-600/50 p-2 lg:p-4 ${isCollapsed ? 'lg:p-2' : ''}`}>
+            <div className={`relative mb-3 lg:mb-4 ${isCollapsed ? 'lg:mb-2' : ''}`}>
+              <div className={`absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl blur-md opacity-30 ${isCollapsed ? 'lg:rounded-xl' : ''}`}></div>
+              <div className={`relative bg-gradient-to-br from-slate-800 to-slate-700 rounded-2xl shadow-xl border border-slate-600/50 transition-all duration-300 ${
+                isCollapsed ? 'lg:p-2.5 lg:rounded-xl' : 'p-2 lg:p-4'
+              }`}>
                 <Image
                   src="https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_300,w_300,f_auto,q_auto/6088316/314367_858588.png"
                   alt="Logo"
                   width={50}
                   height={50}
-                  className={`object-contain drop-shadow-lg transition-all duration-300 w-12 h-12 lg:w-14 lg:h-14 ${isCollapsed ? 'lg:w-9 lg:h-9' : ''}`}
+                  className={`object-contain drop-shadow-lg transition-all duration-300 ${
+                    isCollapsed ? 'w-12 h-12 lg:w-11 lg:h-11' : 'w-12 h-12 lg:w-14 lg:h-14'
+                  }`}
                 />
               </div>
             </div>
-            <div className={`text-center mt-3 lg:mt-4 ${isCollapsed ? 'lg:hidden' : ''}`}>
+            <div className={`text-center transition-all duration-300 ${isCollapsed ? 'lg:hidden' : 'mt-3 lg:mt-4'}`}>
               <h1 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent mb-1">
                 CFFT Import
               </h1>
