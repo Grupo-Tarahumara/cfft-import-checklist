@@ -7,7 +7,6 @@ import { authApi } from '@/lib/api-auth';
 import { CreateInspeccionDto, Proveedor, Fruta, PuntoInspeccion, Usuario } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
 import {
   CalendarIcon,
   TruckIcon,
@@ -41,15 +40,7 @@ export default function NuevaInspeccionPage() {
 
   // Formulario
   const [formData, setFormData] = useState<CreateInspeccionDto>({
-    fecha: (() => {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
-    })(),
+    fecha: new Date().toISOString().split('T')[0],
     numeroOrdenContenedor: '',
     numeroPallets: 0,
     numeroCajas: 0,
@@ -86,9 +77,7 @@ export default function NuevaInspeccionPage() {
       setUsuarios(usuariosData.filter(u => u.activo));
     } catch (error) {
       console.error('Error loading catalogs:', error);
-      toast.error('Error al cargar los catálogos', {
-        description: 'Por favor, intente recargar la página',
-      });
+      alert('Error al cargar los catálogos');
     } finally {
       setLoading(false);
     }
@@ -118,35 +107,25 @@ export default function NuevaInspeccionPage() {
 
     // Validaciones
     if (!formData.proveedorId || formData.proveedorId === 0) {
-      toast.error('Validación requerida', {
-        description: 'Debe seleccionar un proveedor',
-      });
+      alert('Debe seleccionar un proveedor');
       return;
     }
     if (!formData.frutaId || formData.frutaId === 0) {
-      toast.error('Validación requerida', {
-        description: 'Debe seleccionar una fruta',
-      });
+      alert('Debe seleccionar una fruta');
       return;
     }
     if (!formData.puntoInspeccionId || formData.puntoInspeccionId === 0) {
-      toast.error('Validación requerida', {
-        description: 'Debe seleccionar un punto de inspección',
-      });
+      alert('Debe seleccionar un punto de inspección');
       return;
     }
     if (!formData.usuarioId || formData.usuarioId === 0) {
-      toast.error('Validación requerida', {
-        description: 'Debe seleccionar un usuario',
-      });
+      alert('Debe seleccionar un usuario');
       return;
     }
 
     // Validar fotos obligatorias
     if (fotosRequeridas.length < 4) {
-      toast.error('Fotos obligatorias faltantes', {
-        description: 'Debe adjuntar las 4 fotos obligatorias',
-      });
+      alert('Debe adjuntar las 4 fotos obligatorias');
       return;
     }
 
@@ -155,13 +134,11 @@ export default function NuevaInspeccionPage() {
     if (frutaSeleccionada) {
       if (formData.temperaturaFruta < frutaSeleccionada.tempMinima ||
           formData.temperaturaFruta > frutaSeleccionada.tempMaxima) {
-        toast.warning('Temperatura fuera de rango', {
-          description: `La temperatura ${formData.temperaturaFruta}°C está fuera del rango óptimo para ${frutaSeleccionada.nombre} (${frutaSeleccionada.tempMinima}°C - ${frutaSeleccionada.tempMaxima}°C). Se generará una alerta.`,
-          duration: 6000,
-        });
+        const confirmacion = confirm(
+          `⚠️ ADVERTENCIA: La temperatura ${formData.temperaturaFruta}°C está fuera del rango óptimo para ${frutaSeleccionada.nombre} (${frutaSeleccionada.tempMinima}°C - ${frutaSeleccionada.tempMaxima}°C).\n\n¿Desea continuar? Esto generará una alerta.`
+        );
+        if (!confirmacion) return;
         formData.tieneAlertas = true;
-        // Pequeña pausa para que el usuario vea el mensaje
-        await new Promise(resolve => setTimeout(resolve, 1500));
       }
     }
 
@@ -189,19 +166,11 @@ export default function NuevaInspeccionPage() {
 
       const nuevaInspeccion = await authApi.post<any>('/inspecciones', formDataToSend);
 
-      toast.success('¡Inspección creada exitosamente!', {
-        description: `Se ha registrado la inspección #${nuevaInspeccion.id}${formData.tieneAlertas ? ' con alertas generadas' : ''}`,
-        duration: 4000,
-      });
-
-      // Pequeña pausa para que el usuario vea el mensaje
-      await new Promise(resolve => setTimeout(resolve, 800));
+      alert('Inspección creada exitosamente');
       router.push(`/inspecciones/${nuevaInspeccion.id}`);
     } catch (error) {
       console.error('Error creating inspección:', error);
-      toast.error('Error al crear la inspección', {
-        description: 'Por favor, verifique los datos e intente nuevamente',
-      });
+      alert('Error al crear la inspección');
     } finally {
       setSubmitting(false);
     }
@@ -270,7 +239,7 @@ export default function NuevaInspeccionPage() {
                   Fecha de Inspección *
                 </label>
                 <input
-                  type="datetime-local"
+                  type="date"
                   value={formData.fecha}
                   onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
                   required

@@ -71,25 +71,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('access_token', access_token);
       setToken(access_token);
 
-      // Cargar el perfil del usuario y obtenerlo para redirigir
-      const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/profile`, {
-        headers: {
-          'Authorization': `Bearer ${access_token}`,
-        },
-        credentials: 'include',
-      });
+      // Cargar el perfil del usuario
+      await loadUserProfile(access_token);
 
-      if (profileResponse.ok) {
-        const profile = await profileResponse.json();
-        setUser(profile);
-
-        // Redirigir según el rol del usuario
-        if (profile.rol === 'admin') {
-          router.push('/dashboard');
-        } else {
-          router.push('/inspecciones');
-        }
-      }
+      // Redirigir al dashboard
+      router.push('/dashboard');
     } catch (error: any) {
       // Solo mostrar en consola si NO es un error 401 (credenciales incorrectas)
       if (error?.status !== 401) {

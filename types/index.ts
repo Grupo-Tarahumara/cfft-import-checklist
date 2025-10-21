@@ -3,8 +3,11 @@
 export interface Usuario {
   id: number;
   nombre: string;
+  username: string;
   email: string;
+  telefono?: string;
   area: string; // 'Comercio Exterior' | 'Logística Nacional' | 'Calidad'
+  rol: 'admin' | 'user';
   activo: boolean;
   fechaCreacion: string;
 }
@@ -96,8 +99,12 @@ export interface Inspeccion {
 // DTOs para crear/actualizar
 export interface CreateUsuarioDto {
   nombre: string;
+  username: string;
   email: string;
+  password: string;
+  telefono?: string;
   area: string;
+  rol?: 'admin' | 'user';
   activo?: boolean;
 }
 
@@ -192,8 +199,12 @@ export interface LoginResponse {
 }
 
 export interface UserProfile {
-  userId: number;
+  id: number;
+  userId?: number;
+  nombre: string;
   username: string;
+  email: string;
+  rol: 'admin' | 'user';
 }
 
 // Tipos de foto permitidos

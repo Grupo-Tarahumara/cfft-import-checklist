@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { authApi } from '@/lib/api-auth';
 import { Usuario, CreateUsuarioDto } from '@/types';
 
@@ -12,8 +13,12 @@ export default function UsuariosPage() {
   const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null);
   const [formData, setFormData] = useState<CreateUsuarioDto>({
     nombre: '',
+    username: '',
     email: '',
+    password: '',
+    telefono: '',
     area: 'Comercio Exterior',
+    rol: 'user',
     activo: true,
   });
 
@@ -53,8 +58,12 @@ export default function UsuariosPage() {
     setEditingUsuario(usuario);
     setFormData({
       nombre: usuario.nombre,
+      username: usuario.username,
       email: usuario.email,
+      password: '', // No pre-llenar la contraseña
+      telefono: usuario.telefono || '',
       area: usuario.area,
+      rol: usuario.rol,
       activo: usuario.activo,
     });
     setShowForm(true);
@@ -75,8 +84,12 @@ export default function UsuariosPage() {
   const resetForm = () => {
     setFormData({
       nombre: '',
+      username: '',
       email: '',
+      password: '',
+      telefono: '',
       area: 'Comercio Exterior',
+      rol: 'user',
       activo: true,
     });
     setEditingUsuario(null);
@@ -100,8 +113,9 @@ export default function UsuariosPage() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6 md:space-y-8">
+    <ProtectedRoute allowedRoles={['admin']}>
+      <DashboardLayout>
+        <div className="space-y-6 md:space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -155,6 +169,21 @@ export default function UsuariosPage() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Nombre de Usuario
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    required
+                    disabled={!!editingUsuario}
+                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="usuario_login"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Correo Electrónico
                   </label>
                   <input
@@ -164,6 +193,33 @@ export default function UsuariosPage() {
                     required
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="usuario@ejemplo.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    {editingUsuario ? 'Nueva Contraseña (dejar vacío para no cambiar)' : 'Contraseña'}
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required={!editingUsuario}
+                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Teléfono
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.telefono}
+                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="+56 9 1234 5678"
                   />
                 </div>
 
@@ -180,6 +236,21 @@ export default function UsuariosPage() {
                     <option value="Comercio Exterior">Comercio Exterior</option>
                     <option value="Logística Nacional">Logística Nacional</option>
                     <option value="Calidad">Calidad</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Rol
+                  </label>
+                  <select
+                    value={formData.rol || 'user'}
+                    onChange={(e) => setFormData({ ...formData, rol: e.target.value as 'admin' | 'user' })}
+                    required
+                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  >
+                    <option value="user">Usuario Normal</option>
+                    <option value="admin">Administrador</option>
                   </select>
                 </div>
 
@@ -247,6 +318,14 @@ export default function UsuariosPage() {
                     </div>
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
+                      <span>Rol</span>
+                    </div>
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                     Estado
                   </th>
                   <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">
@@ -275,6 +354,17 @@ export default function UsuariosPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold bg-blue-100 text-blue-800">
                         {usuario.area}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold ${
+                          usuario.rol === 'admin'
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {usuario.rol === 'admin' ? 'Administrador' : 'Usuario Normal'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -320,6 +410,7 @@ export default function UsuariosPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 }
