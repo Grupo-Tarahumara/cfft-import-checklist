@@ -143,7 +143,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, delay: 0.3 }}
-            className="text-6xl md:text-8xl font-extrabold leading-tight mb-6"
+            className="text-4xl md:text-6xl lg:text-8xl font-extrabold leading-tight mb-6"
           >
             <span className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">CFFT Import</span>
             <br />
@@ -157,11 +157,11 @@ export default function Home() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="text-lg md:text-2xl text-blue-100/80 max-w-3xl mx-auto mb-10 leading-relaxed font-light"
+            className="text-base md:text-lg lg:text-2xl text-blue-100/80 max-w-3xl mx-auto mb-10 leading-relaxed font-light px-4"
           >
             Plataforma integral para la gestión, control y trazabilidad de calidad
             <br />
-            <span className="text-blue-200/60 text-base md:text-lg">
+            <span className="text-blue-200/60 text-sm md:text-base lg:text-lg">
               Monitoreo en tiempo real y alertas predictivas inteligentes.
             </span>
           </motion.p>
@@ -244,18 +244,18 @@ export default function Home() {
                 <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 mb-6">
                   <span className="text-blue-400 text-sm font-semibold">PLATAFORMA INTEGRAL</span>
                 </div>
-                <h2 className="text-5xl font-bold text-white mb-6">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
                   Tecnología Avanzada para{' '}
                   <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                     Control de Calidad
                   </span>
                 </h2>
-                <p className="text-xl text-blue-100/70 max-w-2xl mx-auto font-light">
+                <p className="text-base md:text-lg lg:text-xl text-blue-100/70 max-w-2xl mx-auto font-light px-4">
                   Soluciones innovadoras diseñadas para optimizar cada etapa del proceso de inspección y garantizar la excelencia operativa.
                 </p>
               </motion.div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {features.map((feature, index) => (
                   <motion.div
                     key={feature.title}
@@ -265,15 +265,15 @@ export default function Home() {
                     whileHover={{ y: -8, scale: 1.02 }}
                     className="group relative"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-3xl shadow-xl border border-white/10 backdrop-blur-sm transform group-hover:shadow-2xl group-hover:border-white/20 transition-all duration-300"></div>
-                    <div className="relative p-8">
-                      <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-r ${feature.gradient} shadow-lg mb-6`}>
-                        <feature.icon className="h-8 w-8 text-white" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl md:rounded-2xl lg:rounded-3xl shadow-xl border border-white/10 backdrop-blur-sm transform group-hover:shadow-2xl group-hover:border-white/20 transition-all duration-300"></div>
+                    <div className="relative p-4 md:p-6 lg:p-8">
+                      <div className={`inline-flex p-3 md:p-4 rounded-xl md:rounded-2xl bg-gradient-to-r ${feature.gradient} shadow-lg mb-4 md:mb-6`}>
+                        <feature.icon className="h-6 w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-white" />
                       </div>
-                      <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-blue-100 transition-colors">
+                      <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-white mb-3 md:mb-4 group-hover:text-blue-100 transition-colors">
                         {feature.title}
                       </h3>
-                      <p className="text-blue-100/60 leading-relaxed font-light">
+                      <p className="text-sm md:text-base text-blue-100/60 leading-relaxed font-light">
                         {feature.description}
                       </p>
                       <div className="mt-6 pt-6 border-t border-white/10">
@@ -300,23 +300,23 @@ export default function Home() {
               <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-48 translate-x-48"></div>
               <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full translate-y-40 -translate-x-40"></div>
 
-              <div className="relative z-10 p-16">
+              <div className="relative z-10 p-6 md:p-12 lg:p-16">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
-                  className="text-center mb-16"
+                  className="text-center mb-10 md:mb-16"
                 >
-                  <h3 className="text-4xl font-bold text-white mb-4">
+                  <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4">
                     Excelencia Operativa en
                     <span className="text-blue-300"> Tiempo Real</span>
                   </h3>
-                  <p className="text-blue-100 text-xl font-light max-w-2xl mx-auto">
+                  <p className="text-sm md:text-lg lg:text-xl text-blue-100 font-light max-w-2xl mx-auto px-4">
                     Métricas que demuestran nuestro compromiso con la calidad y eficiencia en cada proceso
                   </p>
                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                   {stats.map((stat, index) => (
                     <motion.div
                       key={stat.label}
@@ -325,13 +325,13 @@ export default function Home() {
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                       className="text-center group"
                     >
-                      <div className="inline-flex p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-6 group-hover:bg-white/20 transition-all duration-300">
-                        <stat.icon className="h-8 w-8 text-white" />
+                      <div className="inline-flex p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4 md:mb-6 group-hover:bg-white/20 transition-all duration-300">
+                        <stat.icon className="h-6 w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-white" />
                       </div>
-                      <div className="text-5xl font-black text-white mb-3 drop-shadow-lg">
+                      <div className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-2 md:mb-3 drop-shadow-lg">
                         {stat.value}
                       </div>
-                      <div className="text-blue-200 font-semibold text-lg">
+                      <div className="text-sm md:text-base lg:text-lg text-blue-200 font-semibold">
                         {stat.label}
                       </div>
                     </motion.div>
@@ -344,8 +344,8 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-br from-slate-900 via-slate-950 to-gray-950 text-white py-20 border-t border-white/5">
-        <div className="container mx-auto px-6">
+      <footer className="bg-gradient-to-br from-slate-900 via-slate-950 to-gray-950 text-white py-12 md:py-20 border-t border-white/5">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="text-center">
             <motion.div
               className="flex items-center justify-center space-x-4 mb-8"
@@ -364,17 +364,17 @@ export default function Home() {
                 />
               </div>
               <div>
-                <span className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                <span className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
                   CFFT Import
                 </span>
-                <p className="text-gray-400 text-sm mt-1 font-medium">
+                <p className="text-xs md:text-sm text-gray-400 mt-1 font-medium">
                   Sistema de gestión
                 </p>
               </div>
             </motion.div>
 
             <motion.p
-              className="text-gray-400 text-lg max-w-2xl mx-auto mb-8 leading-relaxed font-light"
+              className="text-sm md:text-base lg:text-lg text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed font-light px-4"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}

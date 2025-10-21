@@ -106,12 +106,12 @@ export default function NotificacionesPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-800">Gestión de Notificaciones</h1>
+      <div className="space-y-6 md:space-y-8">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Gestión de Notificaciones</h1>
 
         {/* Filtros */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Filtrar por Usuario
@@ -164,34 +164,35 @@ export default function NotificacionesPage() {
         </div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-gray-500 text-sm">Total</p>
-            <p className="text-2xl font-bold">{notificaciones.length}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
+            <p className="text-xs md:text-sm text-gray-500">Total</p>
+            <p className="text-xl md:text-2xl font-bold">{notificaciones.length}</p>
           </div>
-          <div className="bg-yellow-50 p-4 rounded-lg shadow">
-            <p className="text-yellow-700 text-sm">Pendientes</p>
-            <p className="text-2xl font-bold text-yellow-700">
+          <div className="bg-yellow-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
+            <p className="text-xs md:text-sm text-yellow-700">Pendientes</p>
+            <p className="text-xl md:text-2xl font-bold text-yellow-700">
               {notificaciones.filter((n) => !n.enviada).length}
             </p>
           </div>
-          <div className="bg-green-50 p-4 rounded-lg shadow">
-            <p className="text-green-700 text-sm">Enviadas</p>
-            <p className="text-2xl font-bold text-green-700">
+          <div className="bg-green-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
+            <p className="text-xs md:text-sm text-green-700">Enviadas</p>
+            <p className="text-xl md:text-2xl font-bold text-green-700">
               {notificaciones.filter((n) => n.enviada).length}
             </p>
           </div>
-          <div className="bg-blue-50 p-4 rounded-lg shadow">
-            <p className="text-blue-700 text-sm">Por Email</p>
-            <p className="text-2xl font-bold text-blue-700">
+          <div className="bg-blue-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
+            <p className="text-xs md:text-sm text-blue-700">Por Email</p>
+            <p className="text-xl md:text-2xl font-bold text-blue-700">
               {notificaciones.filter((n) => n.metodo === 'email').length}
             </p>
           </div>
         </div>
 
         {/* Lista de Notificaciones */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="bg-white rounded-xl md:rounded-2xl shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -260,10 +261,11 @@ export default function NotificacionesPage() {
           </table>
 
           {filteredNotificaciones.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-sm md:text-base text-gray-500">
               No se encontraron notificaciones con los filtros seleccionados
             </div>
           )}
+          </div>
         </div>
       </div>
     </DashboardLayout>

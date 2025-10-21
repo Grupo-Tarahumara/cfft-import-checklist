@@ -44,8 +44,9 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const { user, logout } = useAuth();
-  const { isCollapsed, toggleSidebar, shouldAnimate } = useSidebar();
+  const { isCollapsed, toggleSidebar, shouldAnimate, isMobileOpen, toggleMobileSidebar } = useSidebar();
 
   // Auto-expand Catálogos if any of its submenu items are active on initial load
   const activeCatalogo = menuItems.find(item =>
@@ -59,57 +60,85 @@ export default function Sidebar() {
     }
   }, []); // Only run on mount
 
+  // Close mobile sidebar when route changes
+  useEffect(() => {
+    if (isMobileOpen) {
+      toggleMobileSidebar();
+    }
+  }, [pathname]);
+
+  // Detect if we're on mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const sidebarWidth = isCollapsed ? '80px' : '18rem';
 
   return (
-    <motion.aside
-      initial={false}
-      animate={{ width: sidebarWidth }}
-      transition={{ duration: shouldAnimate ? 0.3 : 0, ease: 'easeInOut' }}
-      style={{ width: sidebarWidth }}
-      className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white h-screen shadow-2xl border-r border-slate-700/50 flex flex-col sticky top-0 relative"
-    >
-      {/* Toggle Button */}
-      <button
-        onClick={toggleSidebar}
-        className="absolute -right-3 top-8 z-50 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-      >
-        {isCollapsed ? (
-          <Bars3Icon className="w-4 h-4" />
-        ) : (
-          <ChevronLeftIcon className="w-4 h-4" />
+    <>
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isMobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={toggleMobileSidebar}
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          />
         )}
-      </button>
+      </AnimatePresence>
 
-      <nav className={`flex-1 overflow-y-auto overflow-x-hidden ${isCollapsed ? 'px-3 py-4' : 'p-6'}`}>
+      {/* Sidebar */}
+      <motion.aside
+        style={{
+          width: sidebarWidth
+        }}
+        className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white h-screen shadow-2xl border-r border-slate-700/50 flex flex-col
+                   fixed left-0 top-0 z-50 transition-all duration-300 ease-in-out
+                   pt-16 lg:pt-0 lg:sticky lg:left-auto lg:top-0
+                   ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+      >
+        {/* Toggle Button - Desktop only */}
+        <button
+          onClick={toggleSidebar}
+          className="hidden lg:block absolute -right-3 top-8 z-50 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        >
+          {isCollapsed ? (
+            <Bars3Icon className="w-4 h-4" />
+          ) : (
+            <ChevronLeftIcon className="w-4 h-4" />
+          )}
+        </button>
+
+      <nav className={`flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-6 ${isCollapsed ? 'lg:px-3 lg:py-4' : ''}`}>
         {/* Logo y Header Section */}
-        <div className={`pb-6 border-b border-slate-700/50 ${isCollapsed ? 'mb-4' : 'mb-8'}`}>
+        <div className={`pb-4 lg:pb-6 border-b border-slate-700/50 mb-6 lg:mb-8 ${isCollapsed ? 'lg:mb-4' : ''}`}>
           <div className="flex flex-col items-center">
-            <div className={`relative ${isCollapsed ? 'mb-0' : 'mb-4'}`}>
+            <div className={`relative mb-3 lg:mb-4 ${isCollapsed ? 'lg:mb-0' : ''}`}>
               <div className={`absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl blur-md opacity-30`}></div>
-              <div className={`relative bg-gradient-to-br from-slate-800 to-slate-700 rounded-2xl shadow-xl border border-slate-600/50 ${isCollapsed ? 'p-2' : 'p-4'}`}>
+              <div className={`relative bg-gradient-to-br from-slate-800 to-slate-700 rounded-2xl shadow-xl border border-slate-600/50 p-2 lg:p-4 ${isCollapsed ? 'lg:p-2' : ''}`}>
                 <Image
                   src="https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_300,w_300,f_auto,q_auto/6088316/314367_858588.png"
                   alt="Logo"
-                  width={isCollapsed ? 32 : 60}
-                  height={isCollapsed ? 32 : 60}
-                  className="object-contain drop-shadow-lg transition-all duration-300"
+                  width={50}
+                  height={50}
+                  className={`object-contain drop-shadow-lg transition-all duration-300 w-12 h-12 lg:w-16 lg:h-16 ${isCollapsed ? 'lg:w-8 lg:h-8' : ''}`}
                 />
               </div>
             </div>
-            {!isCollapsed && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-center mt-4"
-              >
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent mb-1">
-                  CFFT Import
-                </h1>
-                <p className="text-xs text-slate-400 font-medium">Sistema de Gestión</p>
-              </motion.div>
-            )}
+            <div className={`text-center mt-3 lg:mt-4 ${isCollapsed ? 'lg:hidden' : ''}`}>
+              <h1 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent mb-1">
+                CFFT Import
+              </h1>
+              <p className="text-xs text-slate-400 font-medium">Sistema de Gestión</p>
+            </div>
           </div>
         </div>
 
@@ -127,19 +156,17 @@ export default function Sidebar() {
                         setExpandedMenu(isExpanded ? null : item.label);
                       }}
                       className={`w-full flex items-center rounded-xl transition-all duration-200 group ${
-                        isCollapsed ? 'justify-center px-2 py-3' : 'justify-between px-4 py-3'
+                        (isMobile || !isCollapsed) ? 'justify-between px-4 py-3' : 'justify-center px-2 py-3'
                       } ${
                         hasActiveSubmenu || isExpanded
                           ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
                           : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
                       }`}
-                      whileHover={{ x: isCollapsed ? 0 : 4 }}
+                      whileHover={{ x: (isMobile || !isCollapsed) ? 4 : 0 }}
                       whileTap={{ scale: 0.98 }}
-                      title={isCollapsed ? item.label : ''}
+                      title={(isMobile || !isCollapsed) ? '' : item.label}
                     >
-                      {isCollapsed ? (
-                        <item.Icon className="w-5 h-5" />
-                      ) : (
+                      {(isMobile || !isCollapsed) ? (
                         <>
                           <div className="flex items-center">
                             <item.Icon className="w-5 h-5 mr-3" />
@@ -152,12 +179,14 @@ export default function Sidebar() {
                             <ChevronDownIcon className="w-4 h-4" />
                           </motion.div>
                         </>
+                      ) : (
+                        <item.Icon className="w-5 h-5" />
                       )}
                     </motion.button>
 
-                    {/* Submenu icons when collapsed */}
+                    {/* Submenu icons when collapsed (desktop only) */}
                     <AnimatePresence>
-                      {isCollapsed && isExpanded && (
+                      {!isMobile && isCollapsed && isExpanded && (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
@@ -192,8 +221,9 @@ export default function Sidebar() {
                       )}
                     </AnimatePresence>
 
+                    {/* Submenu with text (mobile or desktop expanded) */}
                     <AnimatePresence>
-                      {isExpanded && !isCollapsed && (
+                      {isExpanded && (isMobile || !isCollapsed) && (
                         <motion.ul
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
@@ -238,23 +268,21 @@ export default function Sidebar() {
                   </div>
                 ) : (
                   <motion.div
-                    whileHover={{ x: isCollapsed ? 0 : 4 }}
+                    whileHover={{ x: (isMobile || !isCollapsed) ? 4 : 0 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <Link
                       href={item.href}
                       className={`flex items-center rounded-xl transition-all duration-200 group relative ${
-                        isCollapsed ? 'justify-center px-2 py-3' : 'px-4 py-3'
+                        (isMobile || !isCollapsed) ? 'px-4 py-3' : 'justify-center px-2 py-3'
                       } ${
                         pathname === item.href
                           ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
                           : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
                       }`}
-                      title={isCollapsed ? item.label : ''}
+                      title={(isMobile || !isCollapsed) ? '' : item.label}
                     >
-                      {isCollapsed ? (
-                        <item.Icon className="w-5 h-5" />
-                      ) : (
+                      {(isMobile || !isCollapsed) ? (
                         <>
                           <item.Icon className="w-5 h-5 mr-3" />
                           <span className="font-medium">{item.label}</span>
@@ -266,6 +294,8 @@ export default function Sidebar() {
                             />
                           )}
                         </>
+                      ) : (
+                        <item.Icon className="w-5 h-5" />
                       )}
                     </Link>
                   </motion.div>
@@ -278,11 +308,11 @@ export default function Sidebar() {
       </nav>
 
       {/* User Section - Sticky at bottom */}
-      <div className={`border-t border-slate-700/50 bg-gradient-to-b from-slate-900 to-slate-800 ${isCollapsed ? 'p-3' : 'p-6'}`}>
+      <div className={`border-t border-slate-700/50 bg-gradient-to-b from-slate-900 to-slate-800 ${isMobile ? 'p-6' : (isCollapsed ? 'p-3' : 'p-6')}`}>
         {/* User Info */}
         {user && (
-          <div className={`bg-slate-800/50 rounded-xl border border-slate-700/50 ${isCollapsed ? 'p-2' : 'p-4'}`}>
-            {isCollapsed ? (
+          <div className={`bg-slate-800/50 rounded-xl border border-slate-700/50 ${isMobile ? 'p-4' : (isCollapsed ? 'p-2' : 'p-4')}`}>
+            {!isMobile && isCollapsed ? (
               <div className="flex flex-col items-center space-y-2">
                 <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center" title={user.username}>
                   <UserCircleIcon className="w-5 h-5 text-white" />
@@ -319,5 +349,6 @@ export default function Sidebar() {
         )}
       </div>
     </motion.aside>
+    </>
   );
 }

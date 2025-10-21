@@ -8,7 +8,9 @@
       "Bash(npm run dev:*)",
       "Read(//c/Users/becario1.sis/Proyecto/cfft-import-checklist-backend/**)",
       "Bash(dir:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Read(//c/Users/becario1.sis/Proyecto/**)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

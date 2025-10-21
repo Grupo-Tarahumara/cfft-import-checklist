@@ -6,13 +6,15 @@ interface SidebarContextType {
   isCollapsed: boolean;
   toggleSidebar: () => void;
   shouldAnimate: boolean;
+  isMobileOpen: boolean;
+  toggleMobileSidebar: () => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(() => {
-    // Initialize from localStorage if available
+    // Initialize from localStorage if available (only for desktop)
     if (typeof window !== 'undefined') {
       const savedState = localStorage.getItem('sidebarCollapsed');
       return savedState === 'true';
@@ -20,6 +22,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     return false;
   });
   const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -35,8 +38,12 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     setTimeout(() => setShouldAnimate(false), 300);
   };
 
+  const toggleMobileSidebar = () => {
+    setIsMobileOpen(prev => !prev);
+  };
+
   return (
-    <SidebarContext.Provider value={{ isCollapsed, toggleSidebar, shouldAnimate }}>
+    <SidebarContext.Provider value={{ isCollapsed, toggleSidebar, shouldAnimate, isMobileOpen, toggleMobileSidebar }}>
       {children}
     </SidebarContext.Provider>
   );

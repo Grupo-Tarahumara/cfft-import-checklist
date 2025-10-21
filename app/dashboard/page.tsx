@@ -119,23 +119,23 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
             Dashboard
           </h1>
-          <p className="text-gray-600 mt-2 text-lg">
+          <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-lg">
             Resumen general de inspecciones y alertas del sistema
           </p>
         </motion.div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -144,16 +144,16 @@ export default function DashboardPage() {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="group"
             >
-              <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 group-hover:border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${getColorClasses(stat.color)}`}>
-                    <stat.icon className="h-6 w-6 text-white" />
+              <div className="bg-white rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 border border-gray-100 group-hover:border-gray-200">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <div className={`p-2 md:p-3 rounded-lg md:rounded-xl bg-gradient-to-r ${getColorClasses(stat.color)}`}>
+                    <stat.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</p>
-                  <p className="text-gray-600 text-sm font-medium">{stat.label}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{stat.value}</p>
+                  <p className="text-gray-600 text-xs md:text-sm font-medium">{stat.label}</p>
                 </div>
               </div>
             </motion.div>
@@ -166,17 +166,17 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+            className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
           >
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+            <div className="p-4 md:p-6 border-b border-gray-100">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center space-x-2 md:space-x-3">
                   <div className="p-2 bg-red-100 rounded-lg">
-                    <BellAlertIcon className="h-6 w-6 text-red-600" />
+                    <BellAlertIcon className="h-5 w-5 md:h-6 md:w-6 text-red-600" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Alertas Pendientes</h2>
-                    <p className="text-gray-600 text-sm">
+                    <h2 className="text-lg md:text-xl font-bold text-gray-900">Alertas Pendientes</h2>
+                    <p className="text-gray-600 text-xs md:text-sm">
                       {alertasNoLeidas.length} alertas requieren atención
                     </p>
                   </div>
@@ -191,7 +191,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-4 md:p-6 space-y-3 md:space-y-4">
               {alertasNoLeidas.slice(0, 5).map((alerta, index) => {
                 const styles = getCriticidadStyles(alerta.criticidad);
                 return (
@@ -200,24 +200,24 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className={`p-4 rounded-xl border-l-4 ${styles.border} ${styles.bg} hover:shadow-md transition-all duration-200`}
+                    className={`p-3 md:p-4 rounded-lg md:rounded-xl border-l-4 ${styles.border} ${styles.bg} hover:shadow-md transition-all duration-200`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <p className="font-semibold text-gray-900">{alerta.tipoAlerta}</p>
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${styles.badge}`}>
+                        <div className="flex items-center flex-wrap gap-2 mb-2">
+                          <p className="font-semibold text-sm md:text-base text-gray-900">{alerta.tipoAlerta}</p>
+                          <span className={`text-xs px-2 py-0.5 md:py-1 rounded-full font-medium ${styles.badge}`}>
                             {alerta.criticidad.toUpperCase()}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-700 mb-3">{alerta.descripcion}</p>
-                        <div className="flex items-center space-x-4 text-xs text-gray-500">
+                        <p className="text-xs md:text-sm text-gray-700 mb-2 md:mb-3">{alerta.descripcion}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500">
                           <div className="flex items-center space-x-1">
-                            <CalendarIcon className="h-4 w-4" />
+                            <CalendarIcon className="h-3 w-3 md:h-4 md:w-4" />
                             <span>{new Date(alerta.fechaCreacion).toLocaleDateString('es-ES')}</span>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <BuildingStorefrontIcon className="h-4 w-4" />
+                            <BuildingStorefrontIcon className="h-3 w-3 md:h-4 md:w-4" />
                             <span>Inspección #{alerta.inspeccionId}</span>
                           </div>
                         </div>
@@ -235,17 +235,17 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+          className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
         >
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+          <div className="p-4 md:p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center space-x-2 md:space-x-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
-                  <ClipboardDocumentListIcon className="h-6 w-6 text-blue-600" />
+                  <ClipboardDocumentListIcon className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Últimas Inspecciones</h2>
-                  <p className="text-gray-600 text-sm">
+                  <h2 className="text-lg md:text-xl font-bold text-gray-900">Últimas Inspecciones</h2>
+                  <p className="text-gray-600 text-xs md:text-sm">
                     {inspecciones.length} inspecciones recientes
                   </p>
                 </div>
@@ -260,22 +260,22 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="p-6 space-y-4">
+          <div className="p-4 md:p-6 space-y-3 md:space-y-4">
             {inspecciones.map((inspeccion, index) => (
               <motion.div
                 key={inspeccion.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 bg-gradient-to-r from-gray-50 to-white"
+                className="p-3 md:p-4 rounded-lg md:rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 bg-gradient-to-r from-gray-50 to-white"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <TruckIcon className="h-5 w-5 text-blue-600" />
+                <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
+                  <div className="flex items-center space-x-2 md:space-x-3">
+                    <div className="p-1.5 md:p-2 bg-blue-100 rounded-lg">
+                      <TruckIcon className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-gray-900">
+                      <p className="text-xs md:text-sm font-bold text-gray-900">
                         {inspeccion.numeroOrdenContenedor}
                       </p>
                       <p className="text-xs text-gray-500">
@@ -283,33 +283,33 @@ export default function DashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <span className="inline-flex items-center px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     <CheckBadgeIcon className="h-3 w-3 mr-1" />
                     {inspeccion.estado}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-gray-600">
-                  <div className="flex items-center space-x-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 text-xs text-gray-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                     <div className="flex items-center space-x-1">
-                      <CalendarIcon className="h-4 w-4" />
+                      <CalendarIcon className="h-3 w-3 md:h-4 md:w-4" />
                       <span>{new Date(inspeccion.fecha).toLocaleDateString('es-ES')}</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <BuildingStorefrontIcon className="h-4 w-4" />
+                      <BuildingStorefrontIcon className="h-3 w-3 md:h-4 md:w-4" />
                       <span>{inspeccion.fruta?.nombre || '-'}</span>
                     </div>
                   </div>
                   <div>
                     {inspeccion.tieneAlertas ? (
                       <div className="flex items-center space-x-1 text-red-600">
-                        <ExclamationTriangleIcon className="h-4 w-4" />
-                        <span className="font-medium">Con alertas</span>
+                        <ExclamationTriangleIcon className="h-3 w-3 md:h-4 md:w-4" />
+                        <span className="font-medium text-xs">Con alertas</span>
                       </div>
                     ) : (
                       <div className="flex items-center space-x-1 text-green-600">
-                        <CheckBadgeIcon className="h-4 w-4" />
-                        <span className="font-medium">Sin alertas</span>
+                        <CheckBadgeIcon className="h-3 w-3 md:h-4 md:w-4" />
+                        <span className="font-medium text-xs">Sin alertas</span>
                       </div>
                     )}
                   </div>
