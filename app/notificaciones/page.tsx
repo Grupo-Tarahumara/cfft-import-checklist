@@ -1,0 +1,271 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import DashboardLayout from '@/components/DashboardLayout';
+import { authApi } from '@/lib/api-auth';
+import { Notificacion, Usuario } from '@/types';
+
+export default function NotificacionesPage() {
+  const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
+  const [filteredNotificaciones, setFilteredNotificaciones] = useState<Notificacion[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filterUsuario, setFilterUsuario] = useState('');
+  const [filterMetodo, setFilterMetodo] = useState('');
+  const [filterEstado, setFilterEstado] = useState('');
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    filterData();
+  }, [filterUsuario, filterMetodo, filterEstado, notificaciones]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [notifData, usuariosData] = await Promise.all([
+        authApi.get<Notificacion[]>('/notificaciones'),
+        authApi.get<Usuario[]>('/usuarios'),
+      ]);
+      setNotificaciones(notifData);
+      setUsuarios(usuariosData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterData = () => {
+    let filtered = [...notificaciones];
+
+    if (filterUsuario) {
+      filtered = filtered.filter((n) => n.usuarioId === parseInt(filterUsuario));
+    }
+
+    if (filterMetodo) {
+      filtered = filtered.filter((n) => n.metodo === filterMetodo);
+    }
+
+    if (filterEstado === 'enviadas') {
+      filtered = filtered.filter((n) => n.enviada);
+    } else if (filterEstado === 'pendientes') {
+      filtered = filtered.filter((n) => !n.enviada);
+    }
+
+    setFilteredNotificaciones(filtered);
+  };
+
+  const handleMarcarEnviada = async (id: number) => {
+    try {
+      await authApi.patch(`/notificaciones/${id}/marcar-enviada`, {});
+      await loadData();
+    } catch (error) {
+      console.error('Error marking as sent:', error);
+      alert('Error al marcar la notificación como enviada');
+    }
+  };
+
+  const getMetodoIcon = (metodo: string) => {
+    switch (metodo) {
+      case 'email':
+        return '📧';
+      case 'sistema':
+        return '🔔';
+      case 'push':
+        return '📱';
+      default:
+        return '📬';
+    }
+  };
+
+  const getMetodoColor = (metodo: string) => {
+    switch (metodo) {
+      case 'email':
+        return 'bg-blue-100 text-blue-800';
+      case 'sistema':
+        return 'bg-purple-100 text-purple-800';
+      case 'push':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-gray-800">Gestión de Notificaciones</h1>
+
+        {/* Filtros */}
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filtrar por Usuario
+              </label>
+              <select
+                value={filterUsuario}
+                onChange={(e) => setFilterUsuario(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Todos los usuarios</option>
+                {usuarios.map((usuario) => (
+                  <option key={usuario.id} value={usuario.id}>
+                    {usuario.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filtrar por Método
+              </label>
+              <select
+                value={filterMetodo}
+                onChange={(e) => setFilterMetodo(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Todos los métodos</option>
+                <option value="email">Email</option>
+                <option value="sistema">Sistema</option>
+                <option value="push">Push</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filtrar por Estado
+              </label>
+              <select
+                value={filterEstado}
+                onChange={(e) => setFilterEstado(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Todas</option>
+                <option value="pendientes">Pendientes</option>
+                <option value="enviadas">Enviadas</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Estadísticas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white p-4 rounded-lg shadow">
+            <p className="text-gray-500 text-sm">Total</p>
+            <p className="text-2xl font-bold">{notificaciones.length}</p>
+          </div>
+          <div className="bg-yellow-50 p-4 rounded-lg shadow">
+            <p className="text-yellow-700 text-sm">Pendientes</p>
+            <p className="text-2xl font-bold text-yellow-700">
+              {notificaciones.filter((n) => !n.enviada).length}
+            </p>
+          </div>
+          <div className="bg-green-50 p-4 rounded-lg shadow">
+            <p className="text-green-700 text-sm">Enviadas</p>
+            <p className="text-2xl font-bold text-green-700">
+              {notificaciones.filter((n) => n.enviada).length}
+            </p>
+          </div>
+          <div className="bg-blue-50 p-4 rounded-lg shadow">
+            <p className="text-blue-700 text-sm">Por Email</p>
+            <p className="text-2xl font-bold text-blue-700">
+              {notificaciones.filter((n) => n.metodo === 'email').length}
+            </p>
+          </div>
+        </div>
+
+        {/* Lista de Notificaciones */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Usuario
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Método
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Estado
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Fecha Envío
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Alerta ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredNotificaciones.map((notif) => (
+                <tr key={notif.id} className={`hover:bg-gray-50 ${!notif.enviada ? 'bg-yellow-50' : ''}`}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {notif.usuario?.nombre || `Usuario #${notif.usuarioId}`}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getMetodoColor(notif.metodo)}`}>
+                      {getMetodoIcon(notif.metodo)} {notif.metodo.toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        notif.enviada
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}
+                    >
+                      {notif.enviada ? '✓ Enviada' : '⏳ Pendiente'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {notif.fechaEnvio
+                      ? new Date(notif.fechaEnvio).toLocaleString('es-ES')
+                      : '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    #{notif.alertaId}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {!notif.enviada && (
+                      <button
+                        onClick={() => handleMarcarEnviada(notif.id)}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        Marcar Enviada
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {filteredNotificaciones.length === 0 && (
+            <div className="text-center py-12 text-gray-500">
+              No se encontraron notificaciones con los filtros seleccionados
+            </div>
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}

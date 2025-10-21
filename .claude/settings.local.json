@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(if exist package-lock.json del package-lock.json)",
+      "Bash(if exist node_modules rmdir /s /q node_modules)",
+      "Bash(npm run dev:*)",
+      "Read(//c/Users/becario1.sis/Proyecto/cfft-import-checklist-backend/**)",
+      "Bash(dir:*)",
+      "Bash(test:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
