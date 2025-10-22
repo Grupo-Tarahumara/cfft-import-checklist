@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { authApi } from '@/lib/api-auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Inspeccion, Proveedor, Fruta, PuntoInspeccion, Usuario } from '@/types';
 import Link from 'next/link';
 import {
@@ -20,12 +21,20 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function InspeccionesPage() {
+  const { user } = useAuth();
+  const isNormalUser = user?.rol === 'user';
+
   const [inspecciones, setInspecciones] = useState<Inspeccion[]>([]);
   const [filteredInspecciones, setFilteredInspecciones] = useState<Inspeccion[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterProveedor, setFilterProveedor] = useState('');
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+
+  // Función para convertir Celsius a Fahrenheit
+  const celsiusToFahrenheit = (c: number): number => {
+    return Math.round(((c * 9) / 5 + 32) * 100) / 100;
+  };
 
   useEffect(() => {
     loadData();
@@ -125,7 +134,7 @@ export default function InspeccionesPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={`grid gap-6 ${isNormalUser ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-50 rounded-xl">
@@ -138,33 +147,37 @@ export default function InspeccionesPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-50 rounded-xl">
-                <ExclamationTriangleIcon className="w-6 h-6 text-amber-600" />
+          {!isNormalUser && (
+            <>
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-amber-50 rounded-xl">
+                    <ExclamationTriangleIcon className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Con Alertas</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {filteredInspecciones.filter((i) => i.tieneAlertas).length}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Con Alertas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {filteredInspecciones.filter((i) => i.tieneAlertas).length}
-                </p>
-              </div>
-            </div>
-          </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-50 rounded-xl">
-                <CheckCircleIcon className="w-6 h-6 text-emerald-600" />
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-emerald-50 rounded-xl">
+                    <CheckCircleIcon className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Sin Problemas</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {filteredInspecciones.filter((i) => !i.tieneAlertas).length}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Sin Problemas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {filteredInspecciones.filter((i) => !i.tieneAlertas).length}
-                </p>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
 
         {/* Filtros */}
@@ -174,7 +187,7 @@ export default function InspeccionesPage() {
             <h2 className="text-lg font-semibold text-gray-900">Filtros y Búsqueda</h2>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className={`grid gap-6 ${isNormalUser ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Buscar por Contenedor
@@ -191,23 +204,25 @@ export default function InspeccionesPage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por Proveedor
-              </label>
-              <select
-                value={filterProveedor}
-                onChange={(e) => setFilterProveedor(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              >
-                <option value="">Todos los proveedores</option>
-                {proveedores.map((prov) => (
-                  <option key={prov.id} value={prov.id}>
-                    {prov.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {!isNormalUser && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Filtrar por Proveedor
+                </label>
+                <select
+                  value={filterProveedor}
+                  onChange={(e) => setFilterProveedor(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option value="">Todos los proveedores</option>
+                  {proveedores.map((prov) => (
+                    <option key={prov.id} value={prov.id}>
+                      {prov.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         </div>
 
@@ -244,9 +259,11 @@ export default function InspeccionesPage() {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Alertas
-                  </th>
+                  {!isNormalUser && (
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Alertas
+                    </th>
+                  )}
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Acciones
                   </th>
@@ -287,9 +304,10 @@ export default function InspeccionesPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <div className="text-sm font-semibold text-gray-900">
-                          {inspeccion.temperaturaFruta}°C
+                          <div>{inspeccion.temperaturaFruta}°C</div>
+                          <div className="text-xs text-gray-500">{celsiusToFahrenheit(Number(inspeccion.temperaturaFruta)).toFixed(2)}°F</div>
                         </div>
-                        {inspeccion.temperaturaFruta > 8 && (
+                        {!isNormalUser && inspeccion.temperaturaFruta > 8 && (
                           <ExclamationTriangleIcon className="w-4 h-4 text-amber-500" />
                         )}
                       </div>
@@ -299,19 +317,21 @@ export default function InspeccionesPage() {
                         {inspeccion.estado}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {inspeccion.tieneAlertas ? (
-                        <div className="flex items-center gap-2 text-red-600 font-medium">
-                          <ExclamationTriangleIcon className="w-4 h-4" />
-                          Con Alertas
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 text-emerald-600">
-                          <CheckCircleIcon className="w-4 h-4" />
-                          Sin Alertas
-                        </div>
-                      )}
-                    </td>
+                    {!isNormalUser && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {inspeccion.tieneAlertas ? (
+                          <div className="flex items-center gap-2 text-red-600 font-medium">
+                            <ExclamationTriangleIcon className="w-4 h-4" />
+                            Con Alertas
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 text-emerald-600">
+                            <CheckCircleIcon className="w-4 h-4" />
+                            Sin Alertas
+                          </div>
+                        )}
+                      </td>
+                    )}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <Link
@@ -321,13 +341,15 @@ export default function InspeccionesPage() {
                           <EyeIcon className="w-4 h-4" />
                           Ver
                         </Link>
-                        <button
-                          onClick={() => handleDelete(inspeccion.id)}
-                          className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition-colors font-medium"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                          Eliminar
-                        </button>
+                        {!isNormalUser && (
+                          <button
+                            onClick={() => handleDelete(inspeccion.id)}
+                            className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition-colors font-medium"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                            Eliminar
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

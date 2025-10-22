@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { messaging, getToken, onMessage } from '@/lib/firebase';
 import toast from 'react-hot-toast';
+import { api } from '@/lib/api';
 
 const VAPID_KEY = 'BHtYA2zKEfOrbQkjLQohGefebES0S46e5WZmPf4owHzGc9XQ0QHQzRfanLoipZyfd4p9n21lkS06YE9N2a9hlNc';
 
@@ -106,21 +107,42 @@ export function useNotifications() {
   // Register token with backend
   const registerToken = useCallback(async (token: string) => {
     try {
+      // Extract browser info for deviceName (max 255 chars)
+      const browserInfo = (() => {
+        const ua = navigator.userAgent;
+        if (ua.includes('Chrome')) return 'Chrome';
+        if (ua.includes('Safari')) return 'Safari';
+        if (ua.includes('Firefox')) return 'Firefox';
+        if (ua.includes('Edge')) return 'Edge';
+        return 'Unknown Browser';
+      })();
+
+      // Truncate userAgent to 255 chars (database limit)
+      const truncatedUserAgent = navigator.userAgent.substring(0, 255);
+
+      // Get CSRF token
+      const csrfToken = await api.getCsrfToken();
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/device-tokens/register`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'X-CSRF-Token': csrfToken,
         },
         body: JSON.stringify({
           token,
           platform: 'web',
-          deviceName: navigator.userAgent,
+          deviceName: browserInfo,
+          userAgent: truncatedUserAgent,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to register token');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Backend error:', response.status, errorData);
+        throw new Error(`Failed to register token: ${response.status}`);
       }
 
       console.log('Token registered with backend successfully');
@@ -134,11 +156,16 @@ export function useNotifications() {
   // Unregister token from backend
   const unregisterToken = useCallback(async (token: string) => {
     try {
+      // Get CSRF token
+      const csrfToken = await api.getCsrfToken();
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/device-tokens/unregister`, {
         method: 'DELETE',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'X-CSRF-Token': csrfToken,
         },
         body: JSON.stringify({ token }),
       });

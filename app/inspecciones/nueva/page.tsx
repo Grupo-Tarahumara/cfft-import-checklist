@@ -39,6 +39,9 @@ export default function NuevaInspeccionPage() {
   const [fotosRequeridas, setFotosRequeridas] = useState<File[]>([]);
   const [fotosOpcionales, setFotosOpcionales] = useState<File[]>([]);
 
+  // Estado para unidad de temperatura
+  const [unidadTemperatura, setUnidadTemperatura] = useState<'celsius' | 'fahrenheit'>('celsius');
+
   // Formulario
   const [formData, setFormData] = useState<CreateInspeccionDto>({
     fecha: (() => {
@@ -65,6 +68,16 @@ export default function NuevaInspeccionPage() {
     puntoInspeccionId: 0,
     usuarioId: 0,
   });
+
+  // Función para convertir Fahrenheit a Celsius
+  const fahrenheitToCelsius = (f: number): number => {
+    return Math.round(((f - 32) * 5) / 9 * 100) / 100;
+  };
+
+  // Función para convertir Celsius a Fahrenheit
+  const celsiusToFahrenheit = (c: number): number => {
+    return Math.round(((c * 9) / 5 + 32) * 100) / 100;
+  };
 
   useEffect(() => {
     loadCatalogs();
@@ -160,20 +173,32 @@ export default function NuevaInspeccionPage() {
       return;
     }
 
+    // Convertir temperatura a Celsius si está en Fahrenheit
+    let temperaturaEnCelsius = formData.temperaturaFruta;
+    if (unidadTemperatura === 'fahrenheit') {
+      temperaturaEnCelsius = fahrenheitToCelsius(formData.temperaturaFruta);
+    }
+
     // Validar temperatura contra rango de la fruta
     const frutaSeleccionada = frutas.find(f => f.id === formData.frutaId);
     if (frutaSeleccionada) {
-      if (formData.temperaturaFruta < frutaSeleccionada.tempMinima ||
-          formData.temperaturaFruta > frutaSeleccionada.tempMaxima) {
-        toast.warning('Temperatura fuera de rango', {
-          description: `La temperatura ${formData.temperaturaFruta}°C está fuera del rango óptimo para ${frutaSeleccionada.nombre} (${frutaSeleccionada.tempMinima}°C - ${frutaSeleccionada.tempMaxima}°C). Se generará una alerta.`,
-          duration: 6000,
-        });
+      if (temperaturaEnCelsius < frutaSeleccionada.tempMinima ||
+          temperaturaEnCelsius > frutaSeleccionada.tempMaxima) {
+        // Solo mostrar aviso a administradores
+        if (user?.rol === 'admin') {
+          toast.warning('Temperatura fuera de rango', {
+            description: `La temperatura ${temperaturaEnCelsius.toFixed(2)}°C está fuera del rango óptimo para ${frutaSeleccionada.nombre} (${frutaSeleccionada.tempMinima}°C - ${frutaSeleccionada.tempMaxima}°C). Se generará una alerta.`,
+            duration: 6000,
+          });
+          // Pequeña pausa para que el usuario vea el mensaje
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
         formData.tieneAlertas = true;
-        // Pequeña pausa para que el usuario vea el mensaje
-        await new Promise(resolve => setTimeout(resolve, 1500));
       }
     }
+
+    // Actualizar la temperatura a Celsius antes de enviar
+    formData.temperaturaFruta = temperaturaEnCelsius;
 
     try {
       setSubmitting(true);
@@ -197,7 +222,7 @@ export default function NuevaInspeccionPage() {
         formDataToSend.append(`fotosOpcionales`, foto, `foto_opcional_${index + 1}.jpg`);
       });
 
-      const nuevaInspeccion = await authApi.post<any>('/inspecciones', formDataToSend);
+      const nuevaInspeccion = await authApi.post<Inspeccion>('/inspecciones', formDataToSend);
 
       toast.success('¡Inspección creada exitosamente!', {
         description: `Se ha registrado la inspección #${nuevaInspeccion.id}${formData.tieneAlertas ? ' con alertas generadas' : ''}`,
@@ -347,7 +372,7 @@ export default function NuevaInspeccionPage() {
                   <option value={0}>Seleccione una fruta</option>
                   {frutas.map((fruta) => (
                     <option key={fruta.id} value={fruta.id}>
-                      {fruta.nombre} ({fruta.tempMinima}°C - {fruta.tempMaxima}°C)
+                      {fruta.nombre}
                     </option>
                   ))}
                 </select>
@@ -464,50 +489,113 @@ export default function NuevaInspeccionPage() {
               </div>
               <h2 className="text-xl font-bold text-gray-800">Control de Temperatura</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl p-4 border border-orange-200">
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    id="termografoOrigen"
-                    checked={formData.termografoOrigen}
-                    onChange={(e) => setFormData({ ...formData, termografoOrigen: e.target.checked })}
-                    className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="termografoOrigen" className="text-sm font-semibold text-gray-700 cursor-pointer">
-                    Termógrafo Origen
-                  </label>
-                </div>
-              </div>
 
-              <div className="bg-white rounded-xl p-4 border border-orange-200">
-                <div className="flex items-center space-x-3">
+            {/* Selector de unidad de temperatura */}
+            <div className="mb-6 p-4 bg-white rounded-xl border border-orange-200">
+              <p className="text-sm font-semibold text-gray-700 mb-3">Unidad de Temperatura</p>
+              <div className="flex gap-4">
+                <label className="flex items-center cursor-pointer">
                   <input
-                    type="checkbox"
-                    id="termografoNacional"
-                    checked={formData.termografoNacional}
-                    onChange={(e) => setFormData({ ...formData, termografoNacional: e.target.checked })}
-                    className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    type="radio"
+                    name="unidad"
+                    value="celsius"
+                    checked={unidadTemperatura === 'celsius'}
+                    onChange={() => setUnidadTemperatura('celsius')}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                   />
-                  <label htmlFor="termografoNacional" className="text-sm font-semibold text-gray-700 cursor-pointer">
-                    Termógrafo Nacional
+                  <span className="ml-2 text-sm font-medium text-gray-700">Celsius (°C)</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="unidad"
+                    value="fahrenheit"
+                    checked={unidadTemperatura === 'fahrenheit'}
+                    onChange={() => setUnidadTemperatura('fahrenheit')}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                  />
+                  <span className="ml-2 text-sm font-medium text-gray-700">Fahrenheit (°F)</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Termógrafos - ahora como opciones Sí/No */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-3">¿Termógrafo de Origen? *</p>
+                <div className="flex gap-3">
+                  <label className="flex items-center flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all" style={{ borderColor: formData.termografoOrigen ? '#2563eb' : '#d1d5db', backgroundColor: formData.termografoOrigen ? '#eff6ff' : '#ffffff' }}>
+                    <input
+                      type="radio"
+                      name="termografoOrigen"
+                      value="yes"
+                      checked={formData.termografoOrigen === true}
+                      onChange={() => setFormData({ ...formData, termografoOrigen: true })}
+                      className="h-4 w-4 text-blue-600"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">Sí</span>
+                  </label>
+                  <label className="flex items-center flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all" style={{ borderColor: formData.termografoOrigen === false ? '#dc2626' : '#d1d5db', backgroundColor: formData.termografoOrigen === false ? '#fef2f2' : '#ffffff' }}>
+                    <input
+                      type="radio"
+                      name="termografoOrigenNo"
+                      value="no"
+                      checked={formData.termografoOrigen === false}
+                      onChange={() => setFormData({ ...formData, termografoOrigen: false })}
+                      className="h-4 w-4 text-red-600"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">No</span>
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Temperatura de la Fruta (°C) *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.temperaturaFruta || ''}
-                  onChange={(e) => setFormData({ ...formData, temperaturaFruta: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white"
-                />
+                <p className="text-sm font-semibold text-gray-700 mb-3">¿Termógrafo Nacional? *</p>
+                <div className="flex gap-3">
+                  <label className="flex items-center flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all" style={{ borderColor: formData.termografoNacional ? '#2563eb' : '#d1d5db', backgroundColor: formData.termografoNacional ? '#eff6ff' : '#ffffff' }}>
+                    <input
+                      type="radio"
+                      name="termografoNacional"
+                      value="yes"
+                      checked={formData.termografoNacional === true}
+                      onChange={() => setFormData({ ...formData, termografoNacional: true })}
+                      className="h-4 w-4 text-blue-600"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">Sí</span>
+                  </label>
+                  <label className="flex items-center flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all" style={{ borderColor: formData.termografoNacional === false ? '#dc2626' : '#d1d5db', backgroundColor: formData.termografoNacional === false ? '#fef2f2' : '#ffffff' }}>
+                    <input
+                      type="radio"
+                      name="termografoNacionalNo"
+                      value="no"
+                      checked={formData.termografoNacional === false}
+                      onChange={() => setFormData({ ...formData, termografoNacional: false })}
+                      className="h-4 w-4 text-red-600"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">No</span>
+                  </label>
+                </div>
               </div>
+            </div>
+
+            {/* Temperatura de la Fruta */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Temperatura de la Fruta ({unidadTemperatura === 'celsius' ? '°C' : '°F'}) *
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.temperaturaFruta || ''}
+                onChange={(e) => setFormData({ ...formData, temperaturaFruta: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                required
+                placeholder={unidadTemperatura === 'celsius' ? 'Ej: 5.5' : 'Ej: 41.9'}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                {unidadTemperatura === 'fahrenheit' && formData.temperaturaFruta ? `Equivalente: ${fahrenheitToCelsius(formData.temperaturaFruta).toFixed(2)}°C` : ''}
+                {unidadTemperatura === 'celsius' && formData.temperaturaFruta ? `Equivalente: ${celsiusToFahrenheit(formData.temperaturaFruta).toFixed(2)}°F` : ''}
+              </p>
             </div>
           </div>
 

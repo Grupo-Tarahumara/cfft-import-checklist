@@ -5,17 +5,23 @@ import { useRouter, useParams } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
 import { authApi } from '@/lib/api-auth';
 import { Inspeccion } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
+import { generateInspectionPDF } from '@/lib/pdf-generator';
 
 export default function DetalleInspeccionPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { user } = useAuth();
+  const isNormalUser = user?.rol === 'user';
 
   const [inspeccion, setInspeccion] = useState<Inspeccion | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -34,6 +40,28 @@ export default function DetalleInspeccionPage() {
       router.push('/inspecciones');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!inspeccion) return;
+
+    try {
+      setIsGeneratingPDF(true);
+      toast.loading('Generando PDF...', { id: 'pdf-generation' });
+
+      // Para usuarios normales, ocultar rangos de temperatura y alertas
+      await generateInspectionPDF(inspeccion, {
+        hideTemperatureRanges: isNormalUser,
+        hideAlerts: isNormalUser,
+      });
+
+      toast.success('PDF descargado correctamente', { id: 'pdf-generation' });
+    } catch (error) {
+      console.error('Error descargando PDF:', error);
+      toast.error('Error al generar el PDF', { id: 'pdf-generation' });
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -122,16 +150,18 @@ export default function DetalleInspeccionPage() {
               </span>
             </div>
 
-            <div>
-              <p className="text-sm text-gray-500">Tiene Alertas</p>
-              <p className="font-medium">
-                {inspeccion.tieneAlertas ? (
-                  <span className="text-red-600">⚠️ Sí</span>
-                ) : (
-                  <span className="text-green-600">✓ No</span>
-                )}
-              </p>
-            </div>
+            {!isNormalUser && (
+              <div>
+                <p className="text-sm text-gray-500">Tiene Alertas</p>
+                <p className="font-medium">
+                  {inspeccion.tieneAlertas ? (
+                    <span className="text-red-600">⚠️ Sí</span>
+                  ) : (
+                    <span className="text-green-600">✓ No</span>
+                  )}
+                </p>
+              </div>
+            )}
 
             <div>
               <p className="text-sm text-gray-500">Inspector</p>
@@ -185,7 +215,7 @@ export default function DetalleInspeccionPage() {
               <p className="font-medium text-gray-900 text-lg">
                 {inspeccion.fruta?.nombre || '-'}
               </p>
-              {inspeccion.fruta && (
+              {inspeccion.fruta && !isNormalUser && (
                 <div className="mt-2">
                   <p className="text-sm text-gray-600">
                     <span className="font-medium">Rango óptimo:</span>{' '}
@@ -248,7 +278,7 @@ export default function DetalleInspeccionPage() {
                 <p className="text-2xl font-bold text-gray-900">
                   {inspeccion.temperaturaFruta}°C
                 </p>
-                {tempEnRango !== null && (
+                {!isNormalUser && tempEnRango !== null && (
                   tempEnRango ? (
                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
                       ✓ En rango
@@ -260,7 +290,7 @@ export default function DetalleInspeccionPage() {
                   )
                 )}
               </div>
-              {inspeccion.fruta && (
+              {inspeccion.fruta && !isNormalUser && (
                 <p className="text-xs text-gray-500 mt-1">
                   Rango óptimo: {inspeccion.fruta.tempMinima}°C - {inspeccion.fruta.tempMaxima}°C
                 </p>
@@ -278,7 +308,7 @@ export default function DetalleInspeccionPage() {
         )}
 
         {/* Alertas */}
-        {inspeccion.alertas && inspeccion.alertas.length > 0 && (
+        {!isNormalUser && inspeccion.alertas && inspeccion.alertas.length > 0 && (
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               Alertas ({inspeccion.alertas.length})
@@ -388,21 +418,38 @@ export default function DetalleInspeccionPage() {
           <div className="text-sm text-gray-600">
             <p>Última actualización: {new Date(inspeccion.fechaActualizacion).toLocaleString('es-ES')}</p>
           </div>
-          <div className="space-x-3">
+          <div className="space-x-3 flex">
             <Link
               href={`/inspecciones`}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 inline-block"
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 inline-block transition-colors"
             >
               Volver a Lista
             </Link>
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPDF}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed inline-flex items-center gap-2 transition-colors"
+            >
+              {isGeneratingPDF ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <DocumentArrowDownIcon className="h-5 w-5" />
+                  Descargar PDF
+                </>
+              )}
+            </button>
             {inspeccion.pdfGenerado && (
               <a
                 href={inspeccion.pdfGenerado}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 inline-block transition-colors"
               >
-                📄 Descargar PDF
+                📄 PDF del servidor
               </a>
             )}
           </div>
