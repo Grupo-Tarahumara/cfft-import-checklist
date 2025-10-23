@@ -10,6 +10,8 @@ export default function PuntosInspeccionPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPunto, setEditingPunto] = useState<PuntoInspeccion | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
   const [formData, setFormData] = useState<CreatePuntoInspeccionDto>({
     nombre: '',
     ubicacion: '',
@@ -79,6 +81,12 @@ export default function PuntosInspeccionPage() {
     setEditingPunto(null);
     setShowForm(false);
   };
+
+  // Pagination logic
+  const totalPages = Math.ceil(puntos.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedPuntos = puntos.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -238,7 +246,7 @@ export default function PuntosInspeccionPage() {
                 </tr>
               </thead>
               <tbody className="bg-white/50 divide-y divide-gray-200/60">
-                {puntos.map((punto) => (
+                {paginatedPuntos.map((punto) => (
                   <tr key={punto.id} className="hover:bg-purple-50/30 transition-colors duration-200 group">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -312,6 +320,46 @@ export default function PuntosInspeccionPage() {
               <p className="text-gray-500 text-lg font-medium">
                 No hay puntos de inspección registrados
               </p>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {puntos.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200/60 flex items-center justify-between bg-white/50">
+              <div className="text-sm text-gray-600">
+                Mostrando {startIndex + 1} a {Math.min(endIndex, puntos.length)} de {puntos.length} puntos
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  ← Anterior
+                </button>
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Siguiente →
+                </button>
+              </div>
             </div>
           )}
         </div>

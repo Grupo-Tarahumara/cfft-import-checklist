@@ -79,8 +79,11 @@ export interface Inspeccion {
   paletTermografoOrigen?: number; // Número de palet donde está el termógrafo de origen
   paletTermografoNacional?: number; // Número de palet donde está el termógrafo nacional
   temperaturaFruta: number;
+  temperaturaCarga?: number; // Temperatura de la carga (diferente a la de la fruta)
+  lineaTransportista?: string; // Nombre de la línea transportista
   numeroTrancas: number;
   observaciones?: string;
+  firmaTransporte?: string; // Firma del responsable del transporte
   tieneAlertas: boolean;
   pdfGenerado?: string;
   estado: string; // 'Completado' | 'Pendiente' | etc
@@ -148,8 +151,11 @@ export interface CreateInspeccionDto {
   paletTermografoOrigen?: number; // Número de palet donde está el termógrafo de origen
   paletTermografoNacional?: number; // Número de palet donde está el termógrafo nacional
   temperaturaFruta: number;
+  temperaturaCarga?: number; // Temperatura de la carga
+  lineaTransportista?: string; // Línea transportista
   numeroTrancas: number;
   observaciones?: string;
+  firmaTransporte?: string; // Firma de transporte
   tieneAlertas?: boolean;
   pdfGenerado?: string;
   estado?: string;

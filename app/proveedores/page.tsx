@@ -10,6 +10,8 @@ export default function ProveedoresPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProveedor, setEditingProveedor] = useState<Proveedor | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
   const [formData, setFormData] = useState<CreateProveedorDto>({
     nombre: '',
     codigo: '',
@@ -82,6 +84,12 @@ export default function ProveedoresPage() {
     setEditingProveedor(null);
     setShowForm(false);
   };
+
+  // Pagination logic
+  const totalPages = Math.ceil(proveedores.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedProveedores = proveedores.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -253,7 +261,7 @@ export default function ProveedoresPage() {
                 </tr>
               </thead>
               <tbody className="bg-white/50 divide-y divide-gray-200/60">
-                {proveedores.map((proveedor) => (
+                {paginatedProveedores.map((proveedor) => (
                   <tr key={proveedor.id} className="hover:bg-blue-50/30 transition-colors duration-200 group">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold bg-indigo-100 text-indigo-800">
@@ -316,6 +324,46 @@ export default function ProveedoresPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {proveedores.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200/60 flex items-center justify-between bg-white/50">
+              <div className="text-sm text-gray-600">
+                Mostrando {startIndex + 1} a {Math.min(endIndex, proveedores.length)} de {proveedores.length} proveedores
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  ← Anterior
+                </button>
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Siguiente →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>

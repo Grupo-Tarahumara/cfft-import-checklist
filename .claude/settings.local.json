@@ -33,7 +33,8 @@
       "Bash(npx tsc:*)",
       "Bash(xargs:*)",
       "Bash(npm run migration:run:*)",
-      "Bash(npm run migration:show:*)"
+      "Bash(npm run migration:show:*)",
+      "Bash(ls -la \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist\"\" | grep -i \"tailwind|config \")"
     ],
     "deny": [],
     "ask": []

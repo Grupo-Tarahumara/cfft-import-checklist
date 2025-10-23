@@ -31,6 +31,8 @@ export default function InspeccionesPage() {
   const [filterProveedor, setFilterProveedor] = useState('');
   const [filterAlertas, setFilterAlertas] = useState('');
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
 
   // Función para convertir Celsius a Fahrenheit
   const celsiusToFahrenheit = (c: number): number => {
@@ -43,6 +45,7 @@ export default function InspeccionesPage() {
 
   useEffect(() => {
     filterInspecciones();
+    setCurrentPage(1); // Reset to first page when filters change
   }, [searchTerm, filterProveedor, filterAlertas, inspecciones]);
 
   const loadData = async () => {
@@ -110,6 +113,12 @@ export default function InspeccionesPage() {
         return 'bg-gray-100 text-gray-800 ring-1 ring-gray-600/20';
     }
   };
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredInspecciones.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedInspecciones = filteredInspecciones.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -296,7 +305,7 @@ export default function InspeccionesPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredInspecciones.map((inspeccion) => (
+                {paginatedInspecciones.map((inspeccion) => (
                   <tr 
                     key={inspeccion.id} 
                     className="hover:bg-gray-50 transition-colors duration-150"
@@ -389,11 +398,51 @@ export default function InspeccionesPage() {
               <CubeIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron inspecciones</h3>
               <p className="text-gray-600 max-w-sm mx-auto">
-                {searchTerm || filterProveedor 
-                  ? 'Intenta ajustar los filtros para ver más resultados.' 
+                {searchTerm || filterProveedor
+                  ? 'Intenta ajustar los filtros para ver más resultados.'
                   : 'Comienza creando tu primera inspección.'
                 }
               </p>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {filteredInspecciones.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Mostrando {startIndex + 1} a {Math.min(endIndex, filteredInspecciones.length)} de {filteredInspecciones.length} inspecciones
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  ← Anterior
+                </button>
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Siguiente →
+                </button>
+              </div>
             </div>
           )}
         </div>

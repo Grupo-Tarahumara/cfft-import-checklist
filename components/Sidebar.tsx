@@ -117,7 +117,7 @@ export default function Sidebar() {
           )}
         </button>
 
-      <nav className={`flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 lg:px-4 lg:py-6 ${isCollapsed ? 'lg:px-2 lg:py-4' : ''}`}>
+      <nav className={`flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 lg:px-4 lg:py-6 scrollbar-hide ${isCollapsed ? 'lg:px-2 lg:py-4' : ''}`}>
         {/* Logo y Header Section */}
         <div className={`pb-3 lg:pb-4 border-b border-slate-700/50 mb-4 lg:mb-6 ${isCollapsed ? 'lg:mb-4' : ''}`}>
           <div className="flex flex-col items-center">

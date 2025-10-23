@@ -183,7 +183,7 @@ export default function NotificacionesPage() {
         </div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 md:gap-6">
           <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
             <p className="text-xs md:text-sm text-gray-500">Total</p>
             <p className="text-xl md:text-2xl font-bold">{notificaciones.length}</p>
@@ -201,9 +201,21 @@ export default function NotificacionesPage() {
             </p>
           </div>
           <div className="bg-blue-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
-            <p className="text-xs md:text-sm text-blue-700">Por Email</p>
+            <p className="text-xs md:text-sm text-blue-700">📧 Email</p>
             <p className="text-xl md:text-2xl font-bold text-blue-700">
               {notificaciones.filter((n) => n.metodo === 'email').length}
+            </p>
+          </div>
+          <div className="bg-green-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
+            <p className="text-xs md:text-sm text-green-700">📱 Push</p>
+            <p className="text-xl md:text-2xl font-bold text-green-700">
+              {notificaciones.filter((n) => n.metodo === 'push').length}
+            </p>
+          </div>
+          <div className="bg-purple-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
+            <p className="text-xs md:text-sm text-purple-700">🔔 Sistema</p>
+            <p className="text-xl md:text-2xl font-bold text-purple-700">
+              {notificaciones.filter((n) => n.metodo === 'sistema').length}
             </p>
           </div>
         </div>

@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { generateInspectionPDF } from '@/lib/pdf-generator';
+import ImageModal from '@/components/ImageModal';
 
 export default function DetalleInspeccionPage() {
   const router = useRouter();
@@ -23,6 +24,8 @@ export default function DetalleInspeccionPage() {
   const [inspeccion, setInspeccion] = useState<Inspeccion | null>(null);
   const [loading, setLoading] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -64,6 +67,16 @@ export default function DetalleInspeccionPage() {
     } finally {
       setIsGeneratingPDF(false);
     }
+  };
+
+  const handleOpenImageModal = (imageUrl: string, imageTitle: string) => {
+    setSelectedImage({ url: imageUrl, title: imageTitle });
+    setIsModalOpen(true);
+  };
+
+  const handleCloseImageModal = () => {
+    setIsModalOpen(false);
+    setSelectedImage(null);
   };
 
   if (loading) {
@@ -408,14 +421,12 @@ export default function DetalleInspeccionPage() {
                           Obligatoria
                         </span>
                       )}
-                      <a
-                        href={foto.urlFoto}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => handleOpenImageModal(foto.urlFoto, foto.tipoFoto.replace(/_/g, ' ').toUpperCase())}
                         className="text-xs text-blue-600 hover:text-blue-700 font-medium"
                       >
                         Ver imagen completa →
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -470,6 +481,16 @@ export default function DetalleInspeccionPage() {
           </div>
         </div>
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <ImageModal
+          isOpen={isModalOpen}
+          imageUrl={selectedImage.url}
+          imageTitle={selectedImage.title}
+          onClose={handleCloseImageModal}
+        />
+      )}
     </DashboardLayout>
   );
 }

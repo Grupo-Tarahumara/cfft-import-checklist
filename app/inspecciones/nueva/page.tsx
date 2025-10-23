@@ -42,6 +42,9 @@ export default function NuevaInspeccionPage() {
   // Estado para unidad de temperatura
   const [unidadTemperatura, setUnidadTemperatura] = useState<'celsius' | 'fahrenheit'>('celsius');
 
+  // Fotos firma
+  const [firmaCanvas, setFirmaCanvas] = useState<HTMLCanvasElement | null>(null);
+
   // Formulario
   const [formData, setFormData] = useState<CreateInspeccionDto>({
     fecha: (() => {
@@ -61,6 +64,8 @@ export default function NuevaInspeccionPage() {
     paletTermografoOrigen: undefined,
     paletTermografoNacional: undefined,
     temperaturaFruta: 0,
+    temperaturaCarga: 0,
+    lineaTransportista: '',
     numeroTrancas: 0,
     observaciones: '',
     tieneAlertas: false,
@@ -167,10 +172,20 @@ export default function NuevaInspeccionPage() {
       return;
     }
 
-    // Validar fotos obligatorias
-    if (fotosRequeridas.length < 4) {
+    // Validar fotos obligatorias - Dinámica según termógrafos seleccionados
+    const fotosRequeridas_Count = (formData.termografoOrigen ? 1 : 0) + (formData.termografoNacional ? 1 : 0) + 2; // +2 para Temperatura y Mercancía
+    const fotosActuales = fotosRequeridas.filter(f => f !== null && f !== undefined).length;
+
+    if (fotosActuales < fotosRequeridas_Count) {
+      const fotosNecesarias = [
+        formData.termografoOrigen ? 'Termógrafo Origen' : null,
+        formData.termografoNacional ? 'Termógrafo Nacional' : null,
+        'Temperatura de la Fruta',
+        'Mercancía'
+      ].filter(f => f !== null);
+
       toast.error('Fotos obligatorias faltantes', {
-        description: 'Debe adjuntar las 4 fotos obligatorias',
+        description: `Debe adjuntar: ${fotosNecesarias.join(', ')}`,
       });
       return;
     }
@@ -211,17 +226,26 @@ export default function NuevaInspeccionPage() {
       // Agregar datos del formulario
       Object.keys(formData).forEach(key => {
         const value = formData[key as keyof CreateInspeccionDto];
+        // No enviar palet fields si el termógrafo no está seleccionado
+        if (key === 'paletTermografoOrigen' && !formData.termografoOrigen) return;
+        if (key === 'paletTermografoNacional' && !formData.termografoNacional) return;
+        // No enviar undefined o null values para los palets
+        if ((key === 'paletTermografoOrigen' || key === 'paletTermografoNacional') && (value === undefined || value === null)) return;
         formDataToSend.append(key, String(value));
       });
 
-      // Agregar fotos obligatorias
+      // Agregar fotos obligatorias (solo las que existen)
       fotosRequeridas.forEach((foto, index) => {
-        formDataToSend.append(`fotosRequeridas`, foto, `foto_requerida_${index + 1}.jpg`);
+        if (foto && foto instanceof File) {
+          formDataToSend.append(`fotosRequeridas`, foto, `foto_requerida_${index + 1}.jpg`);
+        }
       });
 
-      // Agregar fotos opcionales
+      // Agregar fotos opcionales (solo las que existen)
       fotosOpcionales.forEach((foto, index) => {
-        formDataToSend.append(`fotosOpcionales`, foto, `foto_opcional_${index + 1}.jpg`);
+        if (foto && foto instanceof File) {
+          formDataToSend.append(`fotosOpcionales`, foto, `foto_opcional_${index + 1}.jpg`);
+        }
       });
 
       const nuevaInspeccion = await authApi.post<Inspeccion>('/inspecciones', formDataToSend);
@@ -425,6 +449,19 @@ export default function NuevaInspeccionPage() {
                   <p className="text-xs text-gray-500 mt-1">Se ha seleccionado automáticamente tu usuario</p>
                 )}
               </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Línea Transportista
+                </label>
+                <input
+                  type="text"
+                  value={formData.lineaTransportista || ''}
+                  onChange={(e) => setFormData({ ...formData, lineaTransportista: e.target.value })}
+                  placeholder="Ej: Transportes ABC, DHL, etc."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
             </div>
           </div>
 
@@ -521,61 +558,49 @@ export default function NuevaInspeccionPage() {
               </div>
             </div>
 
-            {/* Termógrafos - ahora como opciones Sí/No */}
+            {/* Termógrafos - Toggle Switch */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <p className="text-sm font-semibold text-gray-700 mb-3">¿Termógrafo de Origen? *</p>
-                <div className="flex gap-3">
-                  <label className="flex items-center flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all" style={{ borderColor: formData.termografoOrigen ? '#2563eb' : '#d1d5db', backgroundColor: formData.termografoOrigen ? '#eff6ff' : '#ffffff' }}>
-                    <input
-                      type="radio"
-                      name="termografoOrigen"
-                      value="yes"
-                      checked={formData.termografoOrigen === true}
-                      onChange={() => setFormData({ ...formData, termografoOrigen: true })}
-                      className="h-4 w-4 text-blue-600"
+                <p className="text-sm font-semibold text-gray-700 mb-3">Termógrafo de Origen</p>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, termografoOrigen: !formData.termografoOrigen })}
+                    className={`relative inline-flex h-8 w-16 items-center rounded-full transition-all ${
+                      formData.termografoOrigen ? 'bg-blue-600' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                        formData.termografoOrigen ? 'translate-x-9' : 'translate-x-1'
+                      }`}
                     />
-                    <span className="ml-2 text-sm font-medium text-gray-700">Sí</span>
-                  </label>
-                  <label className="flex items-center flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all" style={{ borderColor: formData.termografoOrigen === false ? '#dc2626' : '#d1d5db', backgroundColor: formData.termografoOrigen === false ? '#fef2f2' : '#ffffff' }}>
-                    <input
-                      type="radio"
-                      name="termografoOrigenNo"
-                      value="no"
-                      checked={formData.termografoOrigen === false}
-                      onChange={() => setFormData({ ...formData, termografoOrigen: false })}
-                      className="h-4 w-4 text-red-600"
-                    />
-                    <span className="ml-2 text-sm font-medium text-gray-700">No</span>
-                  </label>
+                  </button>
+                  <span className="text-sm font-medium text-gray-700">
+                    {formData.termografoOrigen ? 'Sí' : 'No'}
+                  </span>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm font-semibold text-gray-700 mb-3">¿Termógrafo Nacional? *</p>
-                <div className="flex gap-3">
-                  <label className="flex items-center flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all" style={{ borderColor: formData.termografoNacional ? '#2563eb' : '#d1d5db', backgroundColor: formData.termografoNacional ? '#eff6ff' : '#ffffff' }}>
-                    <input
-                      type="radio"
-                      name="termografoNacional"
-                      value="yes"
-                      checked={formData.termografoNacional === true}
-                      onChange={() => setFormData({ ...formData, termografoNacional: true })}
-                      className="h-4 w-4 text-blue-600"
+                <p className="text-sm font-semibold text-gray-700 mb-3">Termógrafo Nacional</p>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, termografoNacional: !formData.termografoNacional })}
+                    className={`relative inline-flex h-8 w-16 items-center rounded-full transition-all ${
+                      formData.termografoNacional ? 'bg-green-600' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                        formData.termografoNacional ? 'translate-x-9' : 'translate-x-1'
+                      }`}
                     />
-                    <span className="ml-2 text-sm font-medium text-gray-700">Sí</span>
-                  </label>
-                  <label className="flex items-center flex-1 p-3 border-2 rounded-lg cursor-pointer transition-all" style={{ borderColor: formData.termografoNacional === false ? '#dc2626' : '#d1d5db', backgroundColor: formData.termografoNacional === false ? '#fef2f2' : '#ffffff' }}>
-                    <input
-                      type="radio"
-                      name="termografoNacionalNo"
-                      value="no"
-                      checked={formData.termografoNacional === false}
-                      onChange={() => setFormData({ ...formData, termografoNacional: false })}
-                      className="h-4 w-4 text-red-600"
-                    />
-                    <span className="ml-2 text-sm font-medium text-gray-700">No</span>
-                  </label>
+                  </button>
+                  <span className="text-sm font-medium text-gray-700">
+                    {formData.termografoNacional ? 'Sí' : 'No'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -644,6 +669,25 @@ export default function NuevaInspeccionPage() {
                 {unidadTemperatura === 'celsius' && formData.temperaturaFruta ? `Equivalente: ${celsiusToFahrenheit(formData.temperaturaFruta).toFixed(2)}°F` : ''}
               </p>
             </div>
+
+            {/* Temperatura de la Carga */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Temperatura de la Carga ({unidadTemperatura === 'celsius' ? '°C' : '°F'})
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.temperaturaCarga || ''}
+                onChange={(e) => setFormData({ ...formData, temperaturaCarga: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                placeholder={unidadTemperatura === 'celsius' ? 'Ej: 5.5' : 'Ej: 41.9'}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                {unidadTemperatura === 'fahrenheit' && formData.temperaturaCarga ? `Equivalente: ${fahrenheitToCelsius(formData.temperaturaCarga).toFixed(2)}°C` : ''}
+                {unidadTemperatura === 'celsius' && formData.temperaturaCarga ? `Equivalente: ${celsiusToFahrenheit(formData.temperaturaCarga).toFixed(2)}°F` : ''}
+              </p>
+            </div>
           </div>
 
           {/* Fotos Obligatorias */}
@@ -655,33 +699,44 @@ export default function NuevaInspeccionPage() {
               <div className="flex-1">
                 <h2 className="text-xl font-bold text-gray-800">Fotografías Obligatorias *</h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  Fotos de ambos termógrafos (origen y nacional), una foto de la temperatura de la fruta y una más de la mercancía antes de cerrar puertas
+                  {[
+                    formData.termografoOrigen ? 'Foto del Termógrafo de Origen' : null,
+                    formData.termografoNacional ? 'Foto del Termógrafo Nacional' : null,
+                    'Foto de la Temperatura de la Fruta',
+                    'Foto de la Mercancía antes de cerrar puertas'
+                  ].filter(f => f !== null).join(', ')}
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className={`grid gap-4 ${
+              formData.termografoOrigen && formData.termografoNacional
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
+                : formData.termografoOrigen || formData.termografoNacional
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                : 'grid-cols-1 md:grid-cols-2'
+            }`}>
               {[
-                'Termógrafo Origen',
-                'Termógrafo Nacional',
-                'Temperatura de la Fruta',
-                'Mercancía'
-              ].map((label, index) => (
-                <div key={index} className="relative">
+                formData.termografoOrigen ? { label: 'Termógrafo Origen', index: 0 } : null,
+                formData.termografoNacional ? { label: 'Termógrafo Nacional', index: 1 } : null,
+                { label: 'Temperatura de la Fruta', index: 2 },
+                { label: 'Mercancía', index: 3 }
+              ].filter(item => item !== null).map((item) => (
+                <div key={item!.index} className="relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {label} *
+                    {item!.label} *
                   </label>
                   <div className="relative">
-                    {fotosRequeridas[index] ? (
+                    {fotosRequeridas[item!.index] ? (
                       <div className="relative group">
                         <img
-                          src={URL.createObjectURL(fotosRequeridas[index])}
-                          alt={`Foto ${index + 1}`}
+                          src={URL.createObjectURL(fotosRequeridas[item!.index])}
+                          alt={`Foto ${item!.label}`}
                           className="w-full h-40 object-cover rounded-xl border-2 border-blue-300"
                         />
                         <button
                           type="button"
-                          onClick={() => handleFotoRequeridaChange(index, null)}
+                          onClick={() => handleFotoRequeridaChange(item!.index, null)}
                           className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full shadow-lg transition-all lg:opacity-0 lg:group-hover:opacity-100"
                         >
                           <XMarkIcon className="h-4 w-4" />
@@ -696,7 +751,7 @@ export default function NuevaInspeccionPage() {
                           accept="image/*"
                           onChange={(e) => {
                             if (e.target.files && e.target.files[0]) {
-                              handleFotoRequeridaChange(index, e.target.files[0]);
+                              handleFotoRequeridaChange(item!.index, e.target.files[0]);
                             }
                           }}
                           className="hidden"
@@ -778,6 +833,30 @@ export default function NuevaInspeccionPage() {
               placeholder="Ingrese cualquier observación relevante sobre la inspección..."
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
             />
+          </div>
+
+          {/* Firma de Transporte */}
+          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl shadow-lg border border-indigo-200 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </div>
+              <label className="text-xl font-bold text-gray-800">
+                Firma de Transporte
+              </label>
+            </div>
+            <textarea
+              value={formData.firmaTransporte || ''}
+              onChange={(e) => setFormData({ ...formData, firmaTransporte: e.target.value })}
+              rows={3}
+              placeholder="Nombre y firma digital del responsable del transporte..."
+              className="w-full px-4 py-3 border border-indigo-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none bg-white"
+            />
+            <p className="text-xs text-gray-600 mt-2">
+              Ingrese el nombre del responsable del transporte y cualquier información adicional de la firma
+            </p>
           </div>
 
           {/* Botones */}

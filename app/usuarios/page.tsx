@@ -11,6 +11,8 @@ export default function UsuariosPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
   const [formData, setFormData] = useState<CreateUsuarioDto>({
     nombre: '',
     username: '',
@@ -95,6 +97,12 @@ export default function UsuariosPage() {
     setEditingUsuario(null);
     setShowForm(false);
   };
+
+  // Pagination logic
+  const totalPages = Math.ceil(usuarios.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedUsuarios = usuarios.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -334,7 +342,7 @@ export default function UsuariosPage() {
                 </tr>
               </thead>
               <tbody className="bg-white/50 divide-y divide-gray-200/60">
-                {usuarios.map((usuario) => (
+                {paginatedUsuarios.map((usuario) => (
                   <tr key={usuario.id} className="hover:bg-blue-50/30 transition-colors duration-200 group">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -408,6 +416,46 @@ export default function UsuariosPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {usuarios.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200/60 flex items-center justify-between bg-white/50">
+              <div className="text-sm text-gray-600">
+                Mostrando {startIndex + 1} a {Math.min(endIndex, usuarios.length)} de {usuarios.length} usuarios
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  ← Anterior
+                </button>
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Siguiente →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       </DashboardLayout>
