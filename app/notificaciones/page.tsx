@@ -113,6 +113,38 @@ export default function NotificacionesPage() {
     }
   };
 
+  // Agrupar notificaciones por alertaId
+  const groupedNotificaciones = () => {
+    const grouped = new Map();
+
+    filteredNotificaciones.forEach((notif) => {
+      const key = notif.alertaId;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          alertaId: notif.alertaId,
+          usuarioId: notif.usuarioId,
+          usuario: notif.usuario,
+          metodos: [],
+          fechaEnvio: notif.fechaEnvio,
+          enviada: true,
+          ids: [],
+        });
+      }
+
+      const group = grouped.get(key);
+      group.metodos.push(notif.metodo);
+      group.ids.push(notif.id);
+
+      // Si cualquier notificación del grupo no está enviada, marcar como no enviada
+      if (!notif.enviada) {
+        group.enviada = false;
+        group.fechaEnvio = notif.fechaEnvio;
+      }
+    });
+
+    return Array.from(grouped.values());
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -183,7 +215,7 @@ export default function NotificacionesPage() {
         </div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
             <p className="text-xs md:text-sm text-gray-500">Total</p>
             <p className="text-xl md:text-2xl font-bold">{notificaciones.length}</p>
@@ -200,24 +232,6 @@ export default function NotificacionesPage() {
               {notificaciones.filter((n) => n.enviada).length}
             </p>
           </div>
-          <div className="bg-blue-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
-            <p className="text-xs md:text-sm text-blue-700">📧 Email</p>
-            <p className="text-xl md:text-2xl font-bold text-blue-700">
-              {notificaciones.filter((n) => n.metodo === 'email').length}
-            </p>
-          </div>
-          <div className="bg-green-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
-            <p className="text-xs md:text-sm text-green-700">📱 Push</p>
-            <p className="text-xl md:text-2xl font-bold text-green-700">
-              {notificaciones.filter((n) => n.metodo === 'push').length}
-            </p>
-          </div>
-          <div className="bg-purple-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
-            <p className="text-xs md:text-sm text-purple-700">🔔 Sistema</p>
-            <p className="text-xl md:text-2xl font-bold text-purple-700">
-              {notificaciones.filter((n) => n.metodo === 'sistema').length}
-            </p>
-          </div>
         </div>
 
         {/* Lista de Notificaciones */}
@@ -230,7 +244,7 @@ export default function NotificacionesPage() {
                   Usuario
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Método
+                  Métodos Emitidos
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
@@ -247,39 +261,46 @@ export default function NotificacionesPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredNotificaciones.map((notif) => (
-                <tr key={notif.id} className={`hover:bg-gray-50 ${!notif.enviada ? 'bg-yellow-50' : ''}`}>
+              {groupedNotificaciones().map((group) => (
+                <tr key={group.alertaId} className={`hover:bg-gray-50 ${!group.enviada ? 'bg-yellow-50' : ''}`}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {notif.usuario?.nombre || `Usuario #${notif.usuarioId}`}
+                    {group.usuario?.nombre || `Usuario #${group.usuarioId}`}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getMetodoColor(notif.metodo)}`}>
-                      {getMetodoIcon(notif.metodo)} {notif.metodo.toUpperCase()}
-                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {group.metodos.map((metodo, idx) => (
+                        <span key={idx} className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getMetodoColor(metodo)}`}>
+                          {getMetodoIcon(metodo)} {metodo.toUpperCase()}
+                        </span>
+                      ))}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        notif.enviada
+                        group.enviada
                           ? 'bg-green-100 text-green-800'
                           : 'bg-yellow-100 text-yellow-800'
                       }`}
                     >
-                      {notif.enviada ? '✓ Enviada' : '⏳ Pendiente'}
+                      {group.enviada ? '✓ Enviada' : '⏳ Pendiente'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {notif.fechaEnvio
-                      ? new Date(notif.fechaEnvio).toLocaleString('es-ES')
+                    {group.fechaEnvio
+                      ? new Date(group.fechaEnvio).toLocaleString('es-ES')
                       : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    #{notif.alertaId}
+                    #{group.alertaId}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {!notif.enviada && (
+                    {!group.enviada && (
                       <button
-                        onClick={() => handleMarcarEnviada(notif.id)}
+                        onClick={() => {
+                          // Marcar todos los ids del grupo como enviados
+                          group.ids.forEach(id => handleMarcarEnviada(id));
+                        }}
                         className="text-blue-600 hover:text-blue-900"
                       >
                         Marcar Enviada
@@ -291,7 +312,7 @@ export default function NotificacionesPage() {
             </tbody>
           </table>
 
-          {filteredNotificaciones.length === 0 && (
+          {groupedNotificaciones().length === 0 && (
             <div className="text-center py-12 text-sm md:text-base text-gray-500">
               No se encontraron notificaciones con los filtros seleccionados
             </div>

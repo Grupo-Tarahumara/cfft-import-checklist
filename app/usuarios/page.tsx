@@ -13,6 +13,9 @@ export default function UsuariosPage() {
   const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 30;
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState<CreateUsuarioDto>({
     nombre: '',
     username: '',
@@ -42,6 +45,14 @@ export default function UsuariosPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingUsuario && formData.password !== confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+    if (!editingUsuario && !formData.password) {
+      alert('Debe ingresar una contraseña');
+      return;
+    }
     try {
       if (editingUsuario) {
         await authApi.patch(`/usuarios/${editingUsuario.id}`, formData);
@@ -94,6 +105,9 @@ export default function UsuariosPage() {
       rol: 'user',
       activo: true,
     });
+    setConfirmPassword('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
     setEditingUsuario(null);
     setShowForm(false);
   };
@@ -168,8 +182,9 @@ export default function UsuariosPage() {
                   <input
                     type="text"
                     value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value.slice(0, 40) })}
                     required
+                    maxLength={40}
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="Ej: Juan Pérez"
                   />
@@ -182,9 +197,10 @@ export default function UsuariosPage() {
                   <input
                     type="text"
                     value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value.slice(0, 20) })}
                     required
                     disabled={!!editingUsuario}
+                    maxLength={20}
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="usuario_login"
                   />
@@ -197,8 +213,9 @@ export default function UsuariosPage() {
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value.slice(0, 40) })}
                     required
+                    maxLength={40}
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="usuario@ejemplo.com"
                   />
@@ -208,15 +225,58 @@ export default function UsuariosPage() {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     {editingUsuario ? 'Nueva Contraseña (dejar vacío para no cambiar)' : 'Contraseña'}
                   </label>
-                  <input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    required={!editingUsuario}
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value.slice(0, 20) })}
+                      required={!editingUsuario}
+                      maxLength={20}
+                      className="w-full px-4 py-3 pr-10 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? '🙈' : '👁️'}
+                    </button>
+                  </div>
                 </div>
+
+                {!editingUsuario && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Confirmar Contraseña
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value.slice(0, 20))}
+                        required={!editingUsuario}
+                        maxLength={20}
+                        className={`w-full px-4 py-3 pr-10 bg-white/50 backdrop-blur-sm border ${
+                          confirmPassword && confirmPassword !== formData.password
+                            ? 'border-red-300'
+                            : 'border-gray-200'
+                        } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                      >
+                        {showConfirmPassword ? '🙈' : '👁️'}
+                      </button>
+                    </div>
+                    {confirmPassword && confirmPassword !== formData.password && (
+                      <p className="text-xs text-red-600 mt-1">Las contraseñas no coinciden</p>
+                    )}
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -225,7 +285,8 @@ export default function UsuariosPage() {
                   <input
                     type="tel"
                     value={formData.telefono}
-                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value.slice(0, 12) })}
+                    maxLength={12}
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="+56 9 1234 5678"
                   />

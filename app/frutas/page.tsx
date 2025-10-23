@@ -12,12 +12,23 @@ export default function FrutasPage() {
   const [editingFruta, setEditingFruta] = useState<Fruta | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 30;
+  const [unidadTemperatura, setUnidadTemperatura] = useState<'celsius' | 'fahrenheit'>('celsius');
   const [formData, setFormData] = useState<CreateFrutaDto>({
     nombre: '',
     tempMinima: 0,
     tempMaxima: 0,
     activo: true,
   });
+  const [tempMinDisplay, setTempMinDisplay] = useState('');
+  const [tempMaxDisplay, setTempMaxDisplay] = useState('');
+
+  const fahrenheitToCelsius = (f: number): number => {
+    return Math.round(((f - 32) * 5) / 9 * 100) / 100;
+  };
+
+  const celsiusToFahrenheit = (c: number): number => {
+    return Math.round(((c * 9) / 5 + 32) * 100) / 100;
+  };
 
   useEffect(() => {
     loadFrutas();
@@ -65,6 +76,8 @@ export default function FrutasPage() {
       tempMaxima: fruta.tempMaxima,
       activo: fruta.activo,
     });
+    setTempMinDisplay(fruta.tempMinima?.toString() || '');
+    setTempMaxDisplay(fruta.tempMaxima?.toString() || '');
     setShowForm(true);
   };
 
@@ -87,6 +100,8 @@ export default function FrutasPage() {
       tempMaxima: 0,
       activo: true,
     });
+    setTempMinDisplay('');
+    setTempMaxDisplay('');
     setEditingFruta(null);
     setShowForm(false);
   };
@@ -160,53 +175,158 @@ export default function FrutasPage() {
                   <input
                     type="text"
                     value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value.slice(0, 40) })}
                     required
+                    maxLength={40}
                     placeholder="Ej: Uva, Manzana, Pera"
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                   />
                 </div>
 
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">Unidad de Temperatura</label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        name="unidad"
+                        value="celsius"
+                        checked={unidadTemperatura === 'celsius'}
+                        onChange={() => setUnidadTemperatura('celsius')}
+                        className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm font-medium text-gray-700">Celsius (°C)</span>
+                    </label>
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        name="unidad"
+                        value="fahrenheit"
+                        checked={unidadTemperatura === 'fahrenheit'}
+                        onChange={() => setUnidadTemperatura('fahrenheit')}
+                        className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm font-medium text-gray-700">Fahrenheit (°F)</span>
+                    </label>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Temperatura Mínima (°C)
+                    Temperatura Mínima ({unidadTemperatura === 'celsius' ? '°C' : '°F'})
                   </label>
                   <div className="relative">
                     <input
                       type="number"
                       step="0.01"
-                      value={formData.tempMinima}
-                      onChange={(e) => setFormData({ ...formData, tempMinima: parseFloat(e.target.value) })}
+                      max={999}
+                      value={tempMinDisplay}
+                      onChange={(e) => {
+                        let val = e.target.value;
+                        // Limitar a máximo 3 dígitos antes del punto decimal
+                        if (val.includes('.')) {
+                          const [intPart, decPart] = val.split('.');
+                          if (intPart.length > 3) {
+                            val = intPart.slice(0, 3) + '.' + decPart;
+                          }
+                        } else if (val.length > 3 && val !== '') {
+                          val = val.slice(0, 3);
+                        }
+                        setTempMinDisplay(val);
+                        if (val === '' || val === '.') {
+                          setFormData({ ...formData, tempMinima: 0 });
+                        } else {
+                          const value = parseFloat(val);
+                          if (!isNaN(value) && value <= 999 && /^[0-9.]*$/.test(val)) {
+                            setFormData({ ...formData, tempMinima: value });
+                          }
+                        }
+                      }}
                       required
+                      placeholder="Ingrese temperatura"
                       className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                      style={{
+                        MozAppearance: 'textfield'
+                      }}
                     />
+                    <style>{`
+                      input[type="number"]::-webkit-outer-spin-button,
+                      input[type="number"]::-webkit-inner-spin-button {
+                        -webkit-appearance: none;
+                        margin: 0;
+                      }
+                    `}</style>
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                       <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                   </div>
+                  {tempMinDisplay && parseFloat(tempMinDisplay) > 0 && unidadTemperatura === 'celsius' && (
+                    <p className="text-xs text-gray-500 mt-1">Equivalente: {celsiusToFahrenheit(parseFloat(tempMinDisplay)).toFixed(2)}°F</p>
+                  )}
+                  {tempMinDisplay && parseFloat(tempMinDisplay) > 0 && unidadTemperatura === 'fahrenheit' && (
+                    <p className="text-xs text-gray-500 mt-1">Equivalente: {fahrenheitToCelsius(parseFloat(tempMinDisplay)).toFixed(2)}°C</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Temperatura Máxima (°C)
+                    Temperatura Máxima ({unidadTemperatura === 'celsius' ? '°C' : '°F'})
                   </label>
                   <div className="relative">
                     <input
                       type="number"
                       step="0.01"
-                      value={formData.tempMaxima}
-                      onChange={(e) => setFormData({ ...formData, tempMaxima: parseFloat(e.target.value) })}
+                      max={999}
+                      value={tempMaxDisplay}
+                      onChange={(e) => {
+                        let val = e.target.value;
+                        // Limitar a máximo 3 dígitos antes del punto decimal
+                        if (val.includes('.')) {
+                          const [intPart, decPart] = val.split('.');
+                          if (intPart.length > 3) {
+                            val = intPart.slice(0, 3) + '.' + decPart;
+                          }
+                        } else if (val.length > 3 && val !== '') {
+                          val = val.slice(0, 3);
+                        }
+                        setTempMaxDisplay(val);
+                        if (val === '' || val === '.') {
+                          setFormData({ ...formData, tempMaxima: 0 });
+                        } else {
+                          const value = parseFloat(val);
+                          if (!isNaN(value) && value <= 999 && /^[0-9.]*$/.test(val)) {
+                            setFormData({ ...formData, tempMaxima: value });
+                          }
+                        }
+                      }}
                       required
+                      placeholder="Ingrese temperatura"
                       className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                      style={{
+                        MozAppearance: 'textfield'
+                      }}
                     />
+                    <style>{`
+                      input[type="number"]::-webkit-outer-spin-button,
+                      input[type="number"]::-webkit-inner-spin-button {
+                        -webkit-appearance: none;
+                        margin: 0;
+                      }
+                    `}</style>
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                       <svg className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
                     </div>
                   </div>
+                  {tempMaxDisplay && parseFloat(tempMaxDisplay) > 0 && unidadTemperatura === 'celsius' && (
+                    <p className="text-xs text-gray-500 mt-1">Equivalente: {celsiusToFahrenheit(parseFloat(tempMaxDisplay)).toFixed(2)}°F</p>
+                  )}
+                  {tempMaxDisplay && parseFloat(tempMaxDisplay) > 0 && unidadTemperatura === 'fahrenheit' && (
+                    <p className="text-xs text-gray-500 mt-1">Equivalente: {fahrenheitToCelsius(parseFloat(tempMaxDisplay)).toFixed(2)}°C</p>
+                  )}
                 </div>
 
                 <div className="flex items-center pt-8">

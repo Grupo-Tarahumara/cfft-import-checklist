@@ -8,6 +8,7 @@ import { CreateInspeccionDto, Inspeccion, Proveedor, Fruta, PuntoInspeccion, Usu
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import SignaturePad from '@/components/SignaturePad';
 import {
   CalendarIcon,
   TruckIcon,
@@ -190,6 +191,54 @@ export default function NuevaInspeccionPage() {
       return;
     }
 
+    // Validar línea transportista
+    if (!formData.lineaTransportista || formData.lineaTransportista.trim() === '') {
+      toast.error('Validación requerida', {
+        description: 'Debe ingresar la línea transportista',
+      });
+      return;
+    }
+
+    // Validar firma de transporte
+    if (!formData.firmaTransporte || formData.firmaTransporte.trim() === '') {
+      toast.error('Validación requerida', {
+        description: 'Debe trazar la firma de transporte',
+      });
+      return;
+    }
+
+    // Validar palet del termógrafo de origen
+    if (formData.termografoOrigen && (!formData.paletTermografoOrigen || formData.paletTermografoOrigen === 0)) {
+      toast.error('Validación requerida', {
+        description: 'Debe especificar el número de palet donde está el Termógrafo de Origen',
+      });
+      return;
+    }
+
+    // Validar palet del termógrafo nacional
+    if (formData.termografoNacional && (!formData.paletTermografoNacional || formData.paletTermografoNacional === 0)) {
+      toast.error('Validación requerida', {
+        description: 'Debe especificar el número de palet donde está el Termógrafo Nacional',
+      });
+      return;
+    }
+
+    // Validar temperatura de la carga
+    if (!formData.temperaturaCarga || formData.temperaturaCarga === 0) {
+      toast.error('Validación requerida', {
+        description: 'Debe ingresar la temperatura de la carga',
+      });
+      return;
+    }
+
+    // Validar observaciones
+    if (!formData.observaciones || formData.observaciones.trim() === '') {
+      toast.error('Validación requerida', {
+        description: 'Debe ingresar observaciones sobre la inspección',
+      });
+      return;
+    }
+
     // Convertir temperatura a Celsius si está en Fahrenheit
     let temperaturaEnCelsius = formData.temperaturaFruta;
     if (unidadTemperatura === 'fahrenheit') {
@@ -346,9 +395,10 @@ export default function NuevaInspeccionPage() {
                 <input
                   type="text"
                   value={formData.numeroOrdenContenedor}
-                  onChange={(e) => setFormData({ ...formData, numeroOrdenContenedor: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, numeroOrdenContenedor: e.target.value.slice(0, 30) })}
                   required
                   placeholder="Ej: CONT-2024-001"
+                  maxLength={30}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
@@ -452,13 +502,15 @@ export default function NuevaInspeccionPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Línea Transportista
+                  Línea Transportista *
                 </label>
                 <input
                   type="text"
                   value={formData.lineaTransportista || ''}
-                  onChange={(e) => setFormData({ ...formData, lineaTransportista: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, lineaTransportista: e.target.value.slice(0, 50) })}
                   placeholder="Ej: Transportes ABC, DHL, etc."
+                  required
+                  maxLength={50}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
@@ -616,14 +668,19 @@ export default function NuevaInspeccionPage() {
                     <input
                       type="number"
                       min="1"
-                      max={formData.numeroPallets || 999}
+                      max={Math.min(formData.numeroPallets || 999, 999)}
                       value={formData.paletTermografoOrigen || ''}
-                      onChange={(e) => setFormData({ ...formData, paletTermografoOrigen: e.target.value === '' ? undefined : parseInt(e.target.value) })}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                        if (value === undefined || value <= 999) {
+                          setFormData({ ...formData, paletTermografoOrigen: value });
+                        }
+                      }}
                       placeholder={`1 - ${formData.numeroPallets || '?'}`}
                       className="w-full px-4 py-3 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
                     />
                     <p className="text-xs text-gray-600 mt-2">
-                      Ingresa el número de palet donde se encuentra el termógrafo de origen (1 a {formData.numeroPallets || 'N/A'})
+                      Ingresa el número de palet (1 a {formData.numeroPallets || 'N/A'})
                     </p>
                   </div>
                 )}
@@ -636,14 +693,19 @@ export default function NuevaInspeccionPage() {
                     <input
                       type="number"
                       min="1"
-                      max={formData.numeroPallets || 999}
+                      max={Math.min(formData.numeroPallets || 999, 999)}
                       value={formData.paletTermografoNacional || ''}
-                      onChange={(e) => setFormData({ ...formData, paletTermografoNacional: e.target.value === '' ? undefined : parseInt(e.target.value) })}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                        if (value === undefined || value <= 999) {
+                          setFormData({ ...formData, paletTermografoNacional: value });
+                        }
+                      }}
                       placeholder={`1 - ${formData.numeroPallets || '?'}`}
                       className="w-full px-4 py-3 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
                     />
                     <p className="text-xs text-gray-600 mt-2">
-                      Ingresa el número de palet donde se encuentra el termógrafo nacional (1 a {formData.numeroPallets || 'N/A'})
+                      Ingresa el número de palet (1 a {formData.numeroPallets || 'N/A'})
                     </p>
                   </div>
                 )}
@@ -658,8 +720,15 @@ export default function NuevaInspeccionPage() {
               <input
                 type="number"
                 step="0.01"
+                inputMode="decimal"
+                max={999}
                 value={formData.temperaturaFruta || ''}
-                onChange={(e) => setFormData({ ...formData, temperaturaFruta: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                  if (value <= 999 && /^[0-9.]*$/.test(e.target.value)) {
+                    setFormData({ ...formData, temperaturaFruta: value });
+                  }
+                }}
                 required
                 placeholder={unidadTemperatura === 'celsius' ? 'Ej: 5.5' : 'Ej: 41.9'}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white"
@@ -673,14 +742,22 @@ export default function NuevaInspeccionPage() {
             {/* Temperatura de la Carga */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Temperatura de la Carga ({unidadTemperatura === 'celsius' ? '°C' : '°F'})
+                Temperatura de la Carga ({unidadTemperatura === 'celsius' ? '°C' : '°F'}) *
               </label>
               <input
                 type="number"
                 step="0.01"
+                inputMode="decimal"
+                max={999}
                 value={formData.temperaturaCarga || ''}
-                onChange={(e) => setFormData({ ...formData, temperaturaCarga: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                  if (value <= 999 && /^[0-9.]*$/.test(e.target.value)) {
+                    setFormData({ ...formData, temperaturaCarga: value });
+                  }
+                }}
                 placeholder={unidadTemperatura === 'celsius' ? 'Ej: 5.5' : 'Ej: 41.9'}
+                required
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white"
               />
               <p className="text-xs text-gray-500 mt-2">
@@ -823,14 +900,16 @@ export default function NuevaInspeccionPage() {
                 <DocumentTextIcon className="h-6 w-6 text-purple-600" />
               </div>
               <label className="text-xl font-bold text-gray-800">
-                Observaciones
+                Observaciones *
               </label>
             </div>
             <textarea
               value={formData.observaciones}
-              onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, observaciones: e.target.value.slice(0, 500) })}
               rows={5}
               placeholder="Ingrese cualquier observación relevante sobre la inspección..."
+              required
+              maxLength={500}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
             />
           </div>
@@ -844,19 +923,16 @@ export default function NuevaInspeccionPage() {
                 </svg>
               </div>
               <label className="text-xl font-bold text-gray-800">
-                Firma de Transporte
+                Firma de Transporte *
               </label>
             </div>
-            <textarea
-              value={formData.firmaTransporte || ''}
-              onChange={(e) => setFormData({ ...formData, firmaTransporte: e.target.value })}
-              rows={3}
-              placeholder="Nombre y firma digital del responsable del transporte..."
-              className="w-full px-4 py-3 border border-indigo-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none bg-white"
-            />
-            <p className="text-xs text-gray-600 mt-2">
-              Ingrese el nombre del responsable del transporte y cualquier información adicional de la firma
+            <p className="text-sm text-gray-700 mb-4">
+              Trace la firma del responsable del transporte en el área de abajo
             </p>
+            <SignaturePad
+              value={formData.firmaTransporte || ''}
+              onChange={(signature) => setFormData({ ...formData, firmaTransporte: signature })}
+            />
           </div>
 
           {/* Botones */}

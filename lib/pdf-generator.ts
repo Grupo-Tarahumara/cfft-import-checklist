@@ -108,6 +108,9 @@ export async function generateInspectionPDF(
       addField('País de Origen', inspeccion.proveedor.pais);
     }
     addField('Tipo de Fruta', inspeccion.fruta?.nombre || 'No especificado');
+    if (inspeccion.lineaTransportista) {
+      addField('Línea Transportista', inspeccion.lineaTransportista);
+    }
 
     if (inspeccion.fruta && !options?.hideTemperatureRanges) {
       addField('Rango Temperatura Optima', `${inspeccion.fruta.tempMinima}°C - ${inspeccion.fruta.tempMaxima}°C`);
@@ -128,6 +131,10 @@ export async function generateInspectionPDF(
 
     addField('Temperatura Fruta', `${inspeccion.temperaturaFruta}°C`);
     addField('Estado Temperatura', tempEnRango ? 'DENTRO DE RANGO' : 'FUERA DE RANGO');
+
+    if (inspeccion.temperaturaCarga) {
+      addField('Temperatura Carga', `${inspeccion.temperaturaCarga}°C`);
+    }
 
     addField('Termógrafo Origen', inspeccion.termografoOrigen ? `SI (Palet ${inspeccion.paletTermografoOrigen || '-'})` : 'NO');
     addField('Termógrafo Nacional', inspeccion.termografoNacional ? `SI (Palet ${inspeccion.paletTermografoNacional || '-'})` : 'NO');
@@ -150,6 +157,58 @@ export async function generateInspectionPDF(
       });
 
       yPosition += 3;
+    }
+
+    // ========== FIRMA DE TRANSPORTE ==========
+    if (inspeccion.firmaTransporte) {
+      addSectionTitle('FIRMA DE TRANSPORTE');
+      checkNewPage(80);
+
+      try {
+        // La firma está en formato base64/data URL
+        let firmaImage = inspeccion.firmaTransporte;
+
+        // Si no comienza con data:, es probablemente base64 puro
+        if (!firmaImage.startsWith('data:')) {
+          firmaImage = `data:image/png;base64,${firmaImage}`;
+        }
+
+        const imgWidth = Math.min(contentWidth - 20, 100);
+        const imgHeight = 50;
+
+        checkNewPage(imgHeight + 10);
+
+        // Marco para la firma
+        pdf.setDrawColor(41, 128, 185);
+        pdf.setLineWidth(1);
+        pdf.rect(margin + 5, yPosition, imgWidth, imgHeight);
+
+        // Imagen de firma
+        try {
+          pdf.addImage(firmaImage, 'PNG', margin + 5, yPosition, imgWidth, imgHeight);
+        } catch (e) {
+          // Si falla, mostrar texto alternativo
+          pdf.setFillColor(240, 240, 240);
+          pdf.rect(margin + 5, yPosition, imgWidth, imgHeight, 'F');
+          pdf.setFontSize(8);
+          pdf.setTextColor(150, 150, 150);
+          pdf.text('[Firma registrada]', margin + 5 + imgWidth / 2, yPosition + imgHeight / 2, { align: 'center' });
+        }
+
+        yPosition += imgHeight + 5;
+
+        pdf.setFontSize(8);
+        pdf.setTextColor(150, 150, 150);
+        pdf.text('Firma del Responsable del Transporte', margin + 5, yPosition);
+
+        yPosition += 5;
+      } catch (error) {
+        console.error('Error procesando firma de transporte:', error);
+        pdf.setFontSize(8);
+        pdf.setTextColor(150, 150, 150);
+        pdf.text('[Firma de transporte disponible]', margin + 5, yPosition);
+        yPosition += 5;
+      }
     }
 
     // ========== ALERTAS ==========

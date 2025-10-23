@@ -238,6 +238,15 @@ export default function DetalleInspeccionPage() {
                 </div>
               )}
             </div>
+
+            {inspeccion.lineaTransportista && (
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Línea Transportista</p>
+                <p className="font-medium text-gray-900 text-lg">
+                  {inspeccion.lineaTransportista}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -320,6 +329,15 @@ export default function DetalleInspeccionPage() {
                 </p>
               )}
             </div>
+
+            {inspeccion.temperaturaCarga && (
+              <div className="border-l-4 border-red-500 pl-4">
+                <p className="text-sm text-gray-500 mb-2">Temperatura de la Carga</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {inspeccion.temperaturaCarga}°C
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -328,6 +346,29 @@ export default function DetalleInspeccionPage() {
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Observaciones</h2>
             <p className="text-gray-700 whitespace-pre-wrap">{inspeccion.observaciones}</p>
+          </div>
+        )}
+
+        {/* Firma de Transporte */}
+        {inspeccion.firmaTransporte && (
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Firma de Transporte</h2>
+            <div className="flex flex-col items-center">
+              <div className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
+                {inspeccion.firmaTransporte.startsWith('data:') || inspeccion.firmaTransporte.startsWith('http') ? (
+                  <img
+                    src={inspeccion.firmaTransporte}
+                    alt="Firma de Transporte"
+                    className="h-40 object-contain"
+                  />
+                ) : (
+                  <p className="text-gray-500 text-center text-sm">Firma registrada</p>
+                )}
+              </div>
+              <p className="text-sm text-gray-600 mt-3 text-center">
+                Firma del Responsable del Transporte
+              </p>
+            </div>
           </div>
         )}
 

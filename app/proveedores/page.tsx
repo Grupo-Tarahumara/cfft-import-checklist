@@ -154,8 +154,9 @@ export default function ProveedoresPage() {
                   <input
                     type="text"
                     value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value.slice(0, 40) })}
                     required
+                    maxLength={40}
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="Ej: Frutas del Valle S.A."
                   />
@@ -168,8 +169,9 @@ export default function ProveedoresPage() {
                   <input
                     type="text"
                     value={formData.codigo}
-                    onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, codigo: e.target.value.slice(0, 30) })}
                     required
+                    maxLength={30}
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="Ej: FDV001"
                   />
@@ -182,8 +184,9 @@ export default function ProveedoresPage() {
                   <input
                     type="text"
                     value={formData.pais}
-                    onChange={(e) => setFormData({ ...formData, pais: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, pais: e.target.value.slice(0, 30) })}
                     required
+                    maxLength={30}
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="Ej: Chile"
                   />

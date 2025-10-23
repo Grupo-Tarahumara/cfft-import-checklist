@@ -152,8 +152,9 @@ export default function PuntosInspeccionPage() {
                   <input
                     type="text"
                     value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value.slice(0, 40) })}
                     required
+                    maxLength={40}
                     placeholder="Ej: Puerto Principal, Almacén Central"
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                   />
@@ -166,8 +167,9 @@ export default function PuntosInspeccionPage() {
                   <input
                     type="text"
                     value={formData.ubicacion}
-                    onChange={(e) => setFormData({ ...formData, ubicacion: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, ubicacion: e.target.value.slice(0, 50) })}
                     required
+                    maxLength={50}
                     placeholder="Ej: Av. Principal 123, Zona Industrial"
                     className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                   />
