@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
 import { authApi } from '@/lib/api-auth';
-import { CreateInspeccionDto, Proveedor, Fruta, PuntoInspeccion, Usuario } from '@/types';
+import { CreateInspeccionDto, Inspeccion, Proveedor, Fruta, PuntoInspeccion, Usuario } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -58,6 +58,8 @@ export default function NuevaInspeccionPage() {
     numeroCajas: 0,
     termografoOrigen: false,
     termografoNacional: false,
+    paletTermografoOrigen: undefined,
+    paletTermografoNacional: undefined,
     temperaturaFruta: 0,
     numeroTrancas: 0,
     observaciones: '',
@@ -225,7 +227,7 @@ export default function NuevaInspeccionPage() {
       const nuevaInspeccion = await authApi.post<Inspeccion>('/inspecciones', formDataToSend);
 
       toast.success('¡Inspección creada exitosamente!', {
-        description: `Se ha registrado la inspección #${nuevaInspeccion.id}${formData.tieneAlertas ? ' con alertas generadas' : ''}`,
+        description: `Se ha registrado la inspección #${nuevaInspeccion.id}`,
         duration: 4000,
       });
 
@@ -577,6 +579,51 @@ export default function NuevaInspeccionPage() {
                 </div>
               </div>
             </div>
+
+            {/* Selección de Pallets para Termógrafos */}
+            {(formData.termografoOrigen || formData.termografoNacional) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-blue-50 rounded-xl border-2 border-blue-200 mb-6">
+                {formData.termografoOrigen && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      ¿En qué palet está el Termógrafo de Origen?
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max={formData.numeroPallets || 999}
+                      value={formData.paletTermografoOrigen || ''}
+                      onChange={(e) => setFormData({ ...formData, paletTermografoOrigen: e.target.value === '' ? undefined : parseInt(e.target.value) })}
+                      placeholder={`1 - ${formData.numeroPallets || '?'}`}
+                      className="w-full px-4 py-3 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                    />
+                    <p className="text-xs text-gray-600 mt-2">
+                      Ingresa el número de palet donde se encuentra el termógrafo de origen (1 a {formData.numeroPallets || 'N/A'})
+                    </p>
+                  </div>
+                )}
+
+                {formData.termografoNacional && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      ¿En qué palet está el Termógrafo Nacional?
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max={formData.numeroPallets || 999}
+                      value={formData.paletTermografoNacional || ''}
+                      onChange={(e) => setFormData({ ...formData, paletTermografoNacional: e.target.value === '' ? undefined : parseInt(e.target.value) })}
+                      placeholder={`1 - ${formData.numeroPallets || '?'}`}
+                      className="w-full px-4 py-3 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                    />
+                    <p className="text-xs text-gray-600 mt-2">
+                      Ingresa el número de palet donde se encuentra el termógrafo nacional (1 a {formData.numeroPallets || 'N/A'})
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Temperatura de la Fruta */}
             <div>

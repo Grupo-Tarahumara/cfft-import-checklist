@@ -29,6 +29,7 @@ export default function InspeccionesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterProveedor, setFilterProveedor] = useState('');
+  const [filterAlertas, setFilterAlertas] = useState('');
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
 
   // Función para convertir Celsius a Fahrenheit
@@ -42,7 +43,7 @@ export default function InspeccionesPage() {
 
   useEffect(() => {
     filterInspecciones();
-  }, [searchTerm, filterProveedor, inspecciones]);
+  }, [searchTerm, filterProveedor, filterAlertas, inspecciones]);
 
   const loadData = async () => {
     try {
@@ -71,6 +72,14 @@ export default function InspeccionesPage() {
 
     if (filterProveedor) {
       filtered = filtered.filter((insp) => insp.proveedorId === parseInt(filterProveedor));
+    }
+
+    if (filterAlertas) {
+      if (filterAlertas === 'con') {
+        filtered = filtered.filter((insp) => insp.tieneAlertas);
+      } else if (filterAlertas === 'sin') {
+        filtered = filtered.filter((insp) => !insp.tieneAlertas);
+      }
     }
 
     setFilteredInspecciones(filtered);
@@ -187,7 +196,7 @@ export default function InspeccionesPage() {
             <h2 className="text-lg font-semibold text-gray-900">Filtros y Búsqueda</h2>
           </div>
           
-          <div className={`grid gap-6 ${isNormalUser ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
+          <div className={`grid gap-6 ${isNormalUser ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Buscar por Contenedor
@@ -205,23 +214,40 @@ export default function InspeccionesPage() {
             </div>
 
             {!isNormalUser && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Filtrar por Proveedor
-                </label>
-                <select
-                  value={filterProveedor}
-                  onChange={(e) => setFilterProveedor(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                >
-                  <option value="">Todos los proveedores</option>
-                  {proveedores.map((prov) => (
-                    <option key={prov.id} value={prov.id}>
-                      {prov.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Filtrar por Proveedor
+                  </label>
+                  <select
+                    value={filterProveedor}
+                    onChange={(e) => setFilterProveedor(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">Todos los proveedores</option>
+                    {proveedores.map((prov) => (
+                      <option key={prov.id} value={prov.id}>
+                        {prov.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Filtrar por Alertas
+                  </label>
+                  <select
+                    value={filterAlertas}
+                    onChange={(e) => setFilterAlertas(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">Todas las inspecciones</option>
+                    <option value="con">Con alertas</option>
+                    <option value="sin">Sin alertas</option>
+                  </select>
+                </div>
+              </>
             )}
           </div>
         </div>

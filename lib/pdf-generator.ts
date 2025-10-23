@@ -17,6 +17,23 @@ export async function generateInspectionPDF(
   options?: PDFOptions
 ): Promise<void> {
   try {
+    console.log('📄 Iniciando generación de PDF');
+    console.log('========================================');
+    console.log('ID Inspección:', inspeccion.id);
+    console.log('Número Contenedor:', inspeccion.numeroOrdenContenedor);
+    console.log('========================================');
+    console.log('Datos completos de inspección:', {
+      id: inspeccion.id,
+      alertas: inspeccion.alertas,
+      fotos: inspeccion.fotos,
+      tieneAlertas: inspeccion.tieneAlertas,
+    });
+    console.log('========================================');
+    console.log('✅ Alertas:', inspeccion.alertas?.length ?? 0);
+    console.log('✅ Fotos:', inspeccion.fotos?.length ?? 0);
+    console.log('✅ hideAlerts:', options?.hideAlerts);
+    console.log('========================================');
+
     // Crear documento PDF en tamaño A4
     const pdf = new jsPDF({
       orientation: 'portrait',
@@ -50,10 +67,10 @@ export async function generateInspectionPDF(
       checkNewPage(15);
       addSeparator();
       pdf.setFontSize(12);
-      pdf.setFont(undefined, 'bold');
+      pdf.setFont('helvetica', 'bold');
       pdf.text(title, margin, yPosition);
       yPosition += 8;
-      pdf.setFont(undefined, 'normal');
+      pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(10);
     };
 
@@ -61,16 +78,16 @@ export async function generateInspectionPDF(
     const addField = (label: string, value: string, inline: boolean = false) => {
       const labelWidth = 50;
       if (inline) {
-        pdf.setFont(undefined, 'bold');
+        pdf.setFont('helvetica', 'bold');
         pdf.text(label + ':', margin, yPosition);
-        pdf.setFont(undefined, 'normal');
+        pdf.setFont('helvetica', 'normal');
         pdf.text(value, margin + labelWidth, yPosition);
         yPosition += 6;
       } else {
-        pdf.setFont(undefined, 'bold');
+        pdf.setFont('helvetica', 'bold');
         pdf.text(label + ':', margin, yPosition);
         yPosition += 5;
-        pdf.setFont(undefined, 'normal');
+        pdf.setFont('helvetica', 'normal');
         const splitText = pdf.splitTextToSize(value, contentWidth - 10);
         splitText.forEach((line: string) => {
           checkNewPage(6);
@@ -88,7 +105,7 @@ export async function generateInspectionPDF(
     pdf.rect(0, 0, pageWidth, 35, 'F');
 
     pdf.setFontSize(20);
-    pdf.setFont(undefined, 'bold');
+    pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(255, 255, 255);
     pdf.text('REPORTE DE INSPECCIÓN', pageWidth / 2, 18, { align: 'center' });
     pdf.setTextColor(0, 0, 0);
@@ -97,7 +114,7 @@ export async function generateInspectionPDF(
 
     // Contenedor y fecha en una línea destacada
     pdf.setFontSize(11);
-    pdf.setFont(undefined, 'bold');
+    pdf.setFont('helvetica', 'bold');
     pdf.setFillColor(245, 245, 245);
     pdf.rect(margin, yPosition - 5, contentWidth, 10, 'F');
     pdf.text(`Contenedor: ${inspeccion.numeroOrdenContenedor}`, margin + 5, yPosition);
@@ -124,7 +141,7 @@ export async function generateInspectionPDF(
     addField('Estado', inspeccion.estado, true);
     addField(
       'Tiene Alertas',
-      inspeccion.tieneAlertas ? 'Sí ⚠️' : 'No ✓',
+      inspeccion.tieneAlertas ? 'Sí (Con alertas)' : 'No',
       true
     );
     addField('Inspector', inspeccion.usuario?.nombre || '-', true);
@@ -166,12 +183,12 @@ export async function generateInspectionPDF(
     addSection('CONTROL DE TEMPERATURA');
     addField(
       'Termógrafo Origen',
-      inspeccion.termografoOrigen ? 'Presente ✓' : 'Ausente ✗',
+      inspeccion.termografoOrigen ? `Presente${inspeccion.paletTermografoOrigen ? ` (Palet ${inspeccion.paletTermografoOrigen})` : ''}` : 'Ausente',
       true
     );
     addField(
       'Termógrafo Nacional',
-      inspeccion.termografoNacional ? 'Presente ✓' : 'Ausente ✗',
+      inspeccion.termografoNacional ? `Presente${inspeccion.paletTermografoNacional ? ` (Palet ${inspeccion.paletTermografoNacional})` : ''}` : 'Ausente',
       true
     );
 
@@ -181,7 +198,7 @@ export async function generateInspectionPDF(
       Number(inspeccion.temperaturaFruta) >= Number(inspeccion.fruta.tempMinima) &&
       Number(inspeccion.temperaturaFruta) <= Number(inspeccion.fruta.tempMaxima);
 
-    const tempStatus = tempEnRango ? 'En rango ✓' : 'Fuera de rango ⚠️';
+    const tempStatus = tempEnRango ? 'En rango' : 'Fuera de rango';
     addField('Temperatura de la Fruta', `${inspeccion.temperaturaFruta}°C - ${tempStatus}`, true);
 
     // ========== OBSERVACIONES ==========
@@ -191,34 +208,91 @@ export async function generateInspectionPDF(
     }
 
     // ========== ALERTAS ==========
+    console.log('🚨 Verificando alertas...');
+    console.log('hideAlerts:', options?.hideAlerts);
+    console.log('inspeccion.alertas existe:', !!inspeccion.alertas);
+    console.log('inspeccion.alertas.length:', inspeccion.alertas?.length);
+
     if (!options?.hideAlerts && inspeccion.alertas && inspeccion.alertas.length > 0) {
+      console.log('✅ Mostrando alertas en PDF');
       addSection(`ALERTAS (${inspeccion.alertas.length})`);
       inspeccion.alertas.forEach((alerta, index) => {
-        checkNewPage(20);
-        pdf.setFont(undefined, 'bold');
-        pdf.text(`${index + 1}. ${alerta.tipoAlerta.replace(/_/g, ' ').toUpperCase()}`, margin, yPosition);
-        yPosition += 5;
-        pdf.setFont(undefined, 'normal');
+        console.log(`Procesando alerta ${index + 1}:`, alerta);
+        checkNewPage(30);
 
-        addField('Criticidad', alerta.criticidad.toUpperCase());
-        addField('Descripción', alerta.descripcion, false);
-        addField('Fecha', new Date(alerta.fechaCreacion).toLocaleString('es-ES'), true);
-        if (alerta.leida) {
-          pdf.setFont(undefined, 'italic');
-          pdf.text('(Leída ✓)', margin + 5, yPosition);
-          pdf.setFont(undefined, 'normal');
-          yPosition += 5;
+        // Determinar color según criticidad
+        let bgColor = [200, 200, 200]; // Gris para media
+        let textColor = [0, 0, 0];
+        if (alerta.criticidad === 'alta') {
+          bgColor = [255, 200, 200]; // Rojo claro
+          textColor = [139, 0, 0]; // Rojo oscuro
+        } else if (alerta.criticidad === 'media') {
+          bgColor = [255, 235, 200]; // Naranja claro
+          textColor = [139, 69, 19]; // Marrón oscuro
+        } else if (alerta.criticidad === 'baja') {
+          bgColor = [200, 255, 200]; // Verde claro
+          textColor = [0, 100, 0]; // Verde oscuro
         }
-        yPosition += 3;
+
+        // Fondo de alerta
+        pdf.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+        pdf.rect(margin, yPosition - 3, contentWidth, 22, 'F');
+
+        // Borde de alerta
+        pdf.setDrawColor(100, 100, 100);
+        pdf.setLineWidth(0.5);
+        pdf.rect(margin, yPosition - 3, contentWidth, 22);
+
+        // Título de alerta
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(11);
+        pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
+        pdf.text(`${index + 1}. ${alerta.tipoAlerta.replace(/_/g, ' ').toUpperCase()}`, margin + 5, yPosition);
+
+        // Criticidad en la misma línea
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(10);
+        pdf.text(`Criticidad: ${alerta.criticidad.toUpperCase()}`, pageWidth - margin - 50, yPosition);
+
+        pdf.setTextColor(0, 0, 0);
+        yPosition += 6;
+
+        // Descripción
+        if (alerta.descripcion) {
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(9);
+          const descSplit = pdf.splitTextToSize(alerta.descripcion, contentWidth - 10);
+          descSplit.forEach((line: string) => {
+            pdf.text(line, margin + 5, yPosition);
+            yPosition += 4;
+          });
+        }
+
+        yPosition += 4;
+
+        // Fecha
+        pdf.setFont('helvetica', 'italic');
+        pdf.setFontSize(8);
+        const fechaText = alerta.fechaCreacion ? new Date(alerta.fechaCreacion).toLocaleString('es-ES') : '-';
+        const lectura = alerta.leida ? ' - Leída' : '';
+        pdf.text(`Fecha: ${fechaText}${lectura}`, margin + 5, yPosition);
+
+        yPosition += 8;
       });
     }
 
     // ========== FOTOS ==========
+    console.log('📸 Verificando fotos...');
+    console.log('inspeccion.fotos existe:', !!inspeccion.fotos);
+    console.log('inspeccion.fotos.length:', inspeccion.fotos?.length);
+
     if (inspeccion.fotos && inspeccion.fotos.length > 0) {
+      console.log('✅ Procesando fotos en PDF');
       addSection(`FOTOS (${inspeccion.fotos.length})`);
 
       for (let i = 0; i < inspeccion.fotos.length; i++) {
         const foto = inspeccion.fotos[i];
+        console.log(`Procesando foto ${i + 1}:`, foto);
         try {
           // Verificar si necesita nueva página - más espacio para fotos grandes
           checkNewPage(90);
@@ -228,7 +302,7 @@ export async function generateInspectionPDF(
           pdf.setLineWidth(0.5);
 
           // Número y título de la foto
-          pdf.setFont(undefined, 'bold');
+          pdf.setFont('helvetica', 'bold');
           pdf.setFontSize(11);
           const fotoTitle = foto.tipoFoto.replace(/_/g, ' ').toUpperCase();
           pdf.text(`${i + 1}. ${fotoTitle}`, margin, yPosition);
@@ -236,7 +310,7 @@ export async function generateInspectionPDF(
 
           // Descripción
           if (foto.descripcion) {
-            pdf.setFont(undefined, 'normal');
+            pdf.setFont('helvetica', 'normal');
             pdf.setFontSize(9);
             const descSplit = pdf.splitTextToSize(foto.descripcion, contentWidth - 10);
             descSplit.forEach((line: string) => {
@@ -247,7 +321,7 @@ export async function generateInspectionPDF(
           }
 
           // Obligatoria/Opcional
-          pdf.setFont(undefined, 'italic');
+          pdf.setFont('helvetica', 'italic');
           pdf.setFontSize(9);
           pdf.setTextColor(100, 100, 100);
           pdf.text(foto.esObligatoria ? '(Foto Obligatoria)' : '(Foto Opcional)', margin + 5, yPosition);
@@ -257,11 +331,13 @@ export async function generateInspectionPDF(
 
           // Cargar imagen
           if (foto.urlFoto) {
+            console.log('📥 Intentando cargar imagen de URL:', foto.urlFoto);
             try {
               // Convertir URL a base64
               const imgBase64 = await imageUrlToBase64(foto.urlFoto);
 
               if (imgBase64) {
+                console.log('✅ Imagen cargada exitosamente, longitud:', imgBase64.length);
                 // Tamaño de imagen más adecuado - máximo 170mm de ancho
                 const imgWidth = Math.min(contentWidth - 10, 170);
                 const imgHeight = Math.min((imgWidth * 3) / 4, 100); // Proporción 4:3 y máximo 100mm
@@ -275,13 +351,16 @@ export async function generateInspectionPDF(
                 pdf.rect(margin + 5, yPosition, imgWidth, imgHeight);
 
                 // Insertar imagen
+                console.log('🖼️ Insertando imagen en PDF...');
                 pdf.addImage(imgBase64, 'JPEG', margin + 5, yPosition, imgWidth, imgHeight);
+                console.log('✅ Imagen insertada en PDF');
                 yPosition += imgHeight + 5;
               } else {
+                console.warn('⚠️ imgBase64 está vacío o null');
                 throw new Error('No se pudo cargar la imagen');
               }
             } catch (imgError) {
-              console.warn(`Error cargando imagen ${foto.tipoFoto}:`, imgError);
+              console.error(`❌ Error cargando imagen ${foto.tipoFoto}:`, imgError);
 
               // Mostrar placeholder cuando no se puede cargar la imagen
               pdf.setDrawColor(220, 220, 220);
@@ -289,7 +368,7 @@ export async function generateInspectionPDF(
               const placeholderHeight = 50;
               pdf.rect(margin + 5, yPosition, contentWidth - 10, placeholderHeight);
 
-              pdf.setFont(undefined, 'italic');
+              pdf.setFont('helvetica', 'italic');
               pdf.setTextColor(150, 150, 150);
               pdf.setFontSize(9);
               pdf.text('[Imagen no disponible - ' + (imgError instanceof Error ? imgError.message : 'Error desconocido') + ']', margin + 10, yPosition + placeholderHeight / 2, {
@@ -302,12 +381,13 @@ export async function generateInspectionPDF(
             }
           } else {
             // Sin URL de foto
+            console.warn('⚠️ Foto sin URL:', foto);
             pdf.setDrawColor(220, 220, 220);
             pdf.setLineWidth(0.5);
             const placeholderHeight = 50;
             pdf.rect(margin + 5, yPosition, contentWidth - 10, placeholderHeight);
 
-            pdf.setFont(undefined, 'italic');
+            pdf.setFont('helvetica', 'italic');
             pdf.setTextColor(150, 150, 150);
             pdf.setFontSize(9);
             pdf.text('[Sin imagen disponible]', margin + 10, yPosition + placeholderHeight / 2, {
@@ -331,7 +411,7 @@ export async function generateInspectionPDF(
     checkNewPage(20);
     addSeparator();
     pdf.setFontSize(8);
-    pdf.setFont(undefined, 'italic');
+    pdf.setFont('helvetica', 'italic');
     pdf.setTextColor(128, 128, 128);
     pdf.text(
       `Generado automáticamente el ${new Date().toLocaleString('es-ES')}`,
@@ -354,19 +434,97 @@ export async function generateInspectionPDF(
  */
 async function imageUrlToBase64(url: string): Promise<string> {
   try {
-    const response = await fetch(url, { mode: 'cors' });
-    const blob = await response.blob();
-    const reader = new FileReader();
+    if (!url) {
+      console.warn('⚠️ URL de imagen vacía');
+      return '';
+    }
 
-    return new Promise((resolve, reject) => {
-      reader.onloadend = () => {
-        resolve(reader.result as string);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    console.log('🖼️ Intentando cargar imagen:', url);
+
+    // Intentar con diferentes configuraciones de fetch
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+
+    try {
+      console.log('📡 Fetch con CORS...');
+      const response = await fetch(url, {
+        credentials: 'include',  // Incluir credenciales para CORS
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.warn(`⚠️ HTTP error! status: ${response.status} para URL: ${url}`);
+        return '';
+      }
+
+      const blob = await response.blob();
+      console.log('✅ Blob obtenido, tamaño:', blob.size, 'bytes');
+
+      if (blob.size === 0) {
+        console.warn(`⚠️ Blob vacío para URL: ${url}`);
+        return '';
+      }
+
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          if (result && result.length > 0) {
+            console.log('✅ Imagen convertida a base64 exitosamente');
+            resolve(result);
+          } else {
+            console.warn('⚠️ Resultado de FileReader vacío');
+            reject(new Error('Resultado de FileReader vacío'));
+          }
+        };
+        reader.onerror = () => {
+          console.error('❌ Error en FileReader');
+          reject(new Error('Error en FileReader'));
+        };
+        reader.readAsDataURL(blob);
+      });
+    } catch (fetchError) {
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.warn(`⏱️ Timeout al cargar imagen: ${url}`);
+      } else {
+        console.warn(`⚠️ Error en fetch para URL: ${url}`, fetchError);
+      }
+
+      // Intentar una segunda vez sin CORS
+      console.log('🔄 Reintentando fetch sin CORS...');
+      try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        console.log('✅ Blob obtenido en reintento, tamaño:', blob.size, 'bytes');
+
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            if (result && result.length > 0) {
+              console.log('✅ Imagen convertida a base64 en reintento');
+              resolve(result);
+            } else {
+              reject(new Error('Resultado vacío en reintento'));
+            }
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch (retryError) {
+        console.warn(`❌ Error en reintento para URL: ${url}`, retryError);
+        return '';
+      }
+    }
   } catch (error) {
-    console.warn(`Error converting image to base64: ${url}`, error);
+    console.error(`❌ Error converting image to base64: ${url}`, error);
     return '';
   }
 }

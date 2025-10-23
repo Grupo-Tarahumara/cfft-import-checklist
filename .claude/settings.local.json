@@ -29,7 +29,11 @@
       "Bash(git rm:*)",
       "Bash(ipconfig:*)",
       "Bash(netsh advfirewall firewall add rule:*)",
-      "Bash(cmd.exe /c \"taskkill /F /PID 25504\")"
+      "Bash(cmd.exe /c \"taskkill /F /PID 25504\")",
+      "Bash(npx tsc:*)",
+      "Bash(xargs:*)",
+      "Bash(npm run migration:run:*)",
+      "Bash(npm run migration:show:*)"
     ],
     "deny": [],
     "ask": []

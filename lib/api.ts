@@ -6,30 +6,44 @@ interface ApiResponse<T = any> {
 }
 
 class ApiClient {
+  // CSRF ya no es necesario con JWT en headers Authorization
   private csrfToken: string | null = null;
 
   /**
-   * Obtiene el token CSRF del backend
+   * Obtiene el token JWT del localStorage
+   */
+  private getAuthToken(): string {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token') || '';
+    }
+    return '';
+  }
+
+  /**
+   * Obtiene los headers por defecto con autenticación
+   */
+  private getHeaders(includeAuth: boolean = true): HeadersInit {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    if (includeAuth) {
+      const token = this.getAuthToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+
+    return headers;
+  }
+
+  /**
+   * Método obsoleto - CSRF no es necesario con JWT
+   * Se mantiene solo para compatibilidad
    */
   async getCsrfToken(): Promise<string> {
-    if (this.csrfToken) return this.csrfToken;
-
-    try {
-      const response = await fetch(`${API_URL}/csrf-token`, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch CSRF token');
-      }
-
-      const data = await response.json();
-      this.csrfToken = data.csrfToken;
-      return this.csrfToken;
-    } catch (error) {
-      console.error('Error fetching CSRF token:', error);
-      throw error;
-    }
+    // Retornar cadena vacía sin hacer petición al backend
+    return '';
   }
 
   /**
@@ -40,9 +54,7 @@ class ApiClient {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getHeaders(),
       });
 
       if (!response.ok) {
@@ -61,15 +73,10 @@ class ApiClient {
    */
   async post<T = any>(endpoint: string, data: any): Promise<T> {
     try {
-      const csrfToken = await this.getCsrfToken();
-
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify(data),
       });
 
@@ -96,15 +103,10 @@ class ApiClient {
    */
   async put<T = any>(endpoint: string, data: any): Promise<T> {
     try {
-      const csrfToken = await this.getCsrfToken();
-
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'PUT',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify(data),
       });
 
@@ -124,15 +126,10 @@ class ApiClient {
    */
   async patch<T = any>(endpoint: string, data: any): Promise<T> {
     try {
-      const csrfToken = await this.getCsrfToken();
-
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'PATCH',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify(data),
       });
 
@@ -152,14 +149,10 @@ class ApiClient {
    */
   async delete<T = any>(endpoint: string): Promise<T> {
     try {
-      const csrfToken = await this.getCsrfToken();
-
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'DELETE',
         credentials: 'include',
-        headers: {
-          'X-CSRF-Token': csrfToken,
-        },
+        headers: this.getHeaders(),
       });
 
       if (!response.ok) {

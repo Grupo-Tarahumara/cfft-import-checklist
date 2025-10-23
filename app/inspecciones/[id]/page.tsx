@@ -18,6 +18,7 @@ export default function DetalleInspeccionPage() {
   const id = params.id as string;
   const { user } = useAuth();
   const isNormalUser = user?.rol === 'user';
+  const isAdmin = user?.rol === 'admin';
 
   const [inspeccion, setInspeccion] = useState<Inspeccion | null>(null);
   const [loading, setLoading] = useState(true);
@@ -249,30 +250,40 @@ export default function DetalleInspeccionPage() {
         {/* Control de Temperatura */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Control de Temperatura</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="border-l-4 border-blue-500 pl-4">
               <p className="text-sm text-gray-500 mb-2">Termógrafo Origen</p>
-              <div className="flex items-center">
+              <div className="flex items-center mb-1">
                 {inspeccion.termografoOrigen ? (
                   <span className="text-green-600 font-medium">✓ Presente</span>
                 ) : (
                   <span className="text-red-600 font-medium">✗ Ausente</span>
                 )}
               </div>
+              {inspeccion.termografoOrigen && inspeccion.paletTermografoOrigen && (
+                <p className="text-sm bg-blue-50 text-blue-900 px-2 py-1 rounded inline-block font-semibold">
+                  Palet #{inspeccion.paletTermografoOrigen}
+                </p>
+              )}
             </div>
 
-            <div>
+            <div className="border-l-4 border-green-500 pl-4">
               <p className="text-sm text-gray-500 mb-2">Termógrafo Nacional</p>
-              <div className="flex items-center">
+              <div className="flex items-center mb-1">
                 {inspeccion.termografoNacional ? (
                   <span className="text-green-600 font-medium">✓ Presente</span>
                 ) : (
                   <span className="text-red-600 font-medium">✗ Ausente</span>
                 )}
               </div>
+              {inspeccion.termografoNacional && inspeccion.paletTermografoNacional && (
+                <p className="text-sm bg-green-50 text-green-900 px-2 py-1 rounded inline-block font-semibold">
+                  Palet #{inspeccion.paletTermografoNacional}
+                </p>
+              )}
             </div>
 
-            <div>
+            <div className="border-l-4 border-orange-500 pl-4">
               <p className="text-sm text-gray-500 mb-2">Temperatura de la Fruta</p>
               <div className="flex items-center space-x-2">
                 <p className="text-2xl font-bold text-gray-900">
@@ -425,32 +436,36 @@ export default function DetalleInspeccionPage() {
             >
               Volver a Lista
             </Link>
-            <button
-              onClick={handleDownloadPDF}
-              disabled={isGeneratingPDF}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed inline-flex items-center gap-2 transition-colors"
-            >
-              {isGeneratingPDF ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Generando...
-                </>
-              ) : (
-                <>
-                  <DocumentArrowDownIcon className="h-5 w-5" />
-                  Descargar PDF
-                </>
-              )}
-            </button>
-            {inspeccion.pdfGenerado && (
-              <a
-                href={inspeccion.pdfGenerado}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 inline-block transition-colors"
-              >
-                📄 PDF del servidor
-              </a>
+            {isAdmin && (
+              <>
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={isGeneratingPDF}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed inline-flex items-center gap-2 transition-colors"
+                >
+                  {isGeneratingPDF ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Generando...
+                    </>
+                  ) : (
+                    <>
+                      <DocumentArrowDownIcon className="h-5 w-5" />
+                      Descargar PDF
+                    </>
+                  )}
+                </button>
+                {inspeccion.pdfGenerado && (
+                  <a
+                    href={inspeccion.pdfGenerado}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 inline-block transition-colors"
+                  >
+                    📄 PDF del servidor
+                  </a>
+                )}
+              </>
             )}
           </div>
         </div>

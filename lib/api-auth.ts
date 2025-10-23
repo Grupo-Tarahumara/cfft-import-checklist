@@ -16,27 +16,13 @@ class AuthApiClient {
   }
 
   /**
-   * Obtiene el token CSRF del backend
+   * Obtiene el token CSRF - OBSOLETO
+   * CSRF no es necesario con JWT en headers Authorization
+   * Se mantiene solo para compatibilidad
    */
   async getCsrfToken(): Promise<string> {
-    if (this.csrfToken) return this.csrfToken;
-
-    try {
-      const response = await fetch(`${API_URL}/csrf-token`, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch CSRF token');
-      }
-
-      const data = await response.json();
-      this.csrfToken = data.csrfToken;
-      return this.csrfToken;
-    } catch (error) {
-      console.error('Error fetching CSRF token:', error);
-      throw error;
-    }
+    // Retornar cadena vacía sin hacer petición al backend
+    return '';
   }
 
   /**
@@ -89,18 +75,14 @@ class AuthApiClient {
    */
   async post<T = any>(endpoint: string, data: any, options?: { headers?: HeadersInit }): Promise<T> {
     try {
-      const csrfToken = await this.getCsrfToken();
-
       // Si data es FormData, no usar getAuthHeaders y dejar que el navegador establezca Content-Type
       let headers: HeadersInit;
       let body: any;
 
       if (data instanceof FormData) {
-        // Para FormData, solo agregar Authorization y CSRF token
+        // Para FormData, solo agregar Authorization (CSRF ya no es necesario con JWT)
         const token = this.getToken();
-        headers = {
-          'X-CSRF-Token': csrfToken,
-        };
+        headers = {};
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
@@ -109,7 +91,7 @@ class AuthApiClient {
       } else {
         // Para datos JSON normales
         headers = this.getAuthHeaders();
-        headers['X-CSRF-Token'] = csrfToken;
+        // No agregar X-CSRF-Token, no es necesario con JWT
         body = JSON.stringify(data);
       }
 
@@ -147,9 +129,7 @@ class AuthApiClient {
    */
   async put<T = any>(endpoint: string, data: any): Promise<T> {
     try {
-      const csrfToken = await this.getCsrfToken();
       const headers = this.getAuthHeaders();
-      headers['X-CSRF-Token'] = csrfToken;
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'PUT',
@@ -180,9 +160,7 @@ class AuthApiClient {
    */
   async patch<T = any>(endpoint: string, data: any): Promise<T> {
     try {
-      const csrfToken = await this.getCsrfToken();
       const headers = this.getAuthHeaders();
-      headers['X-CSRF-Token'] = csrfToken;
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'PATCH',
@@ -213,9 +191,7 @@ class AuthApiClient {
    */
   async delete<T = any>(endpoint: string): Promise<T> {
     try {
-      const csrfToken = await this.getCsrfToken();
       const headers = this.getAuthHeaders();
-      headers['X-CSRF-Token'] = csrfToken;
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'DELETE',
