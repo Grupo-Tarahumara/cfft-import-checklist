@@ -10,7 +10,8 @@ import {
   FireIcon,
   BellAlertIcon,
   CheckCircleIcon,
-  FunnelIcon
+  FunnelIcon,
+  ArchiveBoxIcon
 } from '@heroicons/react/24/outline';
 
 export default function AlertasPage() {
@@ -19,6 +20,7 @@ export default function AlertasPage() {
   const [loading, setLoading] = useState(true);
   const [filterCriticidad, setFilterCriticidad] = useState('');
   const [filterLeida, setFilterLeida] = useState('');
+  const [filterArchivado, setFilterArchivado] = useState('');
 
   useEffect(() => {
     loadAlertas();
@@ -26,7 +28,7 @@ export default function AlertasPage() {
 
   useEffect(() => {
     filterAlertasData();
-  }, [filterCriticidad, filterLeida, alertas]);
+  }, [filterCriticidad, filterLeida, filterArchivado, alertas]);
 
   const loadAlertas = async () => {
     try {
@@ -42,6 +44,14 @@ export default function AlertasPage() {
 
   const filterAlertasData = () => {
     let filtered = [...alertas];
+
+    // Filtrar por estado de archivo (por defecto mostrar no archivadas)
+    if (filterArchivado === 'archivadas') {
+      filtered = filtered.filter((alerta) => alerta.archivado);
+    } else if (filterArchivado === '' || filterArchivado === 'no_archivadas') {
+      filtered = filtered.filter((alerta) => !alerta.archivado);
+    }
+    // Si filterArchivado === 'todas', no aplicar filtro de archivo
 
     if (filterCriticidad) {
       filtered = filtered.filter((alerta) => alerta.criticidad === filterCriticidad);
@@ -68,6 +78,21 @@ export default function AlertasPage() {
     } catch (error) {
       console.error('Error marking alerta as read:', error);
       alert('Error al marcar la alerta como leída');
+    }
+  };
+
+  const handleArchivarLote = async (inspeccionId: number) => {
+    try {
+      await authApi.patch(`/alertas/inspeccion/${inspeccionId}/archivar-todas`, {});
+      // Actualizar el estado local: marcar todas las alertas de esta inspección como archivadas
+      setAlertas(prevAlertas =>
+        prevAlertas.map(alerta =>
+          alerta.inspeccionId === inspeccionId ? { ...alerta, archivado: true } : alerta
+        )
+      );
+    } catch (error) {
+      console.error('Error archiving alertas:', error);
+      alert('Error al archivar las alertas');
     }
   };
 
@@ -206,7 +231,7 @@ export default function AlertasPage() {
             </div>
             <h2 className="text-lg md:text-xl font-bold text-gray-900">Filtros de Búsqueda</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Filtrar por Criticidad
@@ -225,7 +250,7 @@ export default function AlertasPage() {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Filtrar por Estado
+                Filtrar por Estado de Lectura
               </label>
               <select
                 value={filterLeida}
@@ -235,6 +260,21 @@ export default function AlertasPage() {
                 <option value="">Todas</option>
                 <option value="no_leidas">No leídas</option>
                 <option value="leidas">Leídas</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Filtrar por Archivo
+              </label>
+              <select
+                value={filterArchivado}
+                onChange={(e) => setFilterArchivado(e.target.value)}
+                className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              >
+                <option value="">Alertas Activas</option>
+                <option value="archivadas">Alertas Archivadas</option>
+                <option value="todas">Todas las Alertas</option>
               </select>
             </div>
           </div>
@@ -361,6 +401,16 @@ export default function AlertasPage() {
                         <span className="sm:hidden">Marcar leídas</span>
                       </button>
                     )}
+                    {!filterArchivado || filterArchivado === 'no_archivadas' ? (
+                      <button
+                        onClick={() => handleArchivarLote(primeraAlerta.inspeccionId)}
+                        className="flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-600 to-orange-700 text-white px-4 md:px-5 py-2.5 rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
+                      >
+                        <ArchiveBoxIcon className="h-4 w-4 md:h-5 md:w-5" />
+                        <span className="hidden sm:inline">Archivar lote</span>
+                        <span className="sm:hidden">Archivar</span>
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </motion.div>

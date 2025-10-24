@@ -52,6 +52,7 @@ export interface Alerta {
   descripcion: string;
   criticidad: 'alta' | 'media' | 'baja';
   leida: boolean;
+  archivado: boolean;
   fechaCreacion: string;
   inspeccionId: number;
   notificaciones?: Notificacion[];
@@ -183,6 +184,7 @@ export interface CreateAlertaDto {
   descripcion: string;
   criticidad?: 'alta' | 'media' | 'baja';
   leida?: boolean;
+  archivado?: boolean;
   inspeccionId: number;
 }
 
