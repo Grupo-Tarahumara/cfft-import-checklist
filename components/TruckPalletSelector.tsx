@@ -54,7 +54,15 @@ export default function TruckPalletSelector({
       });
 
       // Invertir para que el 1 esté abajo (cerca de la cabina)
-      return [columnaDerechaCabina.reverse(), columnaIzquierda.reverse()];
+      const derechaInvertida = columnaDerechaCabina.reverse();
+      const izquierdaInvertida = columnaIzquierda.reverse();
+
+      // Si hay número impar de pallets, agregar espacio vacío al inicio (arriba, cerca puertas)
+      if (totalPallets % 2 === 1) {
+        derechaInvertida.unshift(0); // 0 representa un espacio vacío al inicio
+      }
+
+      return [derechaInvertida, izquierdaInvertida];
     }
 
     // Para vista horizontal: intercalar pallets entre dos filas
