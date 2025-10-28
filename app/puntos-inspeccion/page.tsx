@@ -12,6 +12,7 @@ export default function PuntosInspeccionPage() {
   const [editingPunto, setEditingPunto] = useState<PuntoInspeccion | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 30;
+  const [errors, setErrors] = useState<{ nombre?: string }>({});
   const [formData, setFormData] = useState<CreatePuntoInspeccionDto>({
     nombre: '',
     ubicacion: '',
@@ -36,6 +37,22 @@ export default function PuntosInspeccionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: { nombre?: string } = {};
+
+    // Check for duplicate nombre (case-insensitive)
+    const duplicateNombre = puntos.some(
+      p => p.nombre.toLowerCase() === formData.nombre.toLowerCase() && (!editingPunto || p.id !== editingPunto.id)
+    );
+    if (duplicateNombre) {
+      newErrors.nombre = 'Este punto de inspección ya existe';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     try {
       if (editingPunto) {
         await authApi.patch(`/puntos-inspeccion/${editingPunto.id}`, formData);
@@ -80,6 +97,7 @@ export default function PuntosInspeccionPage() {
     });
     setEditingPunto(null);
     setShowForm(false);
+    setErrors({});
   };
 
   // Pagination logic
@@ -156,8 +174,13 @@ export default function PuntosInspeccionPage() {
                     required
                     maxLength={40}
                     placeholder="Ej: Puerto Principal, Almacén Central"
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    className={`w-full px-4 py-3 bg-white/50 backdrop-blur-sm border ${
+                      errors.nombre ? 'border-red-300' : 'border-gray-200'
+                    } rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200`}
                   />
+                  {errors.nombre && (
+                    <p className="text-xs text-red-600 mt-1">{errors.nombre}</p>
+                  )}
                 </div>
 
                 <div>

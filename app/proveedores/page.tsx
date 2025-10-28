@@ -12,6 +12,7 @@ export default function ProveedoresPage() {
   const [editingProveedor, setEditingProveedor] = useState<Proveedor | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 30;
+  const [errors, setErrors] = useState<{ nombre?: string }>({});
   const [formData, setFormData] = useState<CreateProveedorDto>({
     nombre: '',
     codigo: '',
@@ -37,6 +38,22 @@ export default function ProveedoresPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: { nombre?: string } = {};
+
+    // Check for duplicate nombre (case-insensitive)
+    const duplicateNombre = proveedores.some(
+      p => p.nombre.toLowerCase() === formData.nombre.toLowerCase() && (!editingProveedor || p.id !== editingProveedor.id)
+    );
+    if (duplicateNombre) {
+      newErrors.nombre = 'Este proveedor ya existe';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     try {
       if (editingProveedor) {
         await authApi.patch(`/proveedores/${editingProveedor.id}`, formData);
@@ -83,6 +100,7 @@ export default function ProveedoresPage() {
     });
     setEditingProveedor(null);
     setShowForm(false);
+    setErrors({});
   };
 
   // Pagination logic
@@ -157,9 +175,14 @@ export default function ProveedoresPage() {
                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value.slice(0, 40) })}
                     required
                     maxLength={40}
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className={`w-full px-4 py-3 bg-white/50 backdrop-blur-sm border ${
+                      errors.nombre ? 'border-red-300' : 'border-gray-200'
+                    } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                     placeholder="Ej: Frutas del Valle S.A."
                   />
+                  {errors.nombre && (
+                    <p className="text-xs text-red-600 mt-1">{errors.nombre}</p>
+                  )}
                 </div>
 
                 <div>

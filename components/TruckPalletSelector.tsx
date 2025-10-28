@@ -194,14 +194,14 @@ export default function TruckPalletSelector({
       <div className="relative bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 p-4 rounded-xl border-4 border-gray-400 shadow-xl" style={{ backgroundColor: '#f0f0f0' }}>
 
         {/* Contenedor con scroll */}
-        <div className={isVertical ? '' : (totalPallets > 20 ? 'overflow-x-auto' : '')} style={{ minHeight: isVertical ? 'auto' : '200px' }}>
+        <div className={isVertical ? (totalPallets > 24 ? 'overflow-y-auto' : '') : (totalPallets > 20 ? 'overflow-x-auto' : '')} style={{ minHeight: isVertical ? (totalPallets > 24 ? '400px' : 'auto') : '200px', maxHeight: isVertical && totalPallets > 24 ? '400px' : 'none', paddingLeft: !isVertical ? '50px' : '0px', position: 'relative' }}>
           {/* VISTA DEL CAMIÓN */}
           {isVertical ? (
             // VISTA VERTICAL - Para teléfonos (DOS COLUMNAS)
             <div className="relative flex flex-col gap-0 w-fit mx-auto">
               {/* Marcas de puertas traseras - HORIZONTAL */}
               <div className="text-xs font-bold text-gray-500 w-full text-center mb-2">
-                PUERTAS TRASERAS
+                PUERTAS 
               </div>
 
               {/* CAJA DEL CAMIÓN - DOS COLUMNAS */}
@@ -289,11 +289,12 @@ export default function TruckPalletSelector({
               <div className="h-1 bg-gradient-to-r from-gray-400 via-gray-500 to-gray-400 rounded"></div>
 
               {/* CABINA DEL CAMIÓN - VERTICAL */}
-              <div className="flex flex-col items-center justify-center p-3 border-b-4 border-gray-600">
-                <div className="text-xs font-bold text-gray-700 mb-2 tracking-widest">CABINA</div>
+              <div className="flex flex-col items-center justify-center p-3 border-t-4 border-gray-600">
+                
                 <div className="relative w-20 h-12 bg-gradient-to-b from-gray-600 to-gray-700 border-3 border-gray-800 shadow-lg rounded-b-2xl flex items-center justify-center">
                   <div className="text-white text-xs font-bold opacity-70 text-center px-1">CONDUCTOR</div>
                 </div>
+                <div className="text-xs font-bold text-gray-700 mb-1 tracking-widest">CABINA</div>
               </div>
             </div>
           ) : (
@@ -304,8 +305,8 @@ export default function TruckPalletSelector({
           <div className="relative bg-gradient-to-r from-gray-200 to-gray-150 border-4 border-gray-600 rounded-l-lg p-3 shadow-md">
 
             {/* Marcas de puertas traseras - VERTICAL */}
-            <div className="absolute left-0 top-1/2 transform -translate-x-16 -translate-y-1/2 text-xs font-bold text-gray-500" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
-              PUERTAS TRASERAS
+            <div className="absolute left-0 top-1/2 transform -translate-x-8 -translate-y-1/2 text-xs font-bold text-gray-500" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+              PUERTAS 
             </div>
 
             {/* Grid de Pallets - Distribuidos horizontalmente */}
@@ -401,7 +402,7 @@ export default function TruckPalletSelector({
 
               {/* CABINA DEL CAMIÓN - LADO DERECHO */}
               <div className="flex flex-col items-center justify-center pl-3 border-l-4 border-gray-400">
-                <div className="text-xs font-bold text-gray-700 mb-1 tracking-widest whitespace-nowrap">CABINA</div>
+                <div className="text-xs font-bold text-gray-700 mb-1 tracking-widest whitespace-nowrap">CABINA</div >
                 {/* Cabina - forma trapecio realista (mirando a la derecha) */}
                 <div className="relative w-16 h-24 bg-gradient-to-l from-gray-600 to-gray-700 border-3 border-gray-800 shadow-lg rounded-r-2xl flex items-center justify-center"
                   style={{
@@ -416,7 +417,7 @@ export default function TruckPalletSelector({
 
         {/* Información adicional */}
         <div className="mt-6 text-center text-xs text-gray-600 font-semibold">
-          VISTA SUPERIOR DEL CAMIÓN ({isVertical ? 'Vertical' : 'Horizontal'})
+          VISTA SUPERIOR DEL CAMIÓN
         </div>
       </div>
 

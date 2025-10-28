@@ -62,14 +62,17 @@ export default function NotificacionesPage() {
     setFilteredNotificaciones(filtered);
   };
 
-  const handleMarcarEnviada = async (id: number) => {
+  const handleMarcarEnviada = async (ids: number[]) => {
     try {
-      await authApi.patch(`/notificaciones/${id}/marcar-enviada`, {});
+      // Marcar todas las notificaciones como enviadas
+      await Promise.all(
+        ids.map(id => authApi.patch(`/notificaciones/${id}/marcar-enviada`, {}))
+      );
 
-      // Actualizar solo la notificación en el estado local sin recargar
+      // Actualizar el estado local una sola vez
       setNotificaciones(prevNotificaciones =>
         prevNotificaciones.map(notif =>
-          notif.id === id
+          ids.includes(notif.id)
             ? { ...notif, enviada: true, fechaEnvio: new Date().toISOString() }
             : notif
         )
@@ -298,8 +301,8 @@ export default function NotificacionesPage() {
                     {!group.enviada && (
                       <button
                         onClick={() => {
-                          // Marcar todos los ids del grupo como enviados
-                          group.ids.forEach(id => handleMarcarEnviada(id));
+                          // Marcar todos los ids del grupo como enviados en una sola llamada
+                          handleMarcarEnviada(group.ids);
                         }}
                         className="text-blue-600 hover:text-blue-900"
                       >

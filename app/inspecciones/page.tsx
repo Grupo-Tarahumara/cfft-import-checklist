@@ -17,7 +17,8 @@ import {
   CalendarIcon,
   TruckIcon,
   CubeIcon,
-  FireIcon
+  FireIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
 export default function InspeccionesPage() {
@@ -27,6 +28,7 @@ export default function InspeccionesPage() {
   const [inspecciones, setInspecciones] = useState<Inspeccion[]>([]);
   const [filteredInspecciones, setFilteredInspecciones] = useState<Inspeccion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterProveedor, setFilterProveedor] = useState('');
   const [filterAlertas, setFilterAlertas] = useState('');
@@ -61,6 +63,17 @@ export default function InspeccionesPage() {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await loadData();
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -142,13 +155,24 @@ export default function InspeccionesPage() {
             <h1 className="text-3xl font-bold text-gray-900">Gestión de Inspecciones</h1>
             <p className="text-gray-600 mt-1">Monitorea y gestiona todas las inspecciones de calidad</p>
           </div>
-          <Link
-            href="/inspecciones/nueva"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
-          >
-            <PlusIcon className="w-5 h-5" />
-            Nueva Inspección
-          </Link>
+          <div className="flex gap-3">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-xl transition-all duration-200 font-medium disabled:opacity-50"
+              title="Refrescar inspecciones"
+            >
+              <ArrowPathIcon className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+              Refrescar
+            </button>
+            <Link
+              href="/inspecciones/nueva"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+            >
+              <PlusIcon className="w-5 h-5" />
+              Nueva Inspección
+            </Link>
+          </div>
         </div>
 
         {/* Stats Cards */}

@@ -13,6 +13,7 @@ export default function FrutasPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 30;
   const [unidadTemperatura, setUnidadTemperatura] = useState<'celsius' | 'fahrenheit'>('celsius');
+  const [errors, setErrors] = useState<{ nombre?: string }>({});
   const [formData, setFormData] = useState<CreateFrutaDto>({
     nombre: '',
     tempMinima: 0,
@@ -48,12 +49,27 @@ export default function FrutasPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: { nombre?: string } = {};
 
     if (formData.tempMinima >= formData.tempMaxima) {
       alert('La temperatura mínima debe ser menor que la máxima');
       return;
     }
 
+    // Check for duplicate nombre (case-insensitive)
+    const duplicateNombre = frutas.some(
+      f => f.nombre.toLowerCase() === formData.nombre.toLowerCase() && (!editingFruta || f.id !== editingFruta.id)
+    );
+    if (duplicateNombre) {
+      newErrors.nombre = 'Esta fruta ya existe';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     try {
       if (editingFruta) {
         await authApi.patch(`/frutas/${editingFruta.id}`, formData);
@@ -104,6 +120,7 @@ export default function FrutasPage() {
     setTempMaxDisplay('');
     setEditingFruta(null);
     setShowForm(false);
+    setErrors({});
   };
 
   // Pagination logic
@@ -179,8 +196,13 @@ export default function FrutasPage() {
                     required
                     maxLength={40}
                     placeholder="Ej: Uva, Manzana, Pera"
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                    className={`w-full px-4 py-3 bg-white/50 backdrop-blur-sm border ${
+                      errors.nombre ? 'border-red-300' : 'border-gray-200'
+                    } rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                   />
+                  {errors.nombre && (
+                    <p className="text-xs text-red-600 mt-1">{errors.nombre}</p>
+                  )}
                 </div>
 
                 <div className="md:col-span-2">

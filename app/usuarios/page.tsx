@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { authApi } from '@/lib/api-auth';
 import { Usuario, CreateUsuarioDto } from '@/types';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -16,6 +17,7 @@ export default function UsuariosPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState<{ username?: string; nombre?: string; password?: string }>({});
   const [formData, setFormData] = useState<CreateUsuarioDto>({
     nombre: '',
     username: '',
@@ -45,6 +47,9 @@ export default function UsuariosPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: { username?: string; nombre?: string } = {};
+
+    // Validate password match for new users
     if (!editingUsuario && formData.password !== confirmPassword) {
       alert('Las contraseñas no coinciden');
       return;
@@ -53,6 +58,33 @@ export default function UsuariosPage() {
       alert('Debe ingresar una contraseña');
       return;
     }
+
+    // Check for duplicate username (only for new users or when username changes)
+    if (!editingUsuario || formData.username !== editingUsuario.username) {
+      const duplicateUsername = usuarios.some(
+        u => u.username === formData.username && (!editingUsuario || u.id !== editingUsuario.id)
+      );
+      if (duplicateUsername) {
+        newErrors.username = 'Este nombre de usuario ya está en uso';
+      }
+    }
+
+    // Check for duplicate full name (only for new users)
+    if (!editingUsuario) {
+      const duplicateNombre = usuarios.some(
+        u => u.nombre.toLowerCase() === formData.nombre.toLowerCase()
+      );
+      if (duplicateNombre) {
+        newErrors.nombre = 'Ya existe una cuenta con este nombre completo';
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     try {
       if (editingUsuario) {
         await authApi.patch(`/usuarios/${editingUsuario.id}`, formData);
@@ -110,6 +142,7 @@ export default function UsuariosPage() {
     setShowConfirmPassword(false);
     setEditingUsuario(null);
     setShowForm(false);
+    setErrors({});
   };
 
   // Pagination logic
@@ -185,9 +218,14 @@ export default function UsuariosPage() {
                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value.slice(0, 40) })}
                     required
                     maxLength={40}
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className={`w-full px-4 py-3 bg-white/50 backdrop-blur-sm border ${
+                      errors.nombre ? 'border-red-300' : 'border-gray-200'
+                    } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                     placeholder="Ej: Juan Pérez"
                   />
+                  {errors.nombre && (
+                    <p className="text-xs text-red-600 mt-1">{errors.nombre}</p>
+                  )}
                 </div>
 
                 <div>
@@ -201,9 +239,14 @@ export default function UsuariosPage() {
                     required
                     disabled={!!editingUsuario}
                     maxLength={20}
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className={`w-full px-4 py-3 bg-white/50 backdrop-blur-sm border ${
+                      errors.username ? 'border-red-300' : 'border-gray-200'
+                    } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
                     placeholder="usuario_login"
                   />
+                  {errors.username && (
+                    <p className="text-xs text-red-600 mt-1">{errors.username}</p>
+                  )}
                 </div>
 
                 <div>
@@ -232,7 +275,9 @@ export default function UsuariosPage() {
                       onChange={(e) => setFormData({ ...formData, password: e.target.value.slice(0, 20) })}
                       required={!editingUsuario}
                       maxLength={20}
-                      className="w-full px-4 py-3 pr-10 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className={`w-full px-4 py-3 pr-10 bg-white/50 backdrop-blur-sm border ${
+                        errors.password ? 'border-red-300' : 'border-gray-200'
+                      } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                       placeholder="••••••••"
                     />
                     <button
@@ -240,7 +285,11 @@ export default function UsuariosPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
                     >
-                      {showPassword ? '🙈' : '👁️'}
+                      {showPassword ? (
+                        <EyeSlashIcon className="w-5 h-5" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -269,7 +318,11 @@ export default function UsuariosPage() {
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
                       >
-                        {showConfirmPassword ? '🙈' : '👁️'}
+                        {showConfirmPassword ? (
+                          <EyeSlashIcon className="w-5 h-5" />
+                        ) : (
+                          <EyeIcon className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                     {confirmPassword && confirmPassword !== formData.password && (
