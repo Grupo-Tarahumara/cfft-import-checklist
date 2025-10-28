@@ -11,16 +11,19 @@ import {
   BellAlertIcon,
   CheckCircleIcon,
   FunnelIcon,
-  ArchiveBoxIcon
+  ArchiveBoxIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
 export default function AlertasPage() {
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [filteredAlertas, setFilteredAlertas] = useState<Alerta[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [filterCriticidad, setFilterCriticidad] = useState('');
   const [filterLeida, setFilterLeida] = useState('');
   const [filterArchivado, setFilterArchivado] = useState('');
+  const [searchInspeccionId, setSearchInspeccionId] = useState('');
 
   useEffect(() => {
     loadAlertas();
@@ -28,7 +31,7 @@ export default function AlertasPage() {
 
   useEffect(() => {
     filterAlertasData();
-  }, [filterCriticidad, filterLeida, filterArchivado, alertas]);
+  }, [filterCriticidad, filterLeida, filterArchivado, searchInspeccionId, alertas]);
 
   const loadAlertas = async () => {
     try {
@@ -42,8 +45,26 @@ export default function AlertasPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await loadAlertas();
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const filterAlertasData = () => {
     let filtered = [...alertas];
+
+    // Filtrar por número de inspección
+    if (searchInspeccionId) {
+      filtered = filtered.filter((alerta) =>
+        alerta.inspeccionId.toString().includes(searchInspeccionId)
+      );
+    }
 
     // Filtrar por estado de archivo (por defecto mostrar no archivadas)
     if (filterArchivado === 'archivadas') {
@@ -209,13 +230,24 @@ export default function AlertasPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
+          className="flex items-center justify-between"
         >
-          <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            Gestión de Alertas
-          </h1>
-          <p className="text-sm md:text-lg text-gray-600 mt-2">
-            Monitorea y gestiona las alertas del sistema en tiempo real
-          </p>
+          <div>
+            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Gestión de Alertas
+            </h1>
+            <p className="text-sm md:text-lg text-gray-600 mt-2">
+              Monitorea y gestiona las alertas del sistema en tiempo real
+            </p>
+          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-gray-300 transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refrescar</span>
+          </button>
         </motion.div>
 
         {/* Filtros */}
@@ -231,7 +263,20 @@ export default function AlertasPage() {
             </div>
             <h2 className="text-lg md:text-xl font-bold text-gray-900">Filtros de Búsqueda</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Número de Inspección
+              </label>
+              <input
+                type="text"
+                value={searchInspeccionId}
+                onChange={(e) => setSearchInspeccionId(e.target.value)}
+                placeholder="Ej: 123"
+                className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Filtrar por Criticidad
@@ -397,7 +442,7 @@ export default function AlertasPage() {
                         className="flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 md:px-5 py-2.5 rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
                       >
                         <CheckCircleIcon className="h-4 w-4 md:h-5 md:w-5" />
-                        <span className="hidden sm:inline">Marcar todas como leídas</span>
+                        <span className="hidden sm:inline">Marcar como leídas</span>
                         <span className="sm:hidden">Marcar leídas</span>
                       </button>
                     )}

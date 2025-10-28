@@ -56,11 +56,12 @@ export async function generateInspectionPDF(
     pdf.setFont('helvetica', 'normal');
     pdf.text('Reporte de Control de Calidad', margin, 22);
 
-    // Información del contenedor
+    // Información del contenedor y número de inspección
     pdf.setFontSize(9);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(`Contenedor: ${inspeccion.numeroOrdenContenedor}`, pageWidth - 80, 15);
-    pdf.text(`Fecha: ${new Date(inspeccion.fecha).toLocaleDateString('es-ES')}`, pageWidth - 80, 22);
+    pdf.text(`Nº Inspección: ${inspeccion.id}`, pageWidth - 80, 12);
+    pdf.text(`Contenedor: ${inspeccion.numeroOrdenContenedor}`, pageWidth - 80, 18);
+    pdf.text(`Fecha: ${new Date(inspeccion.fecha).toLocaleDateString('es-ES')}`, pageWidth - 80, 24);
 
     yPosition = 40;
     pdf.setTextColor(darkText[0], darkText[1], darkText[2]);

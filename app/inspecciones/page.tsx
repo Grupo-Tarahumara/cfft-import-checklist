@@ -81,8 +81,10 @@ export default function InspeccionesPage() {
     let filtered = [...inspecciones];
 
     if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter((insp) =>
-        insp.numeroOrdenContenedor.toLowerCase().includes(searchTerm.toLowerCase())
+        insp.numeroOrdenContenedor.toLowerCase().includes(searchLower) ||
+        insp.id.toString().includes(searchLower)
       );
     }
 
@@ -292,6 +294,9 @@ export default function InspeccionesPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Nº Inspección
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4" />
                       Fecha
@@ -330,10 +335,15 @@ export default function InspeccionesPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {paginatedInspecciones.map((inspeccion) => (
-                  <tr 
-                    key={inspeccion.id} 
+                  <tr
+                    key={inspeccion.id}
                     className="hover:bg-gray-50 transition-colors duration-150"
                   >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-semibold text-gray-900 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200 inline-block">
+                        #{inspeccion.id}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {new Date(inspeccion.fecha).toLocaleDateString('es-ES')}

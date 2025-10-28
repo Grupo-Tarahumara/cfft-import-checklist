@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { UserInfoModal } from '@/components/UserInfoModal';
 import { authApi } from '@/lib/api-auth';
 import { Usuario, CreateUsuarioDto } from '@/types';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,6 +20,8 @@ export default function UsuariosPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{ username?: string; nombre?: string; password?: string }>({});
+  const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
+  const [showUserInfo, setShowUserInfo] = useState(false);
   const [formData, setFormData] = useState<CreateUsuarioDto>({
     nombre: '',
     username: '',
@@ -42,6 +46,17 @@ export default function UsuariosPage() {
       console.error('Error loading usuarios:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await loadUsuarios();
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -180,19 +195,29 @@ export default function UsuariosPage() {
               Administra los usuarios del sistema y sus permisos
             </p>
           </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="group flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-5 md:px-6 py-3 rounded-xl hover:shadow-2xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
-          >
-            <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {showForm ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              )}
-            </svg>
-            <span>{showForm ? 'Cancelar' : 'Nuevo Usuario'}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="group flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-gray-300 transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refrescar</span>
+            </button>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="group flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-5 md:px-6 py-3 rounded-xl hover:shadow-2xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
+            >
+              <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {showForm ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                )}
+              </svg>
+              <span>{showForm ? 'Cancelar' : 'Nuevo Usuario'}</span>
+            </button>
+          </div>
         </div>
 
         {/* Formulario */}
@@ -506,6 +531,19 @@ export default function UsuariosPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
                         <button
+                          onClick={() => {
+                            setSelectedUsuario(usuario);
+                            setShowUserInfo(true);
+                          }}
+                          className="inline-flex items-center justify-center px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors duration-200 text-xs md:text-sm"
+                        >
+                          <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <span>Ver</span>
+                        </button>
+                        <button
                           onClick={() => handleEdit(usuario)}
                           className="inline-flex items-center justify-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200 text-xs md:text-sm"
                         >
@@ -571,6 +609,12 @@ export default function UsuariosPage() {
             </div>
           )}
         </div>
+
+        <UserInfoModal
+          usuario={selectedUsuario}
+          isOpen={showUserInfo}
+          onClose={() => setShowUserInfo(false)}
+        />
       </div>
       </DashboardLayout>
     </ProtectedRoute>

@@ -15,13 +15,15 @@ import {
   CalendarIcon,
   TruckIcon,
   BuildingStorefrontIcon,
-  CheckBadgeIcon
+  CheckBadgeIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
 export default function DashboardPage() {
   const [inspecciones, setInspecciones] = useState<Inspeccion[]>([]);
   const [alertasNoLeidas, setAlertasNoLeidas] = useState<Alerta[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -42,6 +44,17 @@ export default function DashboardPage() {
       console.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -126,13 +139,24 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
+          className="flex items-center justify-between"
         >
-          <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            Dashboard
-          </h1>
-          <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-lg">
-            Resumen general de inspecciones y alertas del sistema
-          </p>
+          <div>
+            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Dashboard
+            </h1>
+            <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-lg">
+              Resumen general de inspecciones y alertas del sistema
+            </p>
+          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-gray-300 transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refrescar</span>
+          </button>
         </motion.div>
 
         {/* Notificaciones Push */}
@@ -205,13 +229,16 @@ export default function DashboardPage() {
               {alertasNoLeidas.slice(0, 5).map((alerta, index) => {
                 const styles = getCriticidadStyles(alerta.criticidad);
                 return (
-                  <motion.div
+                  <Link
                     key={alerta.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className={`p-3 md:p-4 rounded-lg md:rounded-xl border-l-4 ${styles.border} ${styles.bg} hover:shadow-md transition-all duration-200`}
+                    href={`/inspecciones/${alerta.inspeccionId}`}
                   >
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.4, delay: index * 0.1 }}
+                      className={`p-3 md:p-4 rounded-lg md:rounded-xl border-l-4 ${styles.border} ${styles.bg} hover:shadow-md transition-all duration-200 cursor-pointer hover:brightness-95`}
+                    >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center flex-wrap gap-2 mb-2">
@@ -233,7 +260,8 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </div>
-                  </motion.div>
+                    </motion.div>
+                  </Link>
                 );
               })}
             </div>
@@ -272,13 +300,16 @@ export default function DashboardPage() {
 
           <div className="p-4 md:p-6 space-y-3 md:space-y-4">
             {inspecciones.map((inspeccion, index) => (
-              <motion.div
+              <Link
                 key={inspeccion.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="p-3 md:p-4 rounded-lg md:rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 bg-gradient-to-r from-gray-50 to-white"
+                href={`/inspecciones/${inspeccion.id}`}
               >
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  className="p-3 md:p-4 rounded-lg md:rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 bg-gradient-to-r from-gray-50 to-white cursor-pointer hover:brightness-95"
+                >
                 <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
                   <div className="flex items-center space-x-2 md:space-x-3">
                     <div className="p-1.5 md:p-2 bg-blue-100 rounded-lg">
@@ -324,7 +355,8 @@ export default function DashboardPage() {
                     )}
                   </div>
                 </div>
-              </motion.div>
+                </motion.div>
+              </Link>
             ))}
           </div>
         </motion.div>

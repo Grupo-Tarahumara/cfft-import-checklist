@@ -5,12 +5,14 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { authApi } from '@/lib/api-auth';
 import { Notificacion, Usuario } from '@/types';
 import { toast } from 'sonner';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 export default function NotificacionesPage() {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [filteredNotificaciones, setFilteredNotificaciones] = useState<Notificacion[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [filterUsuario, setFilterUsuario] = useState('');
   const [filterMetodo, setFilterMetodo] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
@@ -39,6 +41,17 @@ export default function NotificacionesPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await loadData();
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -161,7 +174,17 @@ export default function NotificacionesPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6 md:space-y-8">
-        <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Gestión de Notificaciones</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Gestión de Notificaciones</h1>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-gray-300 transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refrescar</span>
+          </button>
+        </div>
 
         {/* Filtros */}
         <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow">

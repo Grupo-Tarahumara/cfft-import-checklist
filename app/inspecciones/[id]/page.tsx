@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
+import { UserInfoModal } from '@/components/UserInfoModal';
 import { authApi } from '@/lib/api-auth';
-import { Inspeccion } from '@/types';
+import { Inspeccion, Usuario } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -26,6 +27,8 @@ export default function DetalleInspeccionPage() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
+  const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
+  const [showUserInfo, setShowUserInfo] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -128,9 +131,14 @@ export default function DetalleInspeccionPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Detalle de Inspección</h1>
-            <p className="text-gray-600 mt-1">
-              Contenedor: {inspeccion.numeroOrdenContenedor}
-            </p>
+            <div className="flex items-center gap-4 mt-2">
+              <div className="text-sm font-semibold text-gray-900 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">
+                Nº Inspección: #{inspeccion.id}
+              </div>
+              <p className="text-gray-600">
+                Contenedor: {inspeccion.numeroOrdenContenedor}
+              </p>
+            </div>
           </div>
           <button
             onClick={() => router.back()}
@@ -179,12 +187,26 @@ export default function DetalleInspeccionPage() {
 
             <div>
               <p className="text-sm text-gray-500">Inspector</p>
-              <p className="font-medium text-gray-900">
-                {inspeccion.usuario?.nombre || '-'}
-                {inspeccion.usuario?.area && (
-                  <span className="text-sm text-gray-500 ml-2">({inspeccion.usuario.area})</span>
-                )}
-              </p>
+              {inspeccion.usuario ? (
+                <button
+                  onClick={() => {
+                    setSelectedUsuario(inspeccion.usuario);
+                    setShowUserInfo(true);
+                  }}
+                  className="font-medium text-gray-900 hover:text-blue-600 transition-colors flex items-center gap-2 group"
+                  title={`Ver información de ${inspeccion.usuario.nombre}`}
+                >
+                  <span className="group-hover:underline">
+                    {inspeccion.usuario.nombre}
+                  </span>
+                  {inspeccion.usuario.area && (
+                    <span className="text-sm text-gray-500 group-hover:text-blue-500">({inspeccion.usuario.area})</span>
+                  )}
+                  <span className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                </button>
+              ) : (
+                <p className="font-medium text-gray-900">-</p>
+              )}
             </div>
 
             <div>
@@ -558,6 +580,13 @@ export default function DetalleInspeccionPage() {
           onClose={handleCloseImageModal}
         />
       )}
+
+      {/* User Info Modal */}
+      <UserInfoModal
+        usuario={selectedUsuario}
+        isOpen={showUserInfo}
+        onClose={() => setShowUserInfo(false)}
+      />
     </DashboardLayout>
   );
 }
