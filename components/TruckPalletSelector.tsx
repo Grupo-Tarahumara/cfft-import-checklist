@@ -57,9 +57,10 @@ export default function TruckPalletSelector({
       const derechaInvertida = columnaDerechaCabina.reverse();
       const izquierdaInvertida = columnaIzquierda.reverse();
 
-      // Si hay número impar de pallets, agregar espacio vacío al inicio (arriba, cerca puertas)
+      // Si hay número impar de pallets, agregar espacio vacío al inicio de izquierda (arriba, cerca puertas)
+      // para que el 2 quede parejo con el 1
       if (totalPallets % 2 === 1) {
-        derechaInvertida.unshift(0); // 0 representa un espacio vacío al inicio
+        izquierdaInvertida.unshift(0); // 0 representa un espacio vacío al inicio
       }
 
       return [derechaInvertida, izquierdaInvertida];
