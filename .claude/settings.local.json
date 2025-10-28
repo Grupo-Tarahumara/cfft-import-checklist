@@ -14,7 +14,10 @@
       "Bash(dir /s \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist-backend\\src\")",
       "Bash(dir:*)",
       "Bash(cat:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
