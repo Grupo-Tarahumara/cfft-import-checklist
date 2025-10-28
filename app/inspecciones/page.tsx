@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { authApi } from '@/lib/api-auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Inspeccion, Proveedor, Fruta, PuntoInspeccion, Usuario } from '@/types';
 import Link from 'next/link';
 import {
@@ -16,16 +17,29 @@ import {
   CalendarIcon,
   TruckIcon,
   CubeIcon,
-  FireIcon
+  FireIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
 export default function InspeccionesPage() {
+  const { user } = useAuth();
+  const isNormalUser = user?.rol === 'user';
+
   const [inspecciones, setInspecciones] = useState<Inspeccion[]>([]);
   const [filteredInspecciones, setFilteredInspecciones] = useState<Inspeccion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterProveedor, setFilterProveedor] = useState('');
+  const [filterAlertas, setFilterAlertas] = useState('');
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
+
+  // Función para convertir Celsius a Fahrenheit
+  const celsiusToFahrenheit = (c: number): number => {
+    return Math.round(((c * 9) / 5 + 32) * 100) / 100;
+  };
 
   useEffect(() => {
     loadData();
@@ -33,7 +47,8 @@ export default function InspeccionesPage() {
 
   useEffect(() => {
     filterInspecciones();
-  }, [searchTerm, filterProveedor, inspecciones]);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [searchTerm, filterProveedor, filterAlertas, inspecciones]);
 
   const loadData = async () => {
     try {
@@ -51,17 +66,38 @@ export default function InspeccionesPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await loadData();
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const filterInspecciones = () => {
     let filtered = [...inspecciones];
 
     if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter((insp) =>
-        insp.numeroOrdenContenedor.toLowerCase().includes(searchTerm.toLowerCase())
+        insp.numeroOrdenContenedor.toLowerCase().includes(searchLower) ||
+        insp.id.toString().includes(searchLower)
       );
     }
 
     if (filterProveedor) {
       filtered = filtered.filter((insp) => insp.proveedorId === parseInt(filterProveedor));
+    }
+
+    if (filterAlertas) {
+      if (filterAlertas === 'con') {
+        filtered = filtered.filter((insp) => insp.tieneAlertas);
+      } else if (filterAlertas === 'sin') {
+        filtered = filtered.filter((insp) => !insp.tieneAlertas);
+      }
     }
 
     setFilteredInspecciones(filtered);
@@ -93,6 +129,12 @@ export default function InspeccionesPage() {
     }
   };
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredInspecciones.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedInspecciones = filteredInspecciones.slice(startIndex, endIndex);
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -115,17 +157,28 @@ export default function InspeccionesPage() {
             <h1 className="text-3xl font-bold text-gray-900">Gestión de Inspecciones</h1>
             <p className="text-gray-600 mt-1">Monitorea y gestiona todas las inspecciones de calidad</p>
           </div>
-          <Link
-            href="/inspecciones/nueva"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
-          >
-            <PlusIcon className="w-5 h-5" />
-            Nueva Inspección
-          </Link>
+          <div className="flex gap-3">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-xl transition-all duration-200 font-medium disabled:opacity-50"
+              title="Refrescar inspecciones"
+            >
+              <ArrowPathIcon className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+              Refrescar
+            </button>
+            <Link
+              href="/inspecciones/nueva"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+            >
+              <PlusIcon className="w-5 h-5" />
+              Nueva Inspección
+            </Link>
+          </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={`grid gap-6 ${isNormalUser ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-50 rounded-xl">
@@ -138,33 +191,37 @@ export default function InspeccionesPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-50 rounded-xl">
-                <ExclamationTriangleIcon className="w-6 h-6 text-amber-600" />
+          {!isNormalUser && (
+            <>
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-amber-50 rounded-xl">
+                    <ExclamationTriangleIcon className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Con Alertas</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {filteredInspecciones.filter((i) => i.tieneAlertas).length}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Con Alertas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {filteredInspecciones.filter((i) => i.tieneAlertas).length}
-                </p>
-              </div>
-            </div>
-          </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-50 rounded-xl">
-                <CheckCircleIcon className="w-6 h-6 text-emerald-600" />
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-emerald-50 rounded-xl">
+                    <CheckCircleIcon className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Sin Problemas</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {filteredInspecciones.filter((i) => !i.tieneAlertas).length}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Sin Problemas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {filteredInspecciones.filter((i) => !i.tieneAlertas).length}
-                </p>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
 
         {/* Filtros */}
@@ -174,7 +231,7 @@ export default function InspeccionesPage() {
             <h2 className="text-lg font-semibold text-gray-900">Filtros y Búsqueda</h2>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className={`grid gap-6 ${isNormalUser ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Buscar por Contenedor
@@ -191,23 +248,42 @@ export default function InspeccionesPage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por Proveedor
-              </label>
-              <select
-                value={filterProveedor}
-                onChange={(e) => setFilterProveedor(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              >
-                <option value="">Todos los proveedores</option>
-                {proveedores.map((prov) => (
-                  <option key={prov.id} value={prov.id}>
-                    {prov.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {!isNormalUser && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Filtrar por Proveedor
+                  </label>
+                  <select
+                    value={filterProveedor}
+                    onChange={(e) => setFilterProveedor(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">Todos los proveedores</option>
+                    {proveedores.map((prov) => (
+                      <option key={prov.id} value={prov.id}>
+                        {prov.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Filtrar por Alertas
+                  </label>
+                  <select
+                    value={filterAlertas}
+                    onChange={(e) => setFilterAlertas(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">Todas las inspecciones</option>
+                    <option value="con">Con alertas</option>
+                    <option value="sin">Sin alertas</option>
+                  </select>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -217,6 +293,9 @@ export default function InspeccionesPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Nº Inspección
+                  </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4" />
@@ -244,20 +323,27 @@ export default function InspeccionesPage() {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Alertas
-                  </th>
+                  {!isNormalUser && (
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Alertas
+                    </th>
+                  )}
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredInspecciones.map((inspeccion) => (
-                  <tr 
-                    key={inspeccion.id} 
+                {paginatedInspecciones.map((inspeccion) => (
+                  <tr
+                    key={inspeccion.id}
                     className="hover:bg-gray-50 transition-colors duration-150"
                   >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-semibold text-gray-900 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200 inline-block">
+                        #{inspeccion.id}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {new Date(inspeccion.fecha).toLocaleDateString('es-ES')}
@@ -287,9 +373,10 @@ export default function InspeccionesPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <div className="text-sm font-semibold text-gray-900">
-                          {inspeccion.temperaturaFruta}°C
+                          <div>{inspeccion.temperaturaFruta}°C</div>
+                          <div className="text-xs text-gray-500">{celsiusToFahrenheit(Number(inspeccion.temperaturaFruta)).toFixed(2)}°F</div>
                         </div>
-                        {inspeccion.temperaturaFruta > 8 && (
+                        {!isNormalUser && inspeccion.temperaturaFruta > 8 && (
                           <ExclamationTriangleIcon className="w-4 h-4 text-amber-500" />
                         )}
                       </div>
@@ -299,19 +386,21 @@ export default function InspeccionesPage() {
                         {inspeccion.estado}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {inspeccion.tieneAlertas ? (
-                        <div className="flex items-center gap-2 text-red-600 font-medium">
-                          <ExclamationTriangleIcon className="w-4 h-4" />
-                          Con Alertas
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 text-emerald-600">
-                          <CheckCircleIcon className="w-4 h-4" />
-                          Sin Alertas
-                        </div>
-                      )}
-                    </td>
+                    {!isNormalUser && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {inspeccion.tieneAlertas ? (
+                          <div className="flex items-center gap-2 text-red-600 font-medium">
+                            <ExclamationTriangleIcon className="w-4 h-4" />
+                            Con Alertas
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 text-emerald-600">
+                            <CheckCircleIcon className="w-4 h-4" />
+                            Sin Alertas
+                          </div>
+                        )}
+                      </td>
+                    )}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <Link
@@ -321,13 +410,15 @@ export default function InspeccionesPage() {
                           <EyeIcon className="w-4 h-4" />
                           Ver
                         </Link>
-                        <button
-                          onClick={() => handleDelete(inspeccion.id)}
-                          className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition-colors font-medium"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                          Eliminar
-                        </button>
+                        {!isNormalUser && (
+                          <button
+                            onClick={() => handleDelete(inspeccion.id)}
+                            className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition-colors font-medium"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                            Eliminar
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -341,11 +432,51 @@ export default function InspeccionesPage() {
               <CubeIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron inspecciones</h3>
               <p className="text-gray-600 max-w-sm mx-auto">
-                {searchTerm || filterProveedor 
-                  ? 'Intenta ajustar los filtros para ver más resultados.' 
+                {searchTerm || filterProveedor
+                  ? 'Intenta ajustar los filtros para ver más resultados.'
                   : 'Comienza creando tu primera inspección.'
                 }
               </p>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {filteredInspecciones.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                {startIndex + 1} a {Math.min(endIndex, filteredInspecciones.length)} de {filteredInspecciones.length}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  ← Anterior
+                </button>
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Siguiente →
+                </button>
+              </div>
             </div>
           )}
         </div>

@@ -3,8 +3,11 @@
 export interface Usuario {
   id: number;
   nombre: string;
+  username: string;
   email: string;
+  telefono?: string;
   area: string; // 'Comercio Exterior' | 'Logística Nacional' | 'Calidad'
+  rol: 'admin' | 'user';
   activo: boolean;
   fechaCreacion: string;
 }
@@ -49,6 +52,7 @@ export interface Alerta {
   descripcion: string;
   criticidad: 'alta' | 'media' | 'baja';
   leida: boolean;
+  archivado: boolean;
   fechaCreacion: string;
   inspeccionId: number;
   notificaciones?: Notificacion[];
@@ -58,6 +62,7 @@ export interface Notificacion {
   id: number;
   enviada: boolean;
   fechaEnvio?: string;
+  archivado: boolean;
   metodo: 'email' | 'sistema' | 'push';
   alertaId: number;
   usuarioId: number;
@@ -73,9 +78,14 @@ export interface Inspeccion {
   numeroCajas: number;
   termografoOrigen: boolean;
   termografoNacional: boolean;
+  paletTermografoOrigen?: number[]; // Números de pallets donde están los termógrafos de origen
+  paletTermografoNacional?: number[]; // Números de pallets donde están los termógrafos nacionales
   temperaturaFruta: number;
+  temperaturaCarga?: number; // Temperatura de la carga (diferente a la de la fruta)
+  lineaTransportista?: string; // Nombre de la línea transportista
   numeroTrancas: number;
   observaciones?: string;
+  firmaTransporte?: string; // Firma del responsable del transporte
   tieneAlertas: boolean;
   pdfGenerado?: string;
   estado: string; // 'Completado' | 'Pendiente' | etc
@@ -96,8 +106,12 @@ export interface Inspeccion {
 // DTOs para crear/actualizar
 export interface CreateUsuarioDto {
   nombre: string;
+  username: string;
   email: string;
+  password: string;
+  telefono?: string;
   area: string;
+  rol?: 'admin' | 'user';
   activo?: boolean;
 }
 
@@ -136,9 +150,14 @@ export interface CreateInspeccionDto {
   numeroCajas: number;
   termografoOrigen?: boolean;
   termografoNacional?: boolean;
+  paletTermografoOrigen?: number[]; // Números de pallets donde están los termógrafos de origen
+  paletTermografoNacional?: number[]; // Números de pallets donde están los termógrafos nacionales
   temperaturaFruta: number;
+  temperaturaCarga?: number; // Temperatura de la carga
+  lineaTransportista?: string; // Línea transportista
   numeroTrancas: number;
   observaciones?: string;
+  firmaTransporte?: string; // Firma de transporte
   tieneAlertas?: boolean;
   pdfGenerado?: string;
   estado?: string;
@@ -166,6 +185,7 @@ export interface CreateAlertaDto {
   descripcion: string;
   criticidad?: 'alta' | 'media' | 'baja';
   leida?: boolean;
+  archivado?: boolean;
   inspeccionId: number;
 }
 
@@ -174,6 +194,7 @@ export interface UpdateAlertaDto extends Partial<CreateAlertaDto> {}
 export interface CreateNotificacionDto {
   enviada?: boolean;
   fechaEnvio?: string;
+  archivado?: boolean;
   metodo: 'email' | 'sistema' | 'push';
   alertaId: number;
   usuarioId: number;
@@ -192,8 +213,12 @@ export interface LoginResponse {
 }
 
 export interface UserProfile {
-  userId: number;
+  id: number;
+  userId?: number;
+  nombre: string;
   username: string;
+  email: string;
+  rol: 'admin' | 'user';
 }
 
 // Tipos de foto permitidos

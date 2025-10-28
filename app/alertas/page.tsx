@@ -10,15 +10,20 @@ import {
   FireIcon,
   BellAlertIcon,
   CheckCircleIcon,
-  FunnelIcon
+  FunnelIcon,
+  ArchiveBoxIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
 export default function AlertasPage() {
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [filteredAlertas, setFilteredAlertas] = useState<Alerta[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [filterCriticidad, setFilterCriticidad] = useState('');
   const [filterLeida, setFilterLeida] = useState('');
+  const [filterArchivado, setFilterArchivado] = useState('');
+  const [searchInspeccionId, setSearchInspeccionId] = useState('');
 
   useEffect(() => {
     loadAlertas();
@@ -26,7 +31,7 @@ export default function AlertasPage() {
 
   useEffect(() => {
     filterAlertasData();
-  }, [filterCriticidad, filterLeida, alertas]);
+  }, [filterCriticidad, filterLeida, filterArchivado, searchInspeccionId, alertas]);
 
   const loadAlertas = async () => {
     try {
@@ -40,8 +45,34 @@ export default function AlertasPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await loadAlertas();
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const filterAlertasData = () => {
     let filtered = [...alertas];
+
+    // Filtrar por número de inspección
+    if (searchInspeccionId) {
+      filtered = filtered.filter((alerta) =>
+        alerta.inspeccionId.toString().includes(searchInspeccionId)
+      );
+    }
+
+    // Filtrar por estado de archivo (por defecto mostrar no archivadas)
+    if (filterArchivado === 'archivadas') {
+      filtered = filtered.filter((alerta) => alerta.archivado);
+    } else if (filterArchivado === '' || filterArchivado === 'no_archivadas') {
+      filtered = filtered.filter((alerta) => !alerta.archivado);
+    }
+    // Si filterArchivado === 'todas', no aplicar filtro de archivo
 
     if (filterCriticidad) {
       filtered = filtered.filter((alerta) => alerta.criticidad === filterCriticidad);
@@ -68,6 +99,21 @@ export default function AlertasPage() {
     } catch (error) {
       console.error('Error marking alerta as read:', error);
       alert('Error al marcar la alerta como leída');
+    }
+  };
+
+  const handleArchivarLote = async (inspeccionId: number) => {
+    try {
+      await authApi.patch(`/alertas/inspeccion/${inspeccionId}/archivar-todas`, {});
+      // Actualizar el estado local: marcar todas las alertas de esta inspección como archivadas
+      setAlertas(prevAlertas =>
+        prevAlertas.map(alerta =>
+          alerta.inspeccionId === inspeccionId ? { ...alerta, archivado: true } : alerta
+        )
+      );
+    } catch (error) {
+      console.error('Error archiving alertas:', error);
+      alert('Error al archivar las alertas');
     }
   };
 
@@ -178,19 +224,30 @@ export default function AlertasPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
+          className="flex items-center justify-between"
         >
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            Gestión de Alertas
-          </h1>
-          <p className="text-gray-600 mt-2 text-lg">
-            Monitorea y gestiona las alertas del sistema en tiempo real
-          </p>
+          <div>
+            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Gestión de Alertas
+            </h1>
+            <p className="text-sm md:text-lg text-gray-600 mt-2">
+              Monitorea y gestiona las alertas del sistema en tiempo real
+            </p>
+          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-gray-300 transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refrescar</span>
+          </button>
         </motion.div>
 
         {/* Filtros */}
@@ -198,15 +255,28 @@ export default function AlertasPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="bg-white/70 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-gray-200/60"
+          className="bg-white/70 backdrop-blur-xl p-4 md:p-6 rounded-xl md:rounded-3xl shadow-2xl border border-gray-200/60"
         >
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl">
-              <FunnelIcon className="w-6 h-6 text-white" />
+          <div className="flex items-center space-x-3 mb-4 md:mb-6">
+            <div className="p-2 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl md:rounded-2xl">
+              <FunnelIcon className="h-5 w-5 md:h-6 md:w-6 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900">Filtros de Búsqueda</h2>
+            <h2 className="text-lg md:text-xl font-bold text-gray-900">Filtros de Búsqueda</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Número de Inspección
+              </label>
+              <input
+                type="text"
+                value={searchInspeccionId}
+                onChange={(e) => setSearchInspeccionId(e.target.value)}
+                placeholder="Ej: 123"
+                className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Filtrar por Criticidad
@@ -225,7 +295,7 @@ export default function AlertasPage() {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Filtrar por Estado
+                Filtrar por Estado de Lectura
               </label>
               <select
                 value={filterLeida}
@@ -237,11 +307,26 @@ export default function AlertasPage() {
                 <option value="leidas">Leídas</option>
               </select>
             </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Filtrar por Archivo
+              </label>
+              <select
+                value={filterArchivado}
+                onChange={(e) => setFilterArchivado(e.target.value)}
+                className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              >
+                <option value="">Alertas Activas</option>
+                <option value="archivadas">Alertas Archivadas</option>
+                <option value="todas">Todas las Alertas</option>
+              </select>
+            </div>
           </div>
         </motion.div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -250,14 +335,14 @@ export default function AlertasPage() {
               transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
               className="group"
             >
-              <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}>
-                    <stat.icon className="h-6 w-6 text-white" />
+              <div className="bg-white/70 backdrop-blur-xl rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 border border-gray-100">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <div className={`p-2 md:p-3 rounded-xl bg-gradient-to-r ${stat.color}`}>
+                    <stat.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</p>
-                <p className="text-gray-600 text-sm font-medium">{stat.label}</p>
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{stat.value}</p>
+                <p className="text-xs md:text-sm text-gray-600 font-medium">{stat.label}</p>
               </div>
             </motion.div>
           ))}
@@ -284,15 +369,15 @@ export default function AlertasPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className={`bg-white/70 backdrop-blur-xl p-6 rounded-2xl border-l-4 ${styles.border} ${styles.bg} hover:shadow-xl transition-all duration-300 ${
+                className={`bg-white/70 backdrop-blur-xl p-4 md:p-6 rounded-xl md:rounded-2xl border-l-4 ${styles.border} ${styles.bg} hover:shadow-xl transition-all duration-300 ${
                   todasLeidas ? 'opacity-70' : ''
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-3">
+                <div className="flex flex-col sm:flex-row items-start gap-4 sm:justify-between">
+                  <div className="flex-1 w-full sm:w-auto">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
                       <div className={`p-2 rounded-lg ${styles.badge}`}>
-                        <IconComponent className="h-5 w-5" />
+                        <IconComponent className="h-4 w-4 md:h-5 md:w-5" />
                       </div>
                       <span className={`text-xs px-3 py-1 rounded-xl font-semibold ${styles.badge}`}>
                         {criticidadMasAlta.toUpperCase()}
@@ -324,7 +409,7 @@ export default function AlertasPage() {
                       ))}
                     </div>
 
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500">
                       <div className="flex items-center space-x-1">
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -340,12 +425,12 @@ export default function AlertasPage() {
                     </div>
                   </div>
 
-                  <div className="ml-4 flex flex-col space-y-2">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <a
                       href={`/inspecciones/${primeraAlerta.inspeccionId}`}
-                      className="flex items-center space-x-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white px-5 py-2.5 rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-center"
+                      className="flex items-center justify-center space-x-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white px-4 md:px-5 py-2.5 rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-center text-sm md:text-base"
                     >
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
@@ -354,12 +439,23 @@ export default function AlertasPage() {
                     {algunaNoLeida && (
                       <button
                         onClick={() => handleMarcarTodasLeidas(primeraAlerta.inspeccionId)}
-                        className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-5 py-2.5 rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold"
+                        className="flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 md:px-5 py-2.5 rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
                       >
-                        <CheckCircleIcon className="h-5 w-5" />
-                        <span>Marcar todas como leídas</span>
+                        <CheckCircleIcon className="h-4 w-4 md:h-5 md:w-5" />
+                        <span className="hidden sm:inline">Marcar como leídas</span>
+                        <span className="sm:hidden">Marcar leídas</span>
                       </button>
                     )}
+                    {!filterArchivado || filterArchivado === 'no_archivadas' ? (
+                      <button
+                        onClick={() => handleArchivarLote(primeraAlerta.inspeccionId)}
+                        className="flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-600 to-orange-700 text-white px-4 md:px-5 py-2.5 rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
+                      >
+                        <ArchiveBoxIcon className="h-4 w-4 md:h-5 md:w-5" />
+                        <span className="hidden sm:inline">Archivar lote</span>
+                        <span className="sm:hidden">Archivar</span>
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </motion.div>

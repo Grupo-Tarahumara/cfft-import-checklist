@@ -1,14 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)",
-      "Bash(npm cache clean:*)",
-      "Bash(if exist package-lock.json del package-lock.json)",
-      "Bash(if exist node_modules rmdir /s /q node_modules)",
-      "Bash(npm run dev:*)",
-      "Read(//c/Users/becario1.sis/Proyecto/cfft-import-checklist-backend/**)",
+      "Bash(npm run build:*)",
+      "Read(//c/Users/becario1.sis/Proyecto/**)",
+      "Bash(dir \"C:\\Users\\becario1.sis\\Proyecto\")",
+      "Bash(findstr:*)",
+      "Bash(find:*)",
+      "Bash(git rebase:*)",
+      "Bash(git checkout:*)",
+      "Bash(dir /s /b \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist\")",
+      "Bash(tree:*)",
+      "Bash(dir \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist-backend\")",
+      "Bash(dir /s \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist-backend\\src\")",
       "Bash(dir:*)",
-      "Bash(test:*)"
+      "Bash(cat:*)",
+      "Bash(git log:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

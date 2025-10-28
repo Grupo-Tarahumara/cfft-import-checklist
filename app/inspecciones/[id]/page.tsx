@@ -3,19 +3,32 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
+import { UserInfoModal } from '@/components/UserInfoModal';
 import { authApi } from '@/lib/api-auth';
-import { Inspeccion } from '@/types';
+import { Inspeccion, Usuario } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
+import { generateInspectionPDF } from '@/lib/pdf-generator';
+import ImageModal from '@/components/ImageModal';
 
 export default function DetalleInspeccionPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { user } = useAuth();
+  const isNormalUser = user?.rol === 'user';
+  const isAdmin = user?.rol === 'admin';
 
   const [inspeccion, setInspeccion] = useState<Inspeccion | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
+  const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
+  const [showUserInfo, setShowUserInfo] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -35,6 +48,38 @@ export default function DetalleInspeccionPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!inspeccion) return;
+
+    try {
+      setIsGeneratingPDF(true);
+      toast.loading('Generando PDF...', { id: 'pdf-generation' });
+
+      // Para usuarios normales, ocultar rangos de temperatura y alertas
+      await generateInspectionPDF(inspeccion, {
+        hideTemperatureRanges: isNormalUser,
+        hideAlerts: isNormalUser,
+      });
+
+      toast.success('PDF descargado correctamente', { id: 'pdf-generation' });
+    } catch (error) {
+      console.error('Error descargando PDF:', error);
+      toast.error('Error al generar el PDF', { id: 'pdf-generation' });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
+  const handleOpenImageModal = (imageUrl: string, imageTitle: string) => {
+    setSelectedImage({ url: imageUrl, title: imageTitle });
+    setIsModalOpen(true);
+  };
+
+  const handleCloseImageModal = () => {
+    setIsModalOpen(false);
+    setSelectedImage(null);
   };
 
   if (loading) {
@@ -86,9 +131,14 @@ export default function DetalleInspeccionPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Detalle de Inspección</h1>
-            <p className="text-gray-600 mt-1">
-              Contenedor: {inspeccion.numeroOrdenContenedor}
-            </p>
+            <div className="flex items-center gap-4 mt-2">
+              <div className="text-sm font-semibold text-gray-900 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">
+                Nº Inspección: #{inspeccion.id}
+              </div>
+              <p className="text-gray-600">
+                Contenedor: {inspeccion.numeroOrdenContenedor}
+              </p>
+            </div>
           </div>
           <button
             onClick={() => router.back()}
@@ -122,25 +172,41 @@ export default function DetalleInspeccionPage() {
               </span>
             </div>
 
-            <div>
-              <p className="text-sm text-gray-500">Tiene Alertas</p>
-              <p className="font-medium">
-                {inspeccion.tieneAlertas ? (
-                  <span className="text-red-600">⚠️ Sí</span>
-                ) : (
-                  <span className="text-green-600">✓ No</span>
-                )}
-              </p>
-            </div>
+            {!isNormalUser && (
+              <div>
+                <p className="text-sm text-gray-500">Tiene Alertas</p>
+                <p className="font-medium">
+                  {inspeccion.tieneAlertas ? (
+                    <span className="text-red-600">⚠️ Sí</span>
+                  ) : (
+                    <span className="text-green-600">✓ No</span>
+                  )}
+                </p>
+              </div>
+            )}
 
             <div>
               <p className="text-sm text-gray-500">Inspector</p>
-              <p className="font-medium text-gray-900">
-                {inspeccion.usuario?.nombre || '-'}
-                {inspeccion.usuario?.area && (
-                  <span className="text-sm text-gray-500 ml-2">({inspeccion.usuario.area})</span>
-                )}
-              </p>
+              {inspeccion.usuario ? (
+                <button
+                  onClick={() => {
+                    setSelectedUsuario(inspeccion.usuario);
+                    setShowUserInfo(true);
+                  }}
+                  className="font-medium text-gray-900 hover:text-blue-600 transition-colors flex items-center gap-2 group"
+                  title={`Ver información de ${inspeccion.usuario.nombre}`}
+                >
+                  <span className="group-hover:underline">
+                    {inspeccion.usuario.nombre}
+                  </span>
+                  {inspeccion.usuario.area && (
+                    <span className="text-sm text-gray-500 group-hover:text-blue-500">({inspeccion.usuario.area})</span>
+                  )}
+                  <span className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                </button>
+              ) : (
+                <p className="font-medium text-gray-900">-</p>
+              )}
             </div>
 
             <div>
@@ -185,7 +251,7 @@ export default function DetalleInspeccionPage() {
               <p className="font-medium text-gray-900 text-lg">
                 {inspeccion.fruta?.nombre || '-'}
               </p>
-              {inspeccion.fruta && (
+              {inspeccion.fruta && !isNormalUser && (
                 <div className="mt-2">
                   <p className="text-sm text-gray-600">
                     <span className="font-medium">Rango óptimo:</span>{' '}
@@ -194,6 +260,15 @@ export default function DetalleInspeccionPage() {
                 </div>
               )}
             </div>
+
+            {inspeccion.lineaTransportista && (
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Línea Transportista</p>
+                <p className="font-medium text-gray-900 text-lg">
+                  {inspeccion.lineaTransportista}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -219,36 +294,72 @@ export default function DetalleInspeccionPage() {
         {/* Control de Temperatura */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Control de Temperatura</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="border-l-4 border-blue-500 pl-4">
               <p className="text-sm text-gray-500 mb-2">Termógrafo Origen</p>
-              <div className="flex items-center">
+              <div className="flex items-center mb-1">
                 {inspeccion.termografoOrigen ? (
                   <span className="text-green-600 font-medium">✓ Presente</span>
                 ) : (
                   <span className="text-red-600 font-medium">✗ Ausente</span>
                 )}
               </div>
+              {inspeccion.termografoOrigen && inspeccion.paletTermografoOrigen && (
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(inspeccion.paletTermografoOrigen) ? (
+                    inspeccion.paletTermografoOrigen.map((palet) => (
+                      <span
+                        key={palet}
+                        className="text-sm bg-blue-50 text-blue-900 px-2 py-1 rounded inline-block font-semibold"
+                      >
+                        Palet #{palet}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm bg-blue-50 text-blue-900 px-2 py-1 rounded inline-block font-semibold">
+                      Palet #{inspeccion.paletTermografoOrigen}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div>
+            <div className="border-l-4 border-green-500 pl-4">
               <p className="text-sm text-gray-500 mb-2">Termógrafo Nacional</p>
-              <div className="flex items-center">
+              <div className="flex items-center mb-1">
                 {inspeccion.termografoNacional ? (
                   <span className="text-green-600 font-medium">✓ Presente</span>
                 ) : (
                   <span className="text-red-600 font-medium">✗ Ausente</span>
                 )}
               </div>
+              {inspeccion.termografoNacional && inspeccion.paletTermografoNacional && (
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(inspeccion.paletTermografoNacional) ? (
+                    inspeccion.paletTermografoNacional.map((palet) => (
+                      <span
+                        key={palet}
+                        className="text-sm bg-green-50 text-green-900 px-2 py-1 rounded inline-block font-semibold"
+                      >
+                        Palet #{palet}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm bg-green-50 text-green-900 px-2 py-1 rounded inline-block font-semibold">
+                      Palet #{inspeccion.paletTermografoNacional}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div>
+            <div className="border-l-4 border-orange-500 pl-4">
               <p className="text-sm text-gray-500 mb-2">Temperatura de la Fruta</p>
               <div className="flex items-center space-x-2">
                 <p className="text-2xl font-bold text-gray-900">
                   {inspeccion.temperaturaFruta}°C
                 </p>
-                {tempEnRango !== null && (
+                {!isNormalUser && tempEnRango !== null && (
                   tempEnRango ? (
                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
                       ✓ En rango
@@ -260,12 +371,21 @@ export default function DetalleInspeccionPage() {
                   )
                 )}
               </div>
-              {inspeccion.fruta && (
+              {inspeccion.fruta && !isNormalUser && (
                 <p className="text-xs text-gray-500 mt-1">
                   Rango óptimo: {inspeccion.fruta.tempMinima}°C - {inspeccion.fruta.tempMaxima}°C
                 </p>
               )}
             </div>
+
+            {inspeccion.temperaturaCarga && (
+              <div className="border-l-4 border-red-500 pl-4">
+                <p className="text-sm text-gray-500 mb-2">Temperatura de la Carga</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {inspeccion.temperaturaCarga}°C
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -277,8 +397,31 @@ export default function DetalleInspeccionPage() {
           </div>
         )}
 
+        {/* Firma de Transporte */}
+        {inspeccion.firmaTransporte && (
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Firma de Transporte</h2>
+            <div className="flex flex-col items-center">
+              <div className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
+                {inspeccion.firmaTransporte.startsWith('data:') || inspeccion.firmaTransporte.startsWith('http') ? (
+                  <img
+                    src={inspeccion.firmaTransporte}
+                    alt="Firma de Transporte"
+                    className="h-40 object-contain"
+                  />
+                ) : (
+                  <p className="text-gray-500 text-center text-sm">Firma registrada</p>
+                )}
+              </div>
+              <p className="text-sm text-gray-600 mt-3 text-center">
+                Firma del Responsable del Transporte
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Alertas */}
-        {inspeccion.alertas && inspeccion.alertas.length > 0 && (
+        {!isNormalUser && inspeccion.alertas && inspeccion.alertas.length > 0 && (
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               Alertas ({inspeccion.alertas.length})
@@ -367,14 +510,12 @@ export default function DetalleInspeccionPage() {
                           Obligatoria
                         </span>
                       )}
-                      <a
-                        href={foto.urlFoto}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => handleOpenImageModal(foto.urlFoto, foto.tipoFoto.replace(/_/g, ' ').toUpperCase())}
                         className="text-xs text-blue-600 hover:text-blue-700 font-medium"
                       >
                         Ver imagen completa →
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -388,26 +529,64 @@ export default function DetalleInspeccionPage() {
           <div className="text-sm text-gray-600">
             <p>Última actualización: {new Date(inspeccion.fechaActualizacion).toLocaleString('es-ES')}</p>
           </div>
-          <div className="space-x-3">
+          <div className="space-x-3 flex">
             <Link
               href={`/inspecciones`}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 inline-block"
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 inline-block transition-colors"
             >
               Volver a Lista
             </Link>
-            {inspeccion.pdfGenerado && (
-              <a
-                href={inspeccion.pdfGenerado}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
-              >
-                📄 Descargar PDF
-              </a>
+            {isAdmin && (
+              <>
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={isGeneratingPDF}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed inline-flex items-center gap-2 transition-colors"
+                >
+                  {isGeneratingPDF ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Generando...
+                    </>
+                  ) : (
+                    <>
+                      <DocumentArrowDownIcon className="h-5 w-5" />
+                      Descargar PDF
+                    </>
+                  )}
+                </button>
+                {inspeccion.pdfGenerado && (
+                  <a
+                    href={inspeccion.pdfGenerado}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 inline-block transition-colors"
+                  >
+                    📄 PDF del servidor
+                  </a>
+                )}
+              </>
             )}
           </div>
         </div>
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <ImageModal
+          isOpen={isModalOpen}
+          imageUrl={selectedImage.url}
+          imageTitle={selectedImage.title}
+          onClose={handleCloseImageModal}
+        />
+      )}
+
+      {/* User Info Modal */}
+      <UserInfoModal
+        usuario={selectedUsuario}
+        isOpen={showUserInfo}
+        onClose={() => setShowUserInfo(false)}
+      />
     </DashboardLayout>
   );
 }
