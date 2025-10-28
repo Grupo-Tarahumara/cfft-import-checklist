@@ -16,7 +16,6 @@ export default function SignaturePad({ onChange, value }: SignaturePadProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
-  const [dpi, setDpi] = useState(1);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -24,7 +23,6 @@ export default function SignaturePad({ onChange, value }: SignaturePadProps) {
 
     // Obtener el DPI del dispositivo para mejor resolución
     const dpiValue = window.devicePixelRatio || 1;
-    setDpi(dpiValue);
 
     // Establecer tamaño del canvas con DPI
     canvas.width = CANVAS_WIDTH * dpiValue;

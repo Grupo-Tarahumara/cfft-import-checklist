@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -31,18 +32,19 @@ export default function LoginPage() {
     try {
       await login({ username, password });
       // La redirección se maneja en el context
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { status?: number; response?: { status?: number }; message?: string } | null;
       // Mostrar mensaje de error específico
-      if (err?.status === 401 || err?.response?.status === 401 || err?.message?.includes('401')) {
+      if (error?.status === 401 || error?.response?.status === 401 || error?.message?.includes('401')) {
         setError('Usuario o contraseña incorrectos. Por favor, verifica tus credenciales.');
-      } else if (err?.message) {
-        setError(err.message);
+      } else if (error?.message) {
+        setError(error.message);
       } else {
         setError('Error al iniciar sesión. Por favor, intenta de nuevo.');
       }
       // No mostrar en consola si es error 401 (credenciales incorrectas)
-      if (err?.status !== 401) {
-        console.error('Login error:', err);
+      if (error?.status !== 401) {
+        console.error('Login error:', error);
       }
     } finally {
       setIsLoading(false);
@@ -64,10 +66,12 @@ export default function LoginPage() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl blur-md opacity-30 animate-pulse"></div>
               <div className="relative bg-gradient-to-br from-white to-gray-50/80 p-5 rounded-3xl shadow-xl border border-gray-200/60">
-                <img
+                <Image
                   src="https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_300,w_300,f_auto,q_auto/6088316/314367_858588.png"
                   alt="Logo Empresa"
-                  className="w-20 h-20 object-contain drop-shadow-lg"
+                  width={80}
+                  height={80}
+                  className="object-contain drop-shadow-lg"
                 />
               </div>
             </div>

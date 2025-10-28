@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { XMarkIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 interface ImageModalProps {
@@ -73,6 +72,8 @@ export default function ImageModal({
             </div>
           )}
 
+          {/* Using regular img tag for external URLs loaded dynamically */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageUrl}
             alt={imageTitle}

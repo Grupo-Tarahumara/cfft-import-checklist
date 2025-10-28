@@ -12,7 +12,7 @@ import { api } from '@/lib/api';
 
 // Ejemplo 1: Obtener datos con GET
 export function ExampleGetComponent() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +46,7 @@ export function ExampleGetComponent() {
 
 // Ejemplo 2: Enviar datos con POST
 export function ExamplePostComponent() {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

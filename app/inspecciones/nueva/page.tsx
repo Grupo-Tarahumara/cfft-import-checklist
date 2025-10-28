@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import DashboardLayout from '@/components/DashboardLayout';
 import { authApi } from '@/lib/api-auth';
 import { CreateInspeccionDto, Inspeccion, Proveedor, Fruta, PuntoInspeccion, Usuario } from '@/types';
@@ -44,8 +45,7 @@ export default function NuevaInspeccionPage() {
   // Estado para unidad de temperatura
   const [unidadTemperatura, setUnidadTemperatura] = useState<'celsius' | 'fahrenheit'>('celsius');
 
-  // Fotos firma
-  const [firmaCanvas, setFirmaCanvas] = useState<HTMLCanvasElement | null>(null);
+  // Firma component is handled separately via SignaturePad
 
   // Formulario
   const [formData, setFormData] = useState<CreateInspeccionDto>({
@@ -96,8 +96,14 @@ export default function NuevaInspeccionPage() {
   useEffect(() => {
     if (user && user.rol === 'user' && usuarios.length > 0) {
       const usuarioActual = usuarios.find(u => u.username === user.username);
-      if (usuarioActual && formData.usuarioId === 0) {
-        setFormData({ ...formData, usuarioId: usuarioActual.id });
+      if (usuarioActual) {
+        setFormData(prev => {
+          // Only update if usuarioId hasn't been set yet (value of 0 means not set)
+          if (prev.usuarioId === 0) {
+            return { ...prev, usuarioId: usuarioActual.id };
+          }
+          return prev;
+        });
       }
     }
   }, [user, usuarios]);
@@ -105,7 +111,7 @@ export default function NuevaInspeccionPage() {
   // Limpiar pallets seleccionados cuando se desactiva un termógrafo
   useEffect(() => {
     setFormData(prevFormData => {
-      let updated = { ...prevFormData };
+      const updated = { ...prevFormData };
       let hasChanges = false;
 
       // Si se desactiva termógrafo Origen, limpiar pallets
@@ -809,9 +815,11 @@ export default function NuevaInspeccionPage() {
                   <div className="relative">
                     {fotosRequeridas[item!.index] ? (
                       <div className="relative group">
-                        <img
+                        <Image
                           src={URL.createObjectURL(fotosRequeridas[item!.index])}
                           alt={`Foto ${item!.label}`}
+                          width={400}
+                          height={160}
                           className="w-full h-40 object-cover rounded-xl border-2 border-blue-300"
                         />
                         <button
@@ -878,9 +886,11 @@ export default function NuevaInspeccionPage() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                 {fotosOpcionales.map((foto, index) => (
                   <div key={index} className="relative group">
-                    <img
+                    <Image
                       src={URL.createObjectURL(foto)}
                       alt={`Foto opcional ${index + 1}`}
+                      width={300}
+                      height={128}
                       className="w-full h-32 object-cover rounded-xl border border-gray-200"
                     />
                     <button

@@ -63,6 +63,7 @@ export function NotificationPermission() {
     localStorage.setItem('notification-banner-dismissed', 'true');
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleResetDismiss = () => {
     localStorage.removeItem('notification-banner-dismissed');
     setShowBanner(true);

@@ -30,7 +30,38 @@ export default function AlertasPage() {
   }, []);
 
   useEffect(() => {
-    filterAlertasData();
+    const filterAlertas = () => {
+      let filtered = [...alertas];
+
+      // Filtrar por número de inspección
+      if (searchInspeccionId) {
+        filtered = filtered.filter((alerta) =>
+          alerta.inspeccionId.toString().includes(searchInspeccionId)
+        );
+      }
+
+      // Filtrar por estado de archivo (por defecto mostrar no archivadas)
+      if (filterArchivado === 'archivadas') {
+        filtered = filtered.filter((alerta) => alerta.archivado);
+      } else if (filterArchivado === '' || filterArchivado === 'no_archivadas') {
+        filtered = filtered.filter((alerta) => !alerta.archivado);
+      }
+      // Si filterArchivado === 'todas', no aplicar filtro de archivo
+
+      if (filterCriticidad) {
+        filtered = filtered.filter((alerta) => alerta.criticidad === filterCriticidad);
+      }
+
+      if (filterLeida === 'leidas') {
+        filtered = filtered.filter((alerta) => alerta.leida);
+      } else if (filterLeida === 'no_leidas') {
+        filtered = filtered.filter((alerta) => !alerta.leida);
+      }
+
+      setFilteredAlertas(filtered);
+    };
+
+    filterAlertas();
   }, [filterCriticidad, filterLeida, filterArchivado, searchInspeccionId, alertas]);
 
   const loadAlertas = async () => {
@@ -56,38 +87,10 @@ export default function AlertasPage() {
     }
   };
 
-  const filterAlertasData = () => {
-    let filtered = [...alertas];
 
-    // Filtrar por número de inspección
-    if (searchInspeccionId) {
-      filtered = filtered.filter((alerta) =>
-        alerta.inspeccionId.toString().includes(searchInspeccionId)
-      );
-    }
-
-    // Filtrar por estado de archivo (por defecto mostrar no archivadas)
-    if (filterArchivado === 'archivadas') {
-      filtered = filtered.filter((alerta) => alerta.archivado);
-    } else if (filterArchivado === '' || filterArchivado === 'no_archivadas') {
-      filtered = filtered.filter((alerta) => !alerta.archivado);
-    }
-    // Si filterArchivado === 'todas', no aplicar filtro de archivo
-
-    if (filterCriticidad) {
-      filtered = filtered.filter((alerta) => alerta.criticidad === filterCriticidad);
-    }
-
-    if (filterLeida === 'leidas') {
-      filtered = filtered.filter((alerta) => alerta.leida);
-    } else if (filterLeida === 'no_leidas') {
-      filtered = filtered.filter((alerta) => !alerta.leida);
-    }
-
-    setFilteredAlertas(filtered);
-  };
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleMarcarLeida = async (id: number) => {
+    // This function is not currently used but kept for future functionality
     try {
       await authApi.patch(`/alertas/${id}/marcar-leida`, {});
       // Actualizar el estado local sin recargar toda la página

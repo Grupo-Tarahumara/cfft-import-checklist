@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { authApi } from '@/lib/api-auth';
 import { useAuth } from '@/contexts/AuthContext';
-import { Inspeccion, Proveedor, Fruta, PuntoInspeccion, Usuario } from '@/types';
+import { Inspeccion, Proveedor } from '@/types';
 import Link from 'next/link';
 import {
   MagnifyingGlassIcon,
@@ -46,7 +46,29 @@ export default function InspeccionesPage() {
   }, []);
 
   useEffect(() => {
-    filterInspecciones();
+    let filtered = [...inspecciones];
+
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter((insp) =>
+        insp.numeroOrdenContenedor.toLowerCase().includes(searchLower) ||
+        insp.id.toString().includes(searchLower)
+      );
+    }
+
+    if (filterProveedor) {
+      filtered = filtered.filter((insp) => insp.proveedorId === parseInt(filterProveedor));
+    }
+
+    if (filterAlertas) {
+      if (filterAlertas === 'con') {
+        filtered = filtered.filter((insp) => insp.tieneAlertas);
+      } else if (filterAlertas === 'sin') {
+        filtered = filtered.filter((insp) => !insp.tieneAlertas);
+      }
+    }
+
+    setFilteredInspecciones(filtered);
     setCurrentPage(1); // Reset to first page when filters change
   }, [searchTerm, filterProveedor, filterAlertas, inspecciones]);
 
@@ -77,31 +99,6 @@ export default function InspeccionesPage() {
     }
   };
 
-  const filterInspecciones = () => {
-    let filtered = [...inspecciones];
-
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter((insp) =>
-        insp.numeroOrdenContenedor.toLowerCase().includes(searchLower) ||
-        insp.id.toString().includes(searchLower)
-      );
-    }
-
-    if (filterProveedor) {
-      filtered = filtered.filter((insp) => insp.proveedorId === parseInt(filterProveedor));
-    }
-
-    if (filterAlertas) {
-      if (filterAlertas === 'con') {
-        filtered = filtered.filter((insp) => insp.tieneAlertas);
-      } else if (filterAlertas === 'sin') {
-        filtered = filtered.filter((insp) => !insp.tieneAlertas);
-      }
-    }
-
-    setFilteredInspecciones(filtered);
-  };
 
   const handleDelete = async (id: number) => {
     if (!confirm('¿Estás seguro de que deseas eliminar esta inspección?')) return;
