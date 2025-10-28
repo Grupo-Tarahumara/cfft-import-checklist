@@ -22,12 +22,29 @@ export default function TruckPalletSelector({
   onSelectTermografoNacional,
 }: TruckPalletSelectorProps) {
   const [selectionMode, setSelectionMode] = useState<'origen' | 'nacional' | null>(null);
+  const [isVertical, setIsVertical] = useState(false);
+
+  // Detectar tamaño de pantalla
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsVertical(window.innerWidth < 768); // md breakpoint
+    };
+
+    handleResize(); // Llamar al montaje
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Crear layout del camión con DOS FILAS - Intercalado
   const palletLayout = useMemo(() => {
     const pallets: number[] = Array.from({ length: totalPallets }, (_, i) => i + 1);
 
-    // Intercalar pallets entre dos filas: 1 en fila1, 2 en fila2, 3 en fila1, 4 en fila2, etc.
+    if (isVertical) {
+      // Para vista vertical: una sola columna
+      return [pallets, []];
+    }
+
+    // Para vista horizontal: intercalar pallets entre dos filas
     const fila1: number[] = [];
     const fila2: number[] = [];
 
@@ -46,7 +63,7 @@ export default function TruckPalletSelector({
 
     // Invertir orden para que el palet 1 esté al lado del conductor (derecha)
     return [fila1.reverse(), fila2.reverse()];
-  }, [totalPallets]);
+  }, [totalPallets, isVertical]);
 
   const handlePaletClick = (paletNumber: number) => {
     if (selectionMode === 'origen' && termografoOrigenEnabled) {
@@ -151,13 +168,75 @@ export default function TruckPalletSelector({
         </button>
       </div>
 
-      {/* Selector de Pallets - Vista del Camión desde arriba - HORIZONTAL */}
+      {/* Selector de Pallets - Vista del Camión desde arriba */}
       <div className="relative bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 p-4 rounded-xl border-4 border-gray-400 shadow-xl" style={{ backgroundColor: '#f0f0f0' }}>
 
-        {/* Contenedor con scroll horizontal si hay más de 20 palés */}
-        <div className={totalPallets > 20 ? 'overflow-x-auto' : ''} style={{ minHeight: '200px' }}>
-          {/* VISTA DEL CAMIÓN DESDE ARRIBA - HORIZONTAL */}
-          <div className="relative flex gap-0 w-fit" style={{ margin: '0 auto' }}>
+        {/* Contenedor con scroll */}
+        <div className={isVertical ? '' : (totalPallets > 20 ? 'overflow-x-auto' : '')} style={{ minHeight: isVertical ? 'auto' : '200px' }}>
+          {/* VISTA DEL CAMIÓN */}
+          {isVertical ? (
+            // VISTA VERTICAL - Para teléfonos
+            <div className="relative flex flex-col gap-0 w-fit mx-auto">
+              {/* CAJA DEL CAMIÓN - VERTICAL */}
+              <div className="relative bg-gradient-to-b from-gray-200 to-gray-150 border-4 border-gray-600 rounded-t-lg p-3 shadow-md">
+
+                {/* Marcas de puertas traseras - HORIZONTAL */}
+                <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-500 w-full text-center">
+                  PUERTAS TRASERAS
+                </div>
+
+                {/* Grid de Pallets - Una sola columna vertical */}
+                <div className="flex flex-col gap-1">
+                  {palletLayout[0].map((paletNumber, index) => {
+                    if (paletNumber === 0) {
+                      return (
+                        <div key={`empty-${index}`} className="w-14 h-14 flex-shrink-0" />
+                      );
+                    }
+
+                    const styles = getPaletStyles(paletNumber);
+
+                    return (
+                      <div key={paletNumber} className="relative">
+                        <button
+                          type="button"
+                          onClick={() => handlePaletClick(paletNumber)}
+                          disabled={!selectionMode}
+                          className={`
+                            w-14 h-14 flex items-center justify-center rounded-md border-3 transition-all
+                            font-bold text-xs shadow-md flex-shrink-0
+                            ${!selectionMode ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-105 active:scale-95'}
+                            ${styles.textColor}
+                          `}
+                          style={{
+                            background: styles.background,
+                            borderColor: styles.borderColor,
+                            boxShadow: (styles as any).boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
+                          }}
+                          title={`Palet ${paletNumber}`}
+                        >
+                          {paletNumber}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Divisor central del camión */}
+              <div className="w-1 h-2 bg-gradient-to-b from-gray-400 via-gray-500 to-gray-400 rounded mx-auto"></div>
+
+              {/* CABINA DEL CAMIÓN - VERTICAL */}
+              <div className="flex flex-col items-center justify-center pt-3 border-t-4 border-gray-400">
+                <div className="text-xs font-bold text-gray-700 mb-1 tracking-widest">CABINA</div>
+                <div className="relative w-14 h-16 bg-gradient-to-b from-gray-600 to-gray-700 border-3 border-gray-800 shadow-lg rounded-b-2xl flex items-center justify-center">
+                  <div className="text-white text-xs font-bold opacity-70 text-center px-1">CONDUCTOR</div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // VISTA HORIZONTAL - Para escritorio
+            <div className="relative flex gap-0 w-fit" style={{ margin: '0 auto' }}>
 
           {/* CAJA DEL CAMIÓN - CONTENEDOR - LADO IZQUIERDO */}
           <div className="relative bg-gradient-to-r from-gray-200 to-gray-150 border-4 border-gray-600 rounded-l-lg p-3 shadow-md">
@@ -258,23 +337,24 @@ export default function TruckPalletSelector({
             </div>
           </div>
 
-          {/* CABINA DEL CAMIÓN - LADO DERECHO */}
-          <div className="flex flex-col items-center justify-center pl-3 border-l-4 border-gray-400">
-            <div className="text-xs font-bold text-gray-700 mb-1 tracking-widest whitespace-nowrap">CABINA</div>
-            {/* Cabina - forma trapecio realista (mirando a la derecha) */}
-            <div className="relative w-16 h-24 bg-gradient-to-l from-gray-600 to-gray-700 border-3 border-gray-800 shadow-lg rounded-r-2xl flex items-center justify-center"
-              style={{
-                clipPath: 'polygon(0% 0%, 100% 15%, 100% 85%, 0% 100%)'
-              }}>
-              <div className="text-white text-xs font-bold opacity-70 text-center px-1" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>CONDUCTOR</div>
+              {/* CABINA DEL CAMIÓN - LADO DERECHO */}
+              <div className="flex flex-col items-center justify-center pl-3 border-l-4 border-gray-400">
+                <div className="text-xs font-bold text-gray-700 mb-1 tracking-widest whitespace-nowrap">CABINA</div>
+                {/* Cabina - forma trapecio realista (mirando a la derecha) */}
+                <div className="relative w-16 h-24 bg-gradient-to-l from-gray-600 to-gray-700 border-3 border-gray-800 shadow-lg rounded-r-2xl flex items-center justify-center"
+                  style={{
+                    clipPath: 'polygon(0% 0%, 100% 15%, 100% 85%, 0% 100%)'
+                  }}>
+                  <div className="text-white text-xs font-bold opacity-70 text-center px-1" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>CONDUCTOR</div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          )}
         </div>
 
         {/* Información adicional */}
         <div className="mt-6 text-center text-xs text-gray-600 font-semibold">
-          VISTA SUPERIOR DEL CAMIÓN (Horizontal)
+          VISTA SUPERIOR DEL CAMIÓN ({isVertical ? 'Vertical' : 'Horizontal'})
         </div>
       </div>
 
