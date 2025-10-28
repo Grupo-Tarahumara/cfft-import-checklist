@@ -1,7 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Read(//c/Users/becario1.sis/Proyecto/**)",
+      "Bash(dir \"C:\\Users\\becario1.sis\\Proyecto\")",
+      "Bash(findstr:*)",
+      "Bash(find:*)",
+      "Bash(git rebase:*)",
+      "Bash(git checkout:*)",
+      "Bash(dir /s /b \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist\")",
+      "Bash(tree:*)",
+      "Bash(dir \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist-backend\")",
+      "Bash(dir /s \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist-backend\\src\")",
+      "Bash(dir:*)",
+      "Bash(cat:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []

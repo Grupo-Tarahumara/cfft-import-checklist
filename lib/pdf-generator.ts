@@ -136,8 +136,8 @@ export async function generateInspectionPDF(
       addField('Temperatura Carga', `${inspeccion.temperaturaCarga}°C`);
     }
 
-    addField('Termógrafo Origen', inspeccion.termografoOrigen ? `SI (Palet ${inspeccion.paletTermografoOrigen || '-'})` : 'NO');
-    addField('Termógrafo Nacional', inspeccion.termografoNacional ? `SI (Palet ${inspeccion.paletTermografoNacional || '-'})` : 'NO');
+    addField('Termógrafo Origen', inspeccion.termografoOrigen ? `SI (Palets ${Array.isArray(inspeccion.paletTermografoOrigen) ? inspeccion.paletTermografoOrigen.join(', ') : inspeccion.paletTermografoOrigen || '-'})` : 'NO');
+    addField('Termógrafo Nacional', inspeccion.termografoNacional ? `SI (Palets ${Array.isArray(inspeccion.paletTermografoNacional) ? inspeccion.paletTermografoNacional.join(', ') : inspeccion.paletTermografoNacional || '-'})` : 'NO');
 
     // ========== OBSERVACIONES ==========
     if (inspeccion.observaciones) {

@@ -283,9 +283,22 @@ export default function DetalleInspeccionPage() {
                 )}
               </div>
               {inspeccion.termografoOrigen && inspeccion.paletTermografoOrigen && (
-                <p className="text-sm bg-blue-50 text-blue-900 px-2 py-1 rounded inline-block font-semibold">
-                  Palet #{inspeccion.paletTermografoOrigen}
-                </p>
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(inspeccion.paletTermografoOrigen) ? (
+                    inspeccion.paletTermografoOrigen.map((palet) => (
+                      <span
+                        key={palet}
+                        className="text-sm bg-blue-50 text-blue-900 px-2 py-1 rounded inline-block font-semibold"
+                      >
+                        Palet #{palet}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm bg-blue-50 text-blue-900 px-2 py-1 rounded inline-block font-semibold">
+                      Palet #{inspeccion.paletTermografoOrigen}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 
@@ -299,9 +312,22 @@ export default function DetalleInspeccionPage() {
                 )}
               </div>
               {inspeccion.termografoNacional && inspeccion.paletTermografoNacional && (
-                <p className="text-sm bg-green-50 text-green-900 px-2 py-1 rounded inline-block font-semibold">
-                  Palet #{inspeccion.paletTermografoNacional}
-                </p>
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(inspeccion.paletTermografoNacional) ? (
+                    inspeccion.paletTermografoNacional.map((palet) => (
+                      <span
+                        key={palet}
+                        className="text-sm bg-green-50 text-green-900 px-2 py-1 rounded inline-block font-semibold"
+                      >
+                        Palet #{palet}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm bg-green-50 text-green-900 px-2 py-1 rounded inline-block font-semibold">
+                      Palet #{inspeccion.paletTermografoNacional}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 

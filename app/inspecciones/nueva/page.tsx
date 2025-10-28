@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import SignaturePad from '@/components/SignaturePad';
+import TruckPalletSelector from '@/components/TruckPalletSelector';
 import {
   CalendarIcon,
   TruckIcon,
@@ -62,8 +63,8 @@ export default function NuevaInspeccionPage() {
     numeroCajas: 0,
     termografoOrigen: false,
     termografoNacional: false,
-    paletTermografoOrigen: undefined,
-    paletTermografoNacional: undefined,
+    paletTermografoOrigen: [],
+    paletTermografoNacional: [],
     temperaturaFruta: 0,
     temperaturaCarga: 0,
     lineaTransportista: '',
@@ -100,6 +101,28 @@ export default function NuevaInspeccionPage() {
       }
     }
   }, [user, usuarios]);
+
+  // Limpiar pallets seleccionados cuando se desactiva un termógrafo
+  useEffect(() => {
+    setFormData(prevFormData => {
+      let updated = { ...prevFormData };
+      let hasChanges = false;
+
+      // Si se desactiva termógrafo Origen, limpiar pallets
+      if (!prevFormData.termografoOrigen && prevFormData.paletTermografoOrigen && prevFormData.paletTermografoOrigen.length > 0) {
+        updated.paletTermografoOrigen = [];
+        hasChanges = true;
+      }
+
+      // Si se desactiva termógrafo Nacional, limpiar pallets
+      if (!prevFormData.termografoNacional && prevFormData.paletTermografoNacional && prevFormData.paletTermografoNacional.length > 0) {
+        updated.paletTermografoNacional = [];
+        hasChanges = true;
+      }
+
+      return hasChanges ? updated : prevFormData;
+    });
+  }, [formData.termografoOrigen, formData.termografoNacional]);
 
   const loadCatalogs = async () => {
     try {
@@ -208,17 +231,17 @@ export default function NuevaInspeccionPage() {
     }
 
     // Validar palet del termógrafo de origen
-    if (formData.termografoOrigen && (!formData.paletTermografoOrigen || formData.paletTermografoOrigen === 0)) {
+    if (formData.termografoOrigen && (!formData.paletTermografoOrigen || formData.paletTermografoOrigen.length === 0)) {
       toast.error('Validación requerida', {
-        description: 'Debe especificar el número de palet donde está el Termógrafo de Origen',
+        description: 'Debe especificar al menos un palet donde está el Termógrafo de Origen',
       });
       return;
     }
 
     // Validar palet del termógrafo nacional
-    if (formData.termografoNacional && (!formData.paletTermografoNacional || formData.paletTermografoNacional === 0)) {
+    if (formData.termografoNacional && (!formData.paletTermografoNacional || formData.paletTermografoNacional.length === 0)) {
       toast.error('Validación requerida', {
-        description: 'Debe especificar el número de palet donde está el Termógrafo Nacional',
+        description: 'Debe especificar al menos un palet donde está el Termógrafo Nacional',
       });
       return;
     }
@@ -278,8 +301,13 @@ export default function NuevaInspeccionPage() {
         // No enviar palet fields si el termógrafo no está seleccionado
         if (key === 'paletTermografoOrigen' && !formData.termografoOrigen) return;
         if (key === 'paletTermografoNacional' && !formData.termografoNacional) return;
-        // No enviar undefined o null values para los palets
-        if ((key === 'paletTermografoOrigen' || key === 'paletTermografoNacional') && (value === undefined || value === null)) return;
+        // Para arrays de pallets, enviar como JSON
+        if (key === 'paletTermografoOrigen' || key === 'paletTermografoNacional') {
+          if (Array.isArray(value) && value.length > 0) {
+            formDataToSend.append(key, JSON.stringify(value));
+          }
+          return;
+        }
         formDataToSend.append(key, String(value));
       });
 
@@ -659,56 +687,31 @@ export default function NuevaInspeccionPage() {
 
             {/* Selección de Pallets para Termógrafos */}
             {(formData.termografoOrigen || formData.termografoNacional) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-blue-50 rounded-xl border-2 border-blue-200 mb-6">
-                {formData.termografoOrigen && (
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
-                      ¿En qué palet está el Termógrafo de Origen?
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max={Math.min(formData.numeroPallets || 999, 999)}
-                      value={formData.paletTermografoOrigen || ''}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? undefined : parseInt(e.target.value);
-                        if (value === undefined || value <= 999) {
-                          setFormData({ ...formData, paletTermografoOrigen: value });
-                        }
-                      }}
-                      placeholder={`1 - ${formData.numeroPallets || '?'}`}
-                      className="w-full px-4 py-3 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
-                    />
-                    <p className="text-xs text-gray-600 mt-2">
-                      Ingresa el número de palet (1 a {formData.numeroPallets || 'N/A'})
-                    </p>
-                  </div>
-                )}
-
-                {formData.termografoNacional && (
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
-                      ¿En qué palet está el Termógrafo Nacional?
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max={Math.min(formData.numeroPallets || 999, 999)}
-                      value={formData.paletTermografoNacional || ''}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? undefined : parseInt(e.target.value);
-                        if (value === undefined || value <= 999) {
-                          setFormData({ ...formData, paletTermografoNacional: value });
-                        }
-                      }}
-                      placeholder={`1 - ${formData.numeroPallets || '?'}`}
-                      className="w-full px-4 py-3 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
-                    />
-                    <p className="text-xs text-gray-600 mt-2">
-                      Ingresa el número de palet (1 a {formData.numeroPallets || 'N/A'})
-                    </p>
-                  </div>
-                )}
+              <div className="p-4 bg-blue-50 rounded-xl border-2 border-blue-200 mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-4">
+                  Selecciona la ubicación de los termógrafos en el camión
+                </label>
+                <TruckPalletSelector
+                  totalPallets={formData.numeroPallets || 1}
+                  termografoOrigenSelected={formData.paletTermografoOrigen}
+                  termografoNacionalSelected={formData.paletTermografoNacional}
+                  termografoOrigenEnabled={formData.termografoOrigen}
+                  termografoNacionalEnabled={formData.termografoNacional}
+                  onSelectTermografoOrigen={(paletNumber) => {
+                    const current = formData.paletTermografoOrigen || [];
+                    const updated = current.includes(paletNumber)
+                      ? current.filter(p => p !== paletNumber)
+                      : [...current, paletNumber];
+                    setFormData({ ...formData, paletTermografoOrigen: updated });
+                  }}
+                  onSelectTermografoNacional={(paletNumber) => {
+                    const current = formData.paletTermografoNacional || [];
+                    const updated = current.includes(paletNumber)
+                      ? current.filter(p => p !== paletNumber)
+                      : [...current, paletNumber];
+                    setFormData({ ...formData, paletTermografoNacional: updated });
+                  }}
+                />
               </div>
             )}
 

@@ -77,8 +77,8 @@ export interface Inspeccion {
   numeroCajas: number;
   termografoOrigen: boolean;
   termografoNacional: boolean;
-  paletTermografoOrigen?: number; // Número de palet donde está el termógrafo de origen
-  paletTermografoNacional?: number; // Número de palet donde está el termógrafo nacional
+  paletTermografoOrigen?: number[]; // Números de pallets donde están los termógrafos de origen
+  paletTermografoNacional?: number[]; // Números de pallets donde están los termógrafos nacionales
   temperaturaFruta: number;
   temperaturaCarga?: number; // Temperatura de la carga (diferente a la de la fruta)
   lineaTransportista?: string; // Nombre de la línea transportista
@@ -149,8 +149,8 @@ export interface CreateInspeccionDto {
   numeroCajas: number;
   termografoOrigen?: boolean;
   termografoNacional?: boolean;
-  paletTermografoOrigen?: number; // Número de palet donde está el termógrafo de origen
-  paletTermografoNacional?: number; // Número de palet donde está el termógrafo nacional
+  paletTermografoOrigen?: number[]; // Números de pallets donde están los termógrafos de origen
+  paletTermografoNacional?: number[]; // Números de pallets donde están los termógrafos nacionales
   temperaturaFruta: number;
   temperaturaCarga?: number; // Temperatura de la carga
   lineaTransportista?: string; // Línea transportista

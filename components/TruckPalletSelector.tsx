@@ -4,54 +4,68 @@ import React, { useMemo, useState } from 'react';
 
 interface TruckPalletSelectorProps {
   totalPallets: number;
-  termografoOrigenSelected?: number;
-  termografoNacionalSelected?: number;
+  termografoOrigenSelected?: number[];
+  termografoNacionalSelected?: number[];
+  termografoOrigenEnabled?: boolean;
+  termografoNacionalEnabled?: boolean;
   onSelectTermografoOrigen: (paletNumber: number) => void;
   onSelectTermografoNacional: (paletNumber: number) => void;
 }
 
 export default function TruckPalletSelector({
   totalPallets,
-  termografoOrigenSelected,
-  termografoNacionalSelected,
+  termografoOrigenSelected = [],
+  termografoNacionalSelected = [],
+  termografoOrigenEnabled = false,
+  termografoNacionalEnabled = false,
   onSelectTermografoOrigen,
   onSelectTermografoNacional,
 }: TruckPalletSelectorProps) {
   const [selectionMode, setSelectionMode] = useState<'origen' | 'nacional' | null>(null);
 
-  // Crear layout del camión con DOS FILAS
-  const maxPalletsPerRow = Math.ceil(totalPallets / 2);
-
+  // Crear layout del camión con DOS FILAS - Intercalado
   const palletLayout = useMemo(() => {
     const pallets: number[] = Array.from({ length: totalPallets }, (_, i) => i + 1);
 
-    // Dividir en dos filas
-    const fila1 = pallets.slice(0, maxPalletsPerRow).reverse(); // Fila superior, orden inverso
-    const fila2 = pallets.slice(maxPalletsPerRow).reverse(); // Fila inferior, orden inverso
+    // Intercalar pallets entre dos filas: 1 en fila1, 2 en fila2, 3 en fila1, 4 en fila2, etc.
+    const fila1: number[] = [];
+    const fila2: number[] = [];
 
-    return [fila1, fila2];
-  }, [totalPallets, maxPalletsPerRow]);
+    pallets.forEach((palet, index) => {
+      if (index % 2 === 0) {
+        fila1.push(palet);
+      } else {
+        fila2.push(palet);
+      }
+    });
+
+    // Si hay número impar de pallets, agregar espacio vacío al final de fila2
+    if (totalPallets % 2 === 1) {
+      fila2.push(0); // 0 representa un espacio vacío
+    }
+
+    // Invertir orden para que el palet 1 esté al lado del conductor (derecha)
+    return [fila1.reverse(), fila2.reverse()];
+  }, [totalPallets]);
 
   const handlePaletClick = (paletNumber: number) => {
-    if (selectionMode === 'origen') {
+    if (selectionMode === 'origen' && termografoOrigenEnabled) {
       onSelectTermografoOrigen(paletNumber);
-      setSelectionMode(null);
-    } else if (selectionMode === 'nacional') {
+    } else if (selectionMode === 'nacional' && termografoNacionalEnabled) {
       onSelectTermografoNacional(paletNumber);
-      setSelectionMode(null);
     }
   };
 
   const getPaletStyles = (paletNumber: number) => {
-    const isOrigenSelected = termografoOrigenSelected === paletNumber;
-    const isNacionalSelected = termografoNacionalSelected === paletNumber;
+    const isOrigenSelected = termografoOrigenSelected.includes(paletNumber);
+    const isNacionalSelected = termografoNacionalSelected.includes(paletNumber);
 
     if (isOrigenSelected && isNacionalSelected) {
-      // Ambos en el mismo palet - mostrar dividido
+      // Ambos en el mismo palet - degradado diagonal azul a rojo
       return {
-        background: 'linear-gradient(135deg, rgb(59, 130, 246) 50%, rgb(217, 119, 6) 50%)',
-        borderColor: 'rgb(37, 99, 235)',
-        textColor: 'text-white',
+        background: 'linear-gradient(135deg, #3b82f6 0%, #3b82f6 49%, #ef4444 51%, #ef4444 100%)',
+        borderColor: 'rgb(220, 38, 38)',
+        textColor: 'text-white font-bold',
       };
     } else if (isOrigenSelected) {
       return {
@@ -61,8 +75,8 @@ export default function TruckPalletSelector({
       };
     } else if (isNacionalSelected) {
       return {
-        background: 'rgb(217, 119, 6)',
-        borderColor: 'rgb(180, 83, 9)',
+        background: 'rgb(239, 68, 68)',
+        borderColor: 'rgb(220, 38, 38)',
         textColor: 'text-white font-bold',
       };
     } else if (selectionMode) {
@@ -91,18 +105,22 @@ export default function TruckPalletSelector({
       {/* Botones de selección de modo */}
       <div className="grid grid-cols-2 gap-3 mb-8">
         <button
-          onClick={() => setSelectionMode(selectionMode === 'origen' ? null : 'origen')}
+          type="button"
+          onClick={() => termografoOrigenEnabled && setSelectionMode(selectionMode === 'origen' ? null : 'origen')}
+          disabled={!termografoOrigenEnabled}
           className={`py-3 px-4 rounded-lg font-semibold transition-all ${
-            selectionMode === 'origen'
+            !termografoOrigenEnabled
+              ? 'bg-gray-200 text-gray-400 border-2 border-gray-300 cursor-not-allowed opacity-60'
+              : selectionMode === 'origen'
               ? 'bg-blue-500 text-white ring-2 ring-blue-300'
-              : termografoOrigenSelected
-              ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
-              : 'bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200'
+              : termografoOrigenSelected.length > 0
+              ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 hover:bg-blue-200 cursor-pointer'
+              : 'bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200 cursor-pointer'
           }`}
         >
-          {termografoOrigenSelected ? (
+          {termografoOrigenSelected.length > 0 ? (
             <>
-              ✓ Origen: Palet {termografoOrigenSelected}
+              ✓ Origen: Palets {termografoOrigenSelected.join(', ')}
             </>
           ) : (
             'Seleccionar Origen'
@@ -110,18 +128,22 @@ export default function TruckPalletSelector({
         </button>
 
         <button
-          onClick={() => setSelectionMode(selectionMode === 'nacional' ? null : 'nacional')}
+          type="button"
+          onClick={() => termografoNacionalEnabled && setSelectionMode(selectionMode === 'nacional' ? null : 'nacional')}
+          disabled={!termografoNacionalEnabled}
           className={`py-3 px-4 rounded-lg font-semibold transition-all ${
-            selectionMode === 'nacional'
-              ? 'bg-amber-500 text-white ring-2 ring-amber-300'
-              : termografoNacionalSelected
-              ? 'bg-amber-100 text-amber-700 border-2 border-amber-300'
-              : 'bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200'
+            !termografoNacionalEnabled
+              ? 'bg-gray-200 text-gray-400 border-2 border-gray-300 cursor-not-allowed opacity-60'
+              : selectionMode === 'nacional'
+              ? 'bg-red-500 text-white ring-2 ring-red-300'
+              : termografoNacionalSelected.length > 0
+              ? 'bg-red-100 text-red-700 border-2 border-red-300 hover:bg-red-200 cursor-pointer'
+              : 'bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200 cursor-pointer'
           }`}
         >
-          {termografoNacionalSelected ? (
+          {termografoNacionalSelected.length > 0 ? (
             <>
-              ✓ Nacional: Palet {termografoNacionalSelected}
+              ✓ Nacional: Palets {termografoNacionalSelected.join(', ')}
             </>
           ) : (
             'Seleccionar Nacional'
@@ -129,89 +151,134 @@ export default function TruckPalletSelector({
         </button>
       </div>
 
-      {/* Selector de Pallets */}
-      <div className="relative bg-gray-50 p-6 rounded-lg border-2 border-gray-300">
-        {/* Etiqueta PUERTAS */}
-        <div className="absolute -left-6 top-1/2 transform -translate-y-1/2 -rotate-90 origin-center text-xs font-bold text-gray-700 whitespace-nowrap px-2">
-          PUERTAS
-        </div>
+      {/* Selector de Pallets - Vista del Camión desde arriba - HORIZONTAL */}
+      <div className="relative bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 p-4 rounded-xl border-4 border-gray-400 shadow-xl" style={{ backgroundColor: '#f0f0f0' }}>
 
-        {/* Fila Superior */}
-        <div className="mb-4">
-          <div className="flex gap-2 justify-start flex-wrap">
-            {palletLayout[0].map((paletNumber) => {
-              const styles = getPaletStyles(paletNumber);
-              return (
-                <button
-                  key={paletNumber}
-                  onClick={() => handlePaletClick(paletNumber)}
-                  disabled={!selectionMode}
-                  className={`
-                    w-16 h-16 flex items-center justify-center rounded-md border-3 transition-all
-                    font-bold text-base shadow-md
-                    ${!selectionMode ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-110 active:scale-95'}
-                    ${styles.textColor}
-                  `}
-                  style={{
-                    backgroundColor: styles.background,
-                    borderColor: styles.borderColor,
-                  }}
-                  title={`Palet ${paletNumber}`}
-                >
-                  {paletNumber}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {/* Contenedor con scroll horizontal si hay más de 20 palés */}
+        <div className={totalPallets > 20 ? 'overflow-x-auto' : ''} style={{ minHeight: '200px' }}>
+          {/* VISTA DEL CAMIÓN DESDE ARRIBA - HORIZONTAL */}
+          <div className="relative flex gap-0 w-fit" style={{ margin: '0 auto' }}>
 
-        {/* Separador visual entre filas */}
-        <div className="h-1 bg-gray-300 rounded my-3"></div>
+          {/* CAJA DEL CAMIÓN - CONTENEDOR - LADO IZQUIERDO */}
+          <div className="relative bg-gradient-to-r from-gray-200 to-gray-150 border-4 border-gray-600 rounded-l-lg p-3 shadow-md">
 
-        {/* Fila Inferior */}
-        {palletLayout[1].length > 0 && (
-          <div>
-            <div className="flex gap-2 justify-start flex-wrap">
-              {palletLayout[1].map((paletNumber) => {
-                const styles = getPaletStyles(paletNumber);
-                return (
-                  <button
-                    key={paletNumber}
-                    onClick={() => handlePaletClick(paletNumber)}
-                    disabled={!selectionMode}
-                    className={`
-                      w-16 h-16 flex items-center justify-center rounded-md border-3 transition-all
-                      font-bold text-base shadow-md
-                      ${!selectionMode ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-110 active:scale-95'}
-                      ${styles.textColor}
-                    `}
-                    style={{
-                      backgroundColor: styles.background,
-                      borderColor: styles.borderColor,
-                    }}
-                    title={`Palet ${paletNumber}`}
-                  >
-                    {paletNumber}
-                  </button>
-                );
-              })}
+            {/* Marcas de puertas traseras - VERTICAL */}
+            <div className="absolute left-0 top-1/2 transform -translate-x-16 -translate-y-1/2 text-xs font-bold text-gray-500" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+              PUERTAS TRASERAS
+            </div>
+
+            {/* Grid de Pallets - Distribuidos horizontalmente */}
+            <div className="flex flex-col gap-2">
+              {/* Fila Superior de Pallets */}
+              <div className="flex gap-1 justify-start flex-nowrap">
+                {palletLayout[0].map((paletNumber, index) => {
+                  // Si paletNumber es 0, es un espacio vacío
+                  if (paletNumber === 0) {
+                    return (
+                      <div
+                        key={`empty-${index}`}
+                        className="w-14 h-14 flex-shrink-0"
+                      />
+                    );
+                  }
+
+                  const styles = getPaletStyles(paletNumber);
+
+                  return (
+                    <div key={paletNumber} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => handlePaletClick(paletNumber)}
+                        disabled={!selectionMode}
+                        className={`
+                          w-14 h-14 flex items-center justify-center rounded-md border-3 transition-all
+                          font-bold text-xs shadow-md flex-shrink-0
+                          ${!selectionMode ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-105 active:scale-95'}
+                          ${styles.textColor}
+                        `}
+                        style={{
+                          background: styles.background,
+                          borderColor: styles.borderColor,
+                          boxShadow: (styles as any).boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
+                        }}
+                        title={`Palet ${paletNumber}`}
+                      >
+                        {paletNumber}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Divisor central del camión */}
+              <div className="w-full h-1 bg-gradient-to-r from-gray-400 via-gray-500 to-gray-400 rounded"></div>
+
+              {/* Fila Inferior de Pallets */}
+              {palletLayout[1].length > 0 && (
+                <div className="flex gap-1 justify-start flex-nowrap">
+                  {palletLayout[1].map((paletNumber, index) => {
+                    // Si paletNumber es 0, es un espacio vacío
+                    if (paletNumber === 0) {
+                      return (
+                        <div
+                          key={`empty-${index}`}
+                          className="w-14 h-14 flex-shrink-0"
+                        />
+                      );
+                    }
+
+                    const styles = getPaletStyles(paletNumber);
+
+                    return (
+                      <div key={paletNumber} className="relative">
+                        <button
+                          type="button"
+                          onClick={() => handlePaletClick(paletNumber)}
+                          disabled={!selectionMode}
+                          className={`
+                            w-14 h-14 flex items-center justify-center rounded-md border-3 transition-all
+                            font-bold text-xs shadow-md flex-shrink-0
+                            ${!selectionMode ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-105 active:scale-95'}
+                            ${styles.textColor}
+                          `}
+                          style={{
+                            background: styles.background,
+                            borderColor: styles.borderColor,
+                            boxShadow: (styles as any).boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
+                          }}
+                          title={`Palet ${paletNumber}`}
+                        >
+                          {paletNumber}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
-        )}
+
+          {/* CABINA DEL CAMIÓN - LADO DERECHO */}
+          <div className="flex flex-col items-center justify-center pl-3 border-l-4 border-gray-400">
+            <div className="text-xs font-bold text-gray-700 mb-1 tracking-widest whitespace-nowrap">CABINA</div>
+            {/* Cabina - forma trapecio realista (mirando a la derecha) */}
+            <div className="relative w-16 h-24 bg-gradient-to-l from-gray-600 to-gray-700 border-3 border-gray-800 shadow-lg rounded-r-2xl flex items-center justify-center"
+              style={{
+                clipPath: 'polygon(0% 0%, 100% 15%, 100% 85%, 0% 100%)'
+              }}>
+              <div className="text-white text-xs font-bold opacity-70 text-center px-1" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>CONDUCTOR</div>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        {/* Información adicional */}
+        <div className="mt-6 text-center text-xs text-gray-600 font-semibold">
+          VISTA SUPERIOR DEL CAMIÓN (Horizontal)
+        </div>
       </div>
 
-      {/* Mensaje de estado */}
-      <div className="mt-6 p-3 bg-white rounded-lg border border-gray-300 text-center">
-        {selectionMode ? (
-          <span className="text-sm font-semibold text-gray-700">
-            {selectionMode === 'origen' ? '🔵 Haz clic en el palet para Termógrafo de Origen' : '🟠 Haz clic en el palet para Termógrafo Nacional'}
-          </span>
-        ) : (
-          <span className="text-sm text-gray-600">
-            Selecciona el tipo de termógrafo para ubicarlo
-          </span>
-        )}
-      </div>
+      
 
       {/* Leyenda de colores */}
       <div className="mt-4 flex gap-6 justify-center text-xs flex-wrap">
@@ -220,11 +287,11 @@ export default function TruckPalletSelector({
           <span className="text-gray-700">Termógrafo Origen</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-amber-500 rounded"></div>
+          <div className="w-4 h-4 bg-red-500 rounded"></div>
           <span className="text-gray-700">Termógrafo Nacional</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-gradient-to-br from-blue-500 to-amber-500 rounded"></div>
+          <div className="w-4 h-4 rounded" style={{ background: 'linear-gradient(135deg, #3b82f6 49%, #ef4444 51%)' }}></div>
           <span className="text-gray-700">Ambos</span>
         </div>
       </div>
