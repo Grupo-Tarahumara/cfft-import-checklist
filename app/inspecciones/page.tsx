@@ -444,7 +444,7 @@ export default function InspeccionesPage() {
           {filteredInspecciones.length > 0 && (
             <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                Mostrando {startIndex + 1} a {Math.min(endIndex, filteredInspecciones.length)} de {filteredInspecciones.length} inspecciones
+                {startIndex + 1} a {Math.min(endIndex, filteredInspecciones.length)} de {filteredInspecciones.length}
               </div>
               <div className="flex gap-2">
                 <button

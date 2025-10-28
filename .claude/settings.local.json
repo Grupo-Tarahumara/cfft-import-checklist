@@ -16,8 +16,7 @@
       "Bash(cat:*)",
       "Bash(git log:*)",
       "mcp__ide__getDiagnostics",
-      "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

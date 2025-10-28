@@ -16,6 +16,9 @@ export default function NotificacionesPage() {
   const [filterUsuario, setFilterUsuario] = useState('');
   const [filterMetodo, setFilterMetodo] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
+  const [filterArchivado, setFilterArchivado] = useState('activas');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
 
   useEffect(() => {
     loadData();
@@ -23,7 +26,12 @@ export default function NotificacionesPage() {
 
   useEffect(() => {
     filterData();
-  }, [filterUsuario, filterMetodo, filterEstado, notificaciones]);
+    setCurrentPage(1);
+  }, [filterUsuario, filterMetodo, filterEstado, filterArchivado]);
+
+  useEffect(() => {
+    filterData();
+  }, [notificaciones]);
 
   const loadData = async () => {
     try {
@@ -72,6 +80,13 @@ export default function NotificacionesPage() {
       filtered = filtered.filter((n) => !n.enviada);
     }
 
+    if (filterArchivado === 'activas') {
+      filtered = filtered.filter((n) => !n.archivado);
+    } else if (filterArchivado === 'archivadas') {
+      filtered = filtered.filter((n) => n.archivado);
+    }
+    // 'todas' shows all notifications regardless of archivado status
+
     setFilteredNotificaciones(filtered);
   };
 
@@ -82,7 +97,7 @@ export default function NotificacionesPage() {
         ids.map(id => authApi.patch(`/notificaciones/${id}/marcar-enviada`, {}))
       );
 
-      // Actualizar el estado local una sola vez
+      // Actualizar el estado local sin cambiar de página
       setNotificaciones(prevNotificaciones =>
         prevNotificaciones.map(notif =>
           ids.includes(notif.id)
@@ -98,6 +113,33 @@ export default function NotificacionesPage() {
     } catch (error) {
       console.error('Error marking as sent:', error);
       toast.error('Error al marcar como enviada', {
+        description: 'Por favor, intente nuevamente',
+      });
+    }
+  };
+
+  const handleArchivar = async (ids: number[]) => {
+    try {
+      await Promise.all(
+        ids.map(id => authApi.patch(`/notificaciones/${id}/archivar`, {}))
+      );
+
+      // Actualizar localmente marcando como archivado
+      setNotificaciones(prevNotificaciones =>
+        prevNotificaciones.map(notif =>
+          ids.includes(notif.id)
+            ? { ...notif, archivado: true }
+            : notif
+        )
+      );
+
+      toast.success('Notificaciones archivadas', {
+        description: 'Las notificaciones se han archivado correctamente',
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Error archiving notifications:', error);
+      toast.error('Error al archivar', {
         description: 'Por favor, intente nuevamente',
       });
     }
@@ -171,6 +213,12 @@ export default function NotificacionesPage() {
     );
   }
 
+  const grouped = groupedNotificaciones();
+  const totalPages = Math.ceil(grouped.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedNotificaciones = grouped.slice(startIndex, endIndex);
+
   return (
     <DashboardLayout>
       <div className="space-y-6 md:space-y-8">
@@ -188,7 +236,7 @@ export default function NotificacionesPage() {
 
         {/* Filtros */}
         <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Filtrar por Usuario
@@ -235,6 +283,21 @@ export default function NotificacionesPage() {
                 <option value="">Todas</option>
                 <option value="pendientes">Pendientes</option>
                 <option value="enviadas">Enviadas</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filtrar por Estatus
+              </label>
+              <select
+                value={filterArchivado}
+                onChange={(e) => setFilterArchivado(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="activas">Activas</option>
+                <option value="archivadas">Archivadas</option>
+                <option value="todas">Todas</option>
               </select>
             </div>
           </div>
@@ -287,7 +350,7 @@ export default function NotificacionesPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {groupedNotificaciones().map((group) => (
+              {paginatedNotificaciones.map((group) => (
                 <tr key={group.alertaId} className={`hover:bg-gray-50 ${!group.enviada ? 'bg-yellow-50' : ''}`}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {group.usuario?.nombre || `Usuario #${group.usuarioId}`}
@@ -321,26 +384,75 @@ export default function NotificacionesPage() {
                     #{group.alertaId}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {!group.enviada && (
+                    <div className="flex gap-2">
+                      {!group.enviada && (
+                        <button
+                          onClick={() => {
+                            handleMarcarEnviada(group.ids);
+                          }}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          Marcar
+                        </button>
+                      )}
                       <button
                         onClick={() => {
-                          // Marcar todos los ids del grupo como enviados en una sola llamada
-                          handleMarcarEnviada(group.ids);
+                          handleArchivar(group.ids);
                         }}
-                        className="text-blue-600 hover:text-blue-900"
+                        className="text-gray-600 hover:text-gray-900"
                       >
-                        Marcar Enviada
+                        Archivar
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          {groupedNotificaciones().length === 0 && (
+          {grouped.length === 0 && (
             <div className="text-center py-12 text-sm md:text-base text-gray-500">
               No se encontraron notificaciones con los filtros seleccionados
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {grouped.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                {startIndex + 1} a {Math.min(endIndex, grouped.length)} de {grouped.length}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  ← Anterior
+                </button>
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  Siguiente →
+                </button>
+              </div>
             </div>
           )}
           </div>

@@ -378,7 +378,7 @@ export default function ProveedoresPage() {
           {proveedores.length > 0 && (
             <div className="px-6 py-4 border-t border-gray-200/60 flex items-center justify-between bg-white/50">
               <div className="text-sm text-gray-600">
-                Mostrando {startIndex + 1} a {Math.min(endIndex, proveedores.length)} de {proveedores.length} proveedores
+                {startIndex + 1} a {Math.min(endIndex, proveedores.length)} de {proveedores.length}
               </div>
               <div className="flex gap-2">
                 <button

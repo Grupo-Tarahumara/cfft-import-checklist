@@ -62,6 +62,7 @@ export interface Notificacion {
   id: number;
   enviada: boolean;
   fechaEnvio?: string;
+  archivado: boolean;
   metodo: 'email' | 'sistema' | 'push';
   alertaId: number;
   usuarioId: number;
@@ -193,6 +194,7 @@ export interface UpdateAlertaDto extends Partial<CreateAlertaDto> {}
 export interface CreateNotificacionDto {
   enviada?: boolean;
   fechaEnvio?: string;
+  archivado?: boolean;
   metodo: 'email' | 'sistema' | 'push';
   alertaId: number;
   usuarioId: number;

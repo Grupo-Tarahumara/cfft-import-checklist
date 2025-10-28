@@ -573,7 +573,7 @@ export default function UsuariosPage() {
           {usuarios.length > 0 && (
             <div className="px-6 py-4 border-t border-gray-200/60 flex items-center justify-between bg-white/50">
               <div className="text-sm text-gray-600">
-                Mostrando {startIndex + 1} a {Math.min(endIndex, usuarios.length)} de {usuarios.length} usuarios
+                {startIndex + 1} a {Math.min(endIndex, usuarios.length)} de {usuarios.length}
               </div>
               <div className="flex gap-2">
                 <button
