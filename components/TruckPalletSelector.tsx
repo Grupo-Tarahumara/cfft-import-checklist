@@ -41,8 +41,7 @@ export default function TruckPalletSelector({
 
     if (isVertical) {
       // Para vista vertical: DOS COLUMNAS
-      // Conteo: Columna derecha (cerca cabina): 1, 3, 5, 7...
-      //         Columna izquierda: 2, 4, 6, 8...
+      // Conteo DESDE ABAJO (cabina): 1, 3, 5, 7... (derecha) y 2, 4, 6, 8... (izquierda)
       const columnaDerechaCabina: number[] = [];
       const columnaIzquierda: number[] = [];
 
@@ -54,7 +53,8 @@ export default function TruckPalletSelector({
         }
       });
 
-      return [columnaDerechaCabina, columnaIzquierda];
+      // Invertir para que el 1 esté abajo (cerca de la cabina)
+      return [columnaDerechaCabina.reverse(), columnaIzquierda.reverse()];
     }
 
     // Para vista horizontal: intercalar pallets entre dos filas
