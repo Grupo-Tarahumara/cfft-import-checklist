@@ -35,13 +35,26 @@ export default function TruckPalletSelector({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Crear layout del camión con DOS FILAS - Intercalado
+  // Crear layout del camión
   const palletLayout = useMemo(() => {
     const pallets: number[] = Array.from({ length: totalPallets }, (_, i) => i + 1);
 
     if (isVertical) {
-      // Para vista vertical: una sola columna
-      return [pallets, []];
+      // Para vista vertical: DOS COLUMNAS
+      // Conteo: Columna derecha (cerca cabina): 1, 3, 5, 7...
+      //         Columna izquierda: 2, 4, 6, 8...
+      const columnaDerechaCabina: number[] = [];
+      const columnaIzquierda: number[] = [];
+
+      pallets.forEach((palet, index) => {
+        if (index % 2 === 0) {
+          columnaDerechaCabina.push(palet);
+        } else {
+          columnaIzquierda.push(palet);
+        }
+      });
+
+      return [columnaDerechaCabina, columnaIzquierda];
     }
 
     // Para vista horizontal: intercalar pallets entre dos filas
@@ -175,17 +188,57 @@ export default function TruckPalletSelector({
         <div className={isVertical ? '' : (totalPallets > 20 ? 'overflow-x-auto' : '')} style={{ minHeight: isVertical ? 'auto' : '200px' }}>
           {/* VISTA DEL CAMIÓN */}
           {isVertical ? (
-            // VISTA VERTICAL - Para teléfonos
+            // VISTA VERTICAL - Para teléfonos (DOS COLUMNAS)
             <div className="relative flex flex-col gap-0 w-fit mx-auto">
-              {/* CAJA DEL CAMIÓN - VERTICAL */}
-              <div className="relative bg-gradient-to-b from-gray-200 to-gray-150 border-4 border-gray-600 rounded-t-lg p-3 shadow-md">
+              {/* Marcas de puertas traseras - HORIZONTAL */}
+              <div className="text-xs font-bold text-gray-500 w-full text-center mb-2">
+                PUERTAS TRASERAS
+              </div>
 
-                {/* Marcas de puertas traseras - HORIZONTAL */}
-                <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-500 w-full text-center">
-                  PUERTAS TRASERAS
+              {/* CAJA DEL CAMIÓN - DOS COLUMNAS */}
+              <div className="relative bg-gradient-to-b from-gray-200 to-gray-150 border-4 border-gray-600 rounded-t-lg p-3 shadow-md flex gap-2">
+
+                {/* Columna Izquierda - Pallets impares (2, 4, 6...) */}
+                <div className="flex flex-col gap-1">
+                  {palletLayout[1].map((paletNumber, index) => {
+                    if (paletNumber === 0) {
+                      return (
+                        <div key={`empty-${index}`} className="w-14 h-14 flex-shrink-0" />
+                      );
+                    }
+
+                    const styles = getPaletStyles(paletNumber);
+
+                    return (
+                      <div key={paletNumber} className="relative">
+                        <button
+                          type="button"
+                          onClick={() => handlePaletClick(paletNumber)}
+                          disabled={!selectionMode}
+                          className={`
+                            w-14 h-14 flex items-center justify-center rounded-md border-3 transition-all
+                            font-bold text-xs shadow-md flex-shrink-0
+                            ${!selectionMode ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-105 active:scale-95'}
+                            ${styles.textColor}
+                          `}
+                          style={{
+                            background: styles.background,
+                            borderColor: styles.borderColor,
+                            boxShadow: (styles as any).boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
+                          }}
+                          title={`Palet ${paletNumber}`}
+                        >
+                          {paletNumber}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                {/* Grid de Pallets - Una sola columna vertical */}
+                {/* Divisor vertical entre columnas */}
+                <div className="w-1 bg-gradient-to-b from-gray-400 via-gray-500 to-gray-400 rounded"></div>
+
+                {/* Columna Derecha (CABINA) - Pallets pares (1, 3, 5...) + CABINA */}
                 <div className="flex flex-col gap-1">
                   {palletLayout[0].map((paletNumber, index) => {
                     if (paletNumber === 0) {
@@ -223,13 +276,13 @@ export default function TruckPalletSelector({
                 </div>
               </div>
 
-              {/* Divisor central del camión */}
-              <div className="w-1 h-2 bg-gradient-to-b from-gray-400 via-gray-500 to-gray-400 rounded mx-auto"></div>
+              {/* Divisor horizontal */}
+              <div className="h-1 bg-gradient-to-r from-gray-400 via-gray-500 to-gray-400 rounded"></div>
 
               {/* CABINA DEL CAMIÓN - VERTICAL */}
-              <div className="flex flex-col items-center justify-center pt-3 border-t-4 border-gray-400">
-                <div className="text-xs font-bold text-gray-700 mb-1 tracking-widest">CABINA</div>
-                <div className="relative w-14 h-16 bg-gradient-to-b from-gray-600 to-gray-700 border-3 border-gray-800 shadow-lg rounded-b-2xl flex items-center justify-center">
+              <div className="flex flex-col items-center justify-center p-3 border-b-4 border-gray-600">
+                <div className="text-xs font-bold text-gray-700 mb-2 tracking-widest">CABINA</div>
+                <div className="relative w-20 h-12 bg-gradient-to-b from-gray-600 to-gray-700 border-3 border-gray-800 shadow-lg rounded-b-2xl flex items-center justify-center">
                   <div className="text-white text-xs font-bold opacity-70 text-center px-1">CONDUCTOR</div>
                 </div>
               </div>
