@@ -79,7 +79,7 @@ export async function generateInspectionPDF(
       yPosition += 3;
     };
 
-    const addField = (label: string, value: any) => {
+    const addField = (label: string, value: unknown) => {
       checkNewPage(6);
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'bold');
@@ -187,7 +187,7 @@ export async function generateInspectionPDF(
         // Imagen de firma
         try {
           pdf.addImage(firmaImage, 'PNG', margin + 5, yPosition, imgWidth, imgHeight);
-        } catch (e) {
+        } catch {
           // Si falla, mostrar texto alternativo
           pdf.setFillColor(240, 240, 240);
           pdf.rect(margin + 5, yPosition, imgWidth, imgHeight, 'F');
@@ -328,7 +328,7 @@ export async function generateInspectionPDF(
 
               yPosition += imgHeight + 8;
             }
-          } catch (imgError) {
+          } catch {
             // Imagen no disponible
             pdf.setFillColor(lightBg[0], lightBg[1], lightBg[2]);
             pdf.rect(margin + 5, yPosition, contentWidth - 10, 30, 'F');
@@ -407,7 +407,7 @@ async function imageUrlToBase64(url: string): Promise<string> {
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
-    } catch (fetchError) {
+    } catch {
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);

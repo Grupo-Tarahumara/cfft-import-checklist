@@ -95,7 +95,14 @@ export default function TruckPalletSelector({
     }
   };
 
-  const getPaletStyles = (paletNumber: number) => {
+  interface PaletStyles {
+    background: string;
+    borderColor: string;
+    textColor: string;
+    boxShadow?: string;
+  }
+
+  const getPaletStyles = (paletNumber: number): PaletStyles => {
     const isOrigenSelected = termografoOrigenSelected.includes(paletNumber);
     const isNacionalSelected = termografoNacionalSelected.includes(paletNumber);
 
@@ -233,8 +240,8 @@ export default function TruckPalletSelector({
                           style={{
                             background: styles.background,
                             borderColor: styles.borderColor,
-                            boxShadow: (styles as any).boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
-                          }}
+                            boxShadow: styles.boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
+                          } as React.CSSProperties}
                           title={`Palet ${paletNumber}`}
                         >
                           {paletNumber}
@@ -273,8 +280,8 @@ export default function TruckPalletSelector({
                           style={{
                             background: styles.background,
                             borderColor: styles.borderColor,
-                            boxShadow: (styles as any).boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
-                          }}
+                            boxShadow: styles.boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
+                          } as React.CSSProperties}
                           title={`Palet ${paletNumber}`}
                         >
                           {paletNumber}
@@ -341,8 +348,8 @@ export default function TruckPalletSelector({
                         style={{
                           background: styles.background,
                           borderColor: styles.borderColor,
-                          boxShadow: (styles as any).boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
-                        }}
+                          boxShadow: styles.boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
+                        } as React.CSSProperties}
                         title={`Palet ${paletNumber}`}
                       >
                         {paletNumber}
@@ -386,8 +393,8 @@ export default function TruckPalletSelector({
                           style={{
                             background: styles.background,
                             borderColor: styles.borderColor,
-                            boxShadow: (styles as any).boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
-                          }}
+                            boxShadow: styles.boxShadow || '0 2px 8px rgba(0,0,0,0.15)'
+                          } as React.CSSProperties}
                           title={`Palet ${paletNumber}`}
                         >
                           {paletNumber}

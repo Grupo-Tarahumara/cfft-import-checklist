@@ -25,13 +25,32 @@ export default function NotificacionesPage() {
   }, []);
 
   useEffect(() => {
-    filterData();
-    setCurrentPage(1);
-  }, [filterUsuario, filterMetodo, filterEstado, filterArchivado]);
+    let filtered = [...notificaciones];
 
-  useEffect(() => {
-    filterData();
-  }, [notificaciones]);
+    if (filterUsuario) {
+      filtered = filtered.filter((n) => n.usuarioId === parseInt(filterUsuario));
+    }
+
+    if (filterMetodo) {
+      filtered = filtered.filter((n) => n.metodo === filterMetodo);
+    }
+
+    if (filterEstado === 'enviadas') {
+      filtered = filtered.filter((n) => n.enviada);
+    } else if (filterEstado === 'pendientes') {
+      filtered = filtered.filter((n) => !n.enviada);
+    }
+
+    if (filterArchivado === 'activas') {
+      filtered = filtered.filter((n) => !n.archivado);
+    } else if (filterArchivado === 'archivadas') {
+      filtered = filtered.filter((n) => n.archivado);
+    }
+    // 'todas' shows all notifications regardless of archivado status
+
+    setFilteredNotificaciones(filtered);
+    setCurrentPage(1);
+  }, [filterUsuario, filterMetodo, filterEstado, filterArchivado, notificaciones]);
 
   const loadData = async () => {
     try {
@@ -63,32 +82,6 @@ export default function NotificacionesPage() {
     }
   };
 
-  const filterData = () => {
-    let filtered = [...notificaciones];
-
-    if (filterUsuario) {
-      filtered = filtered.filter((n) => n.usuarioId === parseInt(filterUsuario));
-    }
-
-    if (filterMetodo) {
-      filtered = filtered.filter((n) => n.metodo === filterMetodo);
-    }
-
-    if (filterEstado === 'enviadas') {
-      filtered = filtered.filter((n) => n.enviada);
-    } else if (filterEstado === 'pendientes') {
-      filtered = filtered.filter((n) => !n.enviada);
-    }
-
-    if (filterArchivado === 'activas') {
-      filtered = filtered.filter((n) => !n.archivado);
-    } else if (filterArchivado === 'archivadas') {
-      filtered = filtered.filter((n) => n.archivado);
-    }
-    // 'todas' shows all notifications regardless of archivado status
-
-    setFilteredNotificaciones(filtered);
-  };
 
   const handleMarcarEnviada = async (ids: number[]) => {
     try {
@@ -357,7 +350,7 @@ export default function NotificacionesPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-wrap gap-2">
-                      {group.metodos.map((metodo, idx) => (
+                      {group.metodos.map((metodo: string, idx: number) => (
                         <span key={idx} className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getMetodoColor(metodo)}`}>
                           {getMetodoIcon(metodo)} {metodo.toUpperCase()}
                         </span>

@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (credentials: LoginDto) => {
     try {
-      const response = await api.post<{ access_token: string }>('/auth/login', credentials);
+      const response = await api.post<{ access_token: string }, LoginDto>('/auth/login', credentials);
       const { access_token } = response;
 
       // Guardar el token

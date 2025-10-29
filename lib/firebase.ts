@@ -15,7 +15,7 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 // Initialize Firebase Cloud Messaging
-let messaging: any = null;
+let messaging: ReturnType<typeof getMessaging> | null = null;
 
 if (typeof window !== 'undefined') {
   isSupported().then((supported) => {

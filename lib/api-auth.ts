@@ -44,7 +44,7 @@ class AuthApiClient {
   /**
    * Realiza una petición GET autenticada
    */
-  async get<T = any>(endpoint: string): Promise<T> {
+  async get<T = Record<string, unknown>>(endpoint: string): Promise<T> {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'GET',
@@ -73,11 +73,11 @@ class AuthApiClient {
   /**
    * Realiza una petición POST autenticada
    */
-  async post<T = any>(endpoint: string, data: any, options?: { headers?: HeadersInit }): Promise<T> {
+  async post<T = Record<string, unknown>, D = Record<string, unknown>>(endpoint: string, data: FormData | D, options?: { headers?: HeadersInit }): Promise<T> {
     try {
       // Si data es FormData, no usar getAuthHeaders y dejar que el navegador establezca Content-Type
       let headers: HeadersInit;
-      let body: any;
+      let body: FormData | string;
 
       if (data instanceof FormData) {
         // Para FormData, solo agregar Authorization (CSRF ya no es necesario con JWT)
@@ -127,7 +127,7 @@ class AuthApiClient {
   /**
    * Realiza una petición PUT autenticada
    */
-  async put<T = any>(endpoint: string, data: any): Promise<T> {
+  async put<T = Record<string, unknown>, D = Record<string, unknown>>(endpoint: string, data: D): Promise<T> {
     try {
       const headers = this.getAuthHeaders();
 
@@ -158,7 +158,7 @@ class AuthApiClient {
   /**
    * Realiza una petición PATCH autenticada
    */
-  async patch<T = any>(endpoint: string, data: any): Promise<T> {
+  async patch<T = Record<string, unknown>, D = Record<string, unknown>>(endpoint: string, data: D): Promise<T> {
     try {
       const headers = this.getAuthHeaders();
 
@@ -189,7 +189,7 @@ class AuthApiClient {
   /**
    * Realiza una petición DELETE autenticada
    */
-  async delete<T = any>(endpoint: string): Promise<T> {
+  async delete<T = Record<string, unknown>>(endpoint: string): Promise<T> {
     try {
       const headers = this.getAuthHeaders();
 

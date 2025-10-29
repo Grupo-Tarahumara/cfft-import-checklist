@@ -32,23 +32,23 @@ export default function DetalleInspeccionPage() {
 
   useEffect(() => {
     if (id) {
-      loadInspeccion();
+      const loadInspeccionData = async () => {
+        try {
+          setLoading(true);
+          const data = await authApi.get<Inspeccion>(`/inspecciones/${id}`);
+          setInspeccion(data);
+        } catch (error) {
+          console.error('Error loading inspección:', error);
+          alert('Error al cargar la inspección');
+          router.push('/inspecciones');
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadInspeccionData();
     }
-  }, [id]);
+  }, [id, router]);
 
-  const loadInspeccion = async () => {
-    try {
-      setLoading(true);
-      const data = await authApi.get<Inspeccion>(`/inspecciones/${id}`);
-      setInspeccion(data);
-    } catch (error) {
-      console.error('Error loading inspección:', error);
-      alert('Error al cargar la inspección');
-      router.push('/inspecciones');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDownloadPDF = async () => {
     if (!inspeccion) return;
@@ -190,8 +190,10 @@ export default function DetalleInspeccionPage() {
               {inspeccion.usuario ? (
                 <button
                   onClick={() => {
-                    setSelectedUsuario(inspeccion.usuario);
-                    setShowUserInfo(true);
+                    if (inspeccion.usuario) {
+                      setSelectedUsuario(inspeccion.usuario);
+                      setShowUserInfo(true);
+                    }
                   }}
                   className="font-medium text-gray-900 hover:text-blue-600 transition-colors flex items-center gap-2 group"
                   title={`Ver información de ${inspeccion.usuario.nombre}`}
@@ -404,9 +406,11 @@ export default function DetalleInspeccionPage() {
             <div className="flex flex-col items-center">
               <div className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
                 {inspeccion.firmaTransporte.startsWith('data:') || inspeccion.firmaTransporte.startsWith('http') ? (
-                  <img
+                  <Image
                     src={inspeccion.firmaTransporte}
                     alt="Firma de Transporte"
+                    width={300}
+                    height={160}
                     className="h-40 object-contain"
                   />
                 ) : (

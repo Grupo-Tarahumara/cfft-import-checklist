@@ -1,10 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-interface ApiResponse<T = any> {
-  data?: T;
-  error?: string;
-}
-
 class ApiClient {
   // CSRF ya no es necesario con JWT en headers Authorization
   private csrfToken: string | null = null;
@@ -49,7 +44,7 @@ class ApiClient {
   /**
    * Realiza una petición GET
    */
-  async get<T = any>(endpoint: string): Promise<T> {
+  async get<T = Record<string, unknown>>(endpoint: string): Promise<T> {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'GET',
@@ -71,7 +66,7 @@ class ApiClient {
   /**
    * Realiza una petición POST
    */
-  async post<T = any>(endpoint: string, data: any): Promise<T> {
+  async post<T = Record<string, unknown>, D = Record<string, unknown>>(endpoint: string, data: D): Promise<T> {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
@@ -82,16 +77,17 @@ class ApiClient {
 
       if (!response.ok) {
         // Crear un error personalizado con información del response
-        const error: any = new Error(`HTTP error! status: ${response.status}`);
+        const error = new Error(`HTTP error! status: ${response.status}`) as Error & { response?: { status: number }; status?: number };
         error.response = { status: response.status };
         error.status = response.status;
         throw error;
       }
 
       return await response.json();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error & { status?: number };
       // No mostrar el error en consola si es 401 (credenciales incorrectas)
-      if (error.status !== 401) {
+      if (err?.status !== 401) {
         console.error('POST request error:', error);
       }
       throw error;
@@ -101,7 +97,7 @@ class ApiClient {
   /**
    * Realiza una petición PUT
    */
-  async put<T = any>(endpoint: string, data: any): Promise<T> {
+  async put<T = Record<string, unknown>, D = Record<string, unknown>>(endpoint: string, data: D): Promise<T> {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'PUT',
@@ -124,7 +120,7 @@ class ApiClient {
   /**
    * Realiza una petición PATCH
    */
-  async patch<T = any>(endpoint: string, data: any): Promise<T> {
+  async patch<T = Record<string, unknown>, D = Record<string, unknown>>(endpoint: string, data: D): Promise<T> {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'PATCH',
@@ -147,7 +143,7 @@ class ApiClient {
   /**
    * Realiza una petición DELETE
    */
-  async delete<T = any>(endpoint: string): Promise<T> {
+  async delete<T = Record<string, unknown>>(endpoint: string): Promise<T> {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'DELETE',
