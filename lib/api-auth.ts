@@ -60,7 +60,25 @@ class AuthApiClient {
             window.location.href = '/login';
           }
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+        // Intentar obtener mensaje de error del servidor
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+          console.error('Server error response:', errorData);
+        } catch {
+          // No hay JSON en la respuesta de error
+          const text = await response.text();
+          if (text) {
+            console.error('Server error text:', text);
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       return await response.json();
@@ -114,7 +132,25 @@ class AuthApiClient {
             window.location.href = '/login';
           }
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+        // Intentar obtener mensaje de error del servidor
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+          console.error('Server error response:', errorData);
+        } catch {
+          // No hay JSON en la respuesta de error
+          const text = await response.text();
+          if (text) {
+            console.error('Server error text:', text);
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       return await response.json();
@@ -145,7 +181,25 @@ class AuthApiClient {
             window.location.href = '/login';
           }
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+        // Intentar obtener mensaje de error del servidor
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+          console.error('Server error response:', errorData);
+        } catch {
+          // No hay JSON en la respuesta de error
+          const text = await response.text();
+          if (text) {
+            console.error('Server error text:', text);
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       return await response.json();
@@ -176,7 +230,25 @@ class AuthApiClient {
             window.location.href = '/login';
           }
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+        // Intentar obtener mensaje de error del servidor
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+          console.error('Server error response:', errorData);
+        } catch {
+          // No hay JSON en la respuesta de error
+          const text = await response.text();
+          if (text) {
+            console.error('Server error text:', text);
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       return await response.json();
