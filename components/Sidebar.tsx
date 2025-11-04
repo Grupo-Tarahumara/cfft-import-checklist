@@ -85,7 +85,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay - Click to close */}
       <AnimatePresence>
         {isMobileOpen && (
           <motion.div
@@ -93,7 +93,7 @@ export default function Sidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={toggleMobileSidebar}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
           />
         )}
       </AnimatePresence>

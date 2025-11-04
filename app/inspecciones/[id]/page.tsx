@@ -490,11 +490,12 @@ export default function DetalleInspeccionPage() {
                   <div className="relative aspect-video bg-gray-100">
                     {foto.urlFoto ? (
                       <Image
-                        src={foto.urlFoto}
+                        src={normalizeImageUrl(foto.urlFoto) || foto.urlFoto}
                         alt={foto.tipoFoto.replace(/_/g, ' ')}
                         fill
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        unoptimized={true}
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
