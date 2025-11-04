@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { Inspeccion } from '@/types';
+import { normalizeImageUrl } from '@/lib/image-utils';
 
 interface PDFOptions {
   hideTemperatureRanges?: boolean;
@@ -377,11 +378,14 @@ async function imageUrlToBase64(url: string): Promise<string> {
   try {
     if (!url) return '';
 
+    // Normalizar la URL para asegurar que apunta a la API correcta
+    const normalizedUrl = normalizeImageUrl(url) || url;
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch(normalizedUrl, {
         credentials: 'include',
         signal: controller.signal,
       });
@@ -408,7 +412,7 @@ async function imageUrlToBase64(url: string): Promise<string> {
         reader.readAsDataURL(blob);
       });
     } catch {
-      const response = await fetch(url);
+      const response = await fetch(normalizedUrl);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
