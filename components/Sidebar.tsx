@@ -58,19 +58,19 @@ export default function Sidebar() {
     item.submenu?.some(sub => pathname === sub.href)
   );
 
-  // Keep Catálogos expanded if any submenu item is active
+  // Keep Catálogos expanded if any submenu item is active (only on mount)
   useEffect(() => {
     if (activeCatalogo && expandedMenu === null) {
       setExpandedMenu(activeCatalogo.label);
     }
-  }, [activeCatalogo, expandedMenu]); // Include both dependencies
+  }, []); // Only run on mount
 
   // Close mobile sidebar when route changes
   useEffect(() => {
     if (isMobileOpen) {
       toggleMobileSidebar();
     }
-  }, [pathname, isMobileOpen, toggleMobileSidebar]);
+  }, [pathname]);
 
   // Detect if we're on mobile
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function Sidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={toggleMobileSidebar}
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           />
         )}
       </AnimatePresence>
@@ -172,17 +172,20 @@ export default function Sidebar() {
               <li key={index}>
                 {item.submenu ? (
                   <div>
-                    <button
-                      onClick={() => setExpandedMenu(isExpanded ? null : item.label)}
+                    <motion.button
+                      onClick={() => {
+                        setExpandedMenu(isExpanded ? null : item.label);
+                      }}
                       className={`w-full flex items-center rounded-xl transition-all duration-200 group ${
                         (isMobile || !isCollapsed) ? 'justify-between px-4 py-3' : 'justify-center px-2 py-3'
                       } ${
                         hasActiveSubmenu || isExpanded
                           ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
                           : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
-                      } hover:opacity-90 active:opacity-80 cursor-pointer`}
+                      }`}
+                      whileHover={{ x: (isMobile || !isCollapsed) ? 4 : 0 }}
+                      whileTap={{ scale: 0.98 }}
                       title={(isMobile || !isCollapsed) ? '' : item.label}
-                      type="button"
                     >
                       {(isMobile || !isCollapsed) ? (
                         <>
@@ -200,7 +203,7 @@ export default function Sidebar() {
                       ) : (
                         <item.Icon className="w-5 h-5" />
                       )}
-                    </button>
+                    </motion.button>
 
                     {/* Submenu icons when collapsed (desktop only) */}
                     <AnimatePresence>
