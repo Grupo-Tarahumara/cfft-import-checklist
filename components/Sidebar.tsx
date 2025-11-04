@@ -172,8 +172,14 @@ export default function Sidebar() {
               <li key={index}>
                 {item.submenu ? (
                   <div>
-                    <motion.button
-                      onClick={(e: React.MouseEvent) => {
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setExpandedMenu(isExpanded ? null : item.label);
+                      }}
+                      onTouchEnd={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         setExpandedMenu(isExpanded ? null : item.label);
                       }}
@@ -183,10 +189,9 @@ export default function Sidebar() {
                         hasActiveSubmenu || isExpanded
                           ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
                           : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
-                      }`}
-                      whileHover={{ x: (isMobile || !isCollapsed) ? 4 : 0 }}
-                      whileTap={{ scale: 0.98 }}
+                      } hover:opacity-90 active:opacity-80 transition-opacity cursor-pointer`}
                       title={(isMobile || !isCollapsed) ? '' : item.label}
+                      type="button"
                     >
                       {(isMobile || !isCollapsed) ? (
                         <>
@@ -204,7 +209,7 @@ export default function Sidebar() {
                       ) : (
                         <item.Icon className="w-5 h-5" />
                       )}
-                    </motion.button>
+                    </button>
 
                     {/* Submenu icons when collapsed (desktop only) */}
                     <AnimatePresence>
