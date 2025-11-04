@@ -1,5 +1,12 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+// Función auxiliar para construir URLs sin dobles barras
+const buildUrl = (baseUrl: string, endpoint: string): string => {
+  const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return `${base}${path}`;
+};
+
 class ApiClient {
   // CSRF ya no es necesario con JWT en headers Authorization
   private csrfToken: string | null = null;
@@ -46,7 +53,7 @@ class ApiClient {
    */
   async get<T = Record<string, unknown>>(endpoint: string): Promise<T> {
     try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(buildUrl(API_URL, endpoint), {
         method: 'GET',
         credentials: 'include',
         headers: this.getHeaders(),
@@ -68,7 +75,7 @@ class ApiClient {
    */
   async post<T = Record<string, unknown>, D = Record<string, unknown>>(endpoint: string, data: D): Promise<T> {
     try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(buildUrl(API_URL, endpoint), {
         method: 'POST',
         credentials: 'include',
         headers: this.getHeaders(),
@@ -99,7 +106,7 @@ class ApiClient {
    */
   async put<T = Record<string, unknown>, D = Record<string, unknown>>(endpoint: string, data: D): Promise<T> {
     try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(buildUrl(API_URL, endpoint), {
         method: 'PUT',
         credentials: 'include',
         headers: this.getHeaders(),
@@ -122,7 +129,7 @@ class ApiClient {
    */
   async patch<T = Record<string, unknown>, D = Record<string, unknown>>(endpoint: string, data: D): Promise<T> {
     try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(buildUrl(API_URL, endpoint), {
         method: 'PATCH',
         credentials: 'include',
         headers: this.getHeaders(),
@@ -145,7 +152,7 @@ class ApiClient {
    */
   async delete<T = Record<string, unknown>>(endpoint: string): Promise<T> {
     try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(buildUrl(API_URL, endpoint), {
         method: 'DELETE',
         credentials: 'include',
         headers: this.getHeaders(),

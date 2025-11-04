@@ -6,6 +6,12 @@ import { api } from '@/lib/api';
 import { LoginDto, UserProfile } from '@/types';
 import { useNotifications } from '@/hooks/useNotifications';
 
+const buildUrl = (baseUrl: string, endpoint: string): string => {
+  const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return `${base}${path}`;
+};
+
 interface AuthContextType {
   user: UserProfile | null;
   token: string | null;
@@ -37,8 +43,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUserProfile = async (authToken: string) => {
     try {
-      // Configurar el token en los headers
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/profile`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const response = await fetch(buildUrl(apiUrl, '/auth/profile'), {
         headers: {
           'Authorization': `Bearer ${authToken}`,
         },
@@ -99,8 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('access_token', access_token);
       setToken(access_token);
 
-      // Cargar el perfil del usuario y obtenerlo para redirigir
-      const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/profile`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const profileResponse = await fetch(buildUrl(apiUrl, '/auth/profile'), {
         headers: {
           'Authorization': `Bearer ${access_token}`,
         },

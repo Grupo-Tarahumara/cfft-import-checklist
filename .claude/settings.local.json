@@ -1,31 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)",
-      "Read(//c/Users/becario1.sis/Proyecto/**)",
-      "Bash(dir \"C:\\Users\\becario1.sis\\Proyecto\")",
-      "Bash(findstr:*)",
-      "Bash(find:*)",
-      "Bash(git rebase:*)",
-      "Bash(git checkout:*)",
-      "Bash(dir /s /b \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist\")",
-      "Bash(tree:*)",
-      "Bash(dir \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist-backend\")",
-      "Bash(dir /s \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist-backend\\src\")",
-      "Bash(dir:*)",
-      "Bash(cat:*)",
-      "Bash(git log:*)",
-      "mcp__ide__getDiagnostics",
-      "Bash(git add:*)",
-      "Bash(npm run start)",
-      "Bash(curl -i -H \"Authorization: Bearer invalid-token\" http://localhost:3000/alertas?noLeidas=true)",
-      "Bash(curl -i -H \"Authorization: Bearer invalid-token\" http://localhost:3000/inspecciones)",
-      "Bash(curl:*)",
-      "Bash(lsof:*)",
-      "Bash(netstat:*)",
-      "Bash(npm run typeorm:*)",
-      "Bash(taskkill:*)",
-      "Bash(powershell -Command \"Stop-Process -Id 19412 -Force\")"
+      "Bash(powershell -Command \"Get-ChildItem -Path ''C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist\\app\\login'' -File\")",
+      "Bash(nul)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

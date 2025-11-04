@@ -4,6 +4,13 @@
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+// Función auxiliar para construir URLs sin dobles barras
+const buildUrl = (baseUrl: string, endpoint: string): string => {
+  const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return `${base}${path}`;
+};
+
 class AuthApiClient {
   private csrfToken: string | null = null;
 
@@ -46,7 +53,7 @@ class AuthApiClient {
    */
   async get<T = Record<string, unknown>>(endpoint: string): Promise<T> {
     try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(buildUrl(API_URL, endpoint), {
         method: 'GET',
         credentials: 'include',
         headers: this.getAuthHeaders(),
@@ -118,7 +125,7 @@ class AuthApiClient {
         headers = { ...headers, ...options.headers };
       }
 
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(buildUrl(API_URL, endpoint), {
         method: 'POST',
         credentials: 'include',
         headers,
@@ -167,7 +174,7 @@ class AuthApiClient {
     try {
       const headers = this.getAuthHeaders();
 
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(buildUrl(API_URL, endpoint), {
         method: 'PUT',
         credentials: 'include',
         headers,
@@ -216,7 +223,7 @@ class AuthApiClient {
     try {
       const headers = this.getAuthHeaders();
 
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(buildUrl(API_URL, endpoint), {
         method: 'PATCH',
         credentials: 'include',
         headers,
@@ -265,7 +272,7 @@ class AuthApiClient {
     try {
       const headers = this.getAuthHeaders();
 
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await fetch(buildUrl(API_URL, endpoint), {
         method: 'DELETE',
         credentials: 'include',
         headers,
