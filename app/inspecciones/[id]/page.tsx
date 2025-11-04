@@ -8,7 +8,6 @@ import { authApi } from '@/lib/api-auth';
 import { Inspeccion, Usuario } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { generateInspectionPDF } from '@/lib/pdf-generator';
@@ -407,11 +406,9 @@ export default function DetalleInspeccionPage() {
             <div className="flex flex-col items-center">
               <div className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
                 {inspeccion.firmaTransporte.startsWith('data:') || inspeccion.firmaTransporte.startsWith('http') ? (
-                  <Image
+                  <img
                     src={normalizeImageUrl(inspeccion.firmaTransporte) || inspeccion.firmaTransporte}
                     alt="Firma de Transporte"
-                    width={300}
-                    height={160}
                     className="h-40 object-contain"
                   />
                 ) : (
@@ -489,13 +486,10 @@ export default function DetalleInspeccionPage() {
                 <div key={foto.id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200">
                   <div className="relative aspect-video bg-gray-100">
                     {foto.urlFoto ? (
-                      <Image
+                      <img
                         src={normalizeImageUrl(foto.urlFoto) || foto.urlFoto}
                         alt={foto.tipoFoto.replace(/_/g, ' ')}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        unoptimized={true}
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
