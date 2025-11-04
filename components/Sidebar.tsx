@@ -173,23 +173,14 @@ export default function Sidebar() {
                 {item.submenu ? (
                   <div>
                     <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setExpandedMenu(isExpanded ? null : item.label);
-                      }}
-                      onTouchEnd={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setExpandedMenu(isExpanded ? null : item.label);
-                      }}
+                      onClick={() => setExpandedMenu(isExpanded ? null : item.label)}
                       className={`w-full flex items-center rounded-xl transition-all duration-200 group ${
                         (isMobile || !isCollapsed) ? 'justify-between px-4 py-3' : 'justify-center px-2 py-3'
                       } ${
                         hasActiveSubmenu || isExpanded
                           ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
                           : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
-                      } hover:opacity-90 active:opacity-80 transition-opacity cursor-pointer`}
+                      } hover:opacity-90 active:opacity-80 cursor-pointer`}
                       title={(isMobile || !isCollapsed) ? '' : item.label}
                       type="button"
                     >
