@@ -13,6 +13,7 @@ import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outlin
 import toast from 'react-hot-toast';
 import { generateInspectionPDF } from '@/lib/pdf-generator';
 import ImageModal from '@/components/ImageModal';
+import { normalizeImageUrl } from '@/lib/image-utils';
 
 export default function DetalleInspeccionPage() {
   const router = useRouter();
@@ -407,7 +408,7 @@ export default function DetalleInspeccionPage() {
               <div className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
                 {inspeccion.firmaTransporte.startsWith('data:') || inspeccion.firmaTransporte.startsWith('http') ? (
                   <Image
-                    src={inspeccion.firmaTransporte}
+                    src={normalizeImageUrl(inspeccion.firmaTransporte) || inspeccion.firmaTransporte}
                     alt="Firma de Transporte"
                     width={300}
                     height={160}
@@ -515,7 +516,7 @@ export default function DetalleInspeccionPage() {
                         </span>
                       )}
                       <button
-                        onClick={() => handleOpenImageModal(foto.urlFoto, foto.tipoFoto.replace(/_/g, ' ').toUpperCase())}
+                        onClick={() => handleOpenImageModal(normalizeImageUrl(foto.urlFoto) || foto.urlFoto, foto.tipoFoto.replace(/_/g, ' ').toUpperCase())}
                         className="text-xs text-blue-600 hover:text-blue-700 font-medium"
                       >
                         Ver imagen completa →

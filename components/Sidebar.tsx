@@ -173,7 +173,8 @@ export default function Sidebar() {
                 {item.submenu ? (
                   <div>
                     <motion.button
-                      onClick={() => {
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
                         setExpandedMenu(isExpanded ? null : item.label);
                       }}
                       className={`w-full flex items-center rounded-xl transition-all duration-200 group ${
