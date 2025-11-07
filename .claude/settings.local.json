@@ -6,7 +6,8 @@
       "Bash(powershell:*)",
       "Bash(npm run build:*)",
       "Bash(dir:*)",
-      "Bash(npx shadcn@latest add https://tweakcn.com/r/themes/cmeaq8ye9000a04jpet2j344p)"
+      "Bash(npx shadcn@latest add https://tweakcn.com/r/themes/cmeaq8ye9000a04jpet2j344p)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []
