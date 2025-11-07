@@ -8,7 +8,7 @@ import { authApi } from '@/lib/api-auth';
 import { Inspeccion, Usuario } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, DocumentArrowDownIcon, EyeIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { generateInspectionPDF } from '@/lib/pdf-generator';
 import ImageModal from '@/components/ImageModal';
@@ -57,7 +57,6 @@ export default function DetalleInspeccionPage() {
       setIsGeneratingPDF(true);
       toast.loading('Generando PDF...', { id: 'pdf-generation' });
 
-      // Para usuarios normales, ocultar rangos de temperatura y alertas
       await generateInspectionPDF(inspeccion, {
         hideTemperatureRanges: isNormalUser,
         hideAlerts: isNormalUser,
@@ -86,7 +85,7 @@ export default function DetalleInspeccionPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
       </DashboardLayout>
     );
@@ -96,8 +95,8 @@ export default function DetalleInspeccionPage() {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
-          <p className="text-gray-500">Inspección no encontrada</p>
-          <Link href="/inspecciones" className="text-blue-600 hover:underline mt-4 inline-block">
+          <p className="text-muted-foreground">Inspección no encontrada</p>
+          <Link href="/inspecciones" className="text-primary hover:underline mt-4 inline-block">
             Volver a inspecciones
           </Link>
         </div>
@@ -105,13 +104,11 @@ export default function DetalleInspeccionPage() {
     );
   }
 
-  // Validar si la temperatura está en rango
   const tempEnRango = inspeccion.fruta
     ? (Number(inspeccion.temperaturaFruta) >= Number(inspeccion.fruta.tempMinima) &&
        Number(inspeccion.temperaturaFruta) <= Number(inspeccion.fruta.tempMaxima))
     : null;
 
-  // Debug - remover después
   if (inspeccion.fruta) {
     console.log('Validación de temperatura:', {
       temperatura: inspeccion.temperaturaFruta,
@@ -126,36 +123,38 @@ export default function DetalleInspeccionPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Detalle de Inspección</h1>
-            <div className="flex items-center gap-4 mt-2">
-              <div className="text-sm font-semibold text-gray-900 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">
-                Nº Inspección: #{inspeccion.id}
-              </div>
-              <p className="text-gray-600">
-                Contenedor: {inspeccion.numeroOrdenContenedor}
-              </p>
+      <div className="mx-auto space-y-3 md:space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 md:py-4 px-3 md:px-4 rounded-lg bg-card border border-border/50">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h1 className="text-lg md:text-xl font-bold text-foreground">Detalle de Inspección</h1>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-semibold border border-primary/20">
+                <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+                Nº #{inspeccion.id}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">Contenedor:</span> {inspeccion.numeroOrdenContenedor}
+              </span>
             </div>
           </div>
           <button
             onClick={() => router.back()}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-200 font-medium group"
+            className="flex items-center gap-2 px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground rounded text-xs font-medium border border-border transition-all duration-200 group whitespace-nowrap"
           >
-            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform duration-200" />
-            <span>Volver</span>
+            <ArrowLeftIcon className="h-3 w-3 group-hover:-translate-x-1 transition-transform duration-200" />
+            <span className="hidden sm:inline">Volver</span>
           </button>
         </div>
 
-        {/* Información General */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Información General</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <p className="text-sm text-gray-500">Fecha de Inspección</p>
-              <p className="font-medium text-gray-900">
+        <div className="bg-card p-3 md:p-4 rounded-lg border border-border/50">
+          <h2 className="text-sm md:text-base font-bold text-foreground mb-3 pb-2 border-b border-border/50">Información General</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
+            {/* Fecha de Inspección */}
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-semibold">Fecha de Inspección</p>
+              <p className="font-semibold text-xs text-foreground">
                 {new Date(inspeccion.fecha).toLocaleDateString('es-ES', {
                   weekday: 'long',
                   year: 'numeric',
@@ -165,28 +164,35 @@ export default function DetalleInspeccionPage() {
               </p>
             </div>
 
-            <div>
-              <p className="text-sm text-gray-500">Estado</p>
-              <span className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+            {/* Estado */}
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-semibold">Estado</p>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/10 text-green-700 rounded text-xs font-semibold border border-green-500/20">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                 {inspeccion.estado}
               </span>
             </div>
 
+            {/* Alertas */}
             {!isNormalUser && (
-              <div>
-                <p className="text-sm text-gray-500">Tiene Alertas</p>
-                <p className="font-medium">
-                  {inspeccion.tieneAlertas ? (
-                    <span className="text-red-600">⚠️ Sí</span>
-                  ) : (
-                    <span className="text-green-600">✓ No</span>
-                  )}
-                </p>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground font-semibold">Tiene Alertas</p>
+                {inspeccion.tieneAlertas ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-destructive/10 text-destructive rounded text-xs font-semibold border border-destructive/20">
+                    <span className="w-1.5 h-1.5 bg-destructive rounded-full"></span>
+                    Sí
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/10 text-green-700 rounded text-xs font-semibold border border-green-500/20">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                    No
+                  </span>
+                )}
               </div>
             )}
 
-            <div>
-              <p className="text-sm text-gray-500">Inspector</p>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-semibold">Inspector</p>
               {inspeccion.usuario ? (
                 <button
                   onClick={() => {
@@ -195,78 +201,80 @@ export default function DetalleInspeccionPage() {
                       setShowUserInfo(true);
                     }
                   }}
-                  className="font-medium text-gray-900 hover:text-blue-600 transition-colors flex items-center gap-2 group"
+                  className="font-semibold text-xs text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1 group hover:underline"
                   title={`Ver información de ${inspeccion.usuario.nombre}`}
                 >
-                  <span className="group-hover:underline">
-                    {inspeccion.usuario.nombre}
-                  </span>
+                  {inspeccion.usuario.nombre}
                   {inspeccion.usuario.area && (
-                    <span className="text-sm text-gray-500 group-hover:text-blue-500">({inspeccion.usuario.area})</span>
+                    <span className="text-xs text-muted-foreground group-hover:text-primary/60">({inspeccion.usuario.area})</span>
                   )}
-                  <span className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                 </button>
               ) : (
-                <p className="font-medium text-gray-900">-</p>
+                <p className="font-semibold text-xs text-foreground">-</p>
               )}
             </div>
 
-            <div>
-              <p className="text-sm text-gray-500">Punto de Inspección</p>
-              <p className="font-medium text-gray-900">
-                📍 {inspeccion.puntoInspeccion?.nombre || '-'}
+            {/* Punto de Inspección */}
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-semibold">Punto de Inspección</p>
+              <p className="font-semibold text-xs text-foreground">
+                {inspeccion.puntoInspeccion?.nombre || '-'}
               </p>
             </div>
 
-            <div>
-              <p className="text-sm text-gray-500">Fecha de Creación</p>
-              <p className="text-sm text-gray-700">
+            {/* Fecha de Creación */}
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-semibold">Fecha de Creación</p>
+              <p className="text-xs text-foreground">
                 {new Date(inspeccion.fechaCreacion).toLocaleString('es-ES')}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Datos de la Carga */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Datos de la Carga</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Proveedor</p>
-              <p className="font-medium text-gray-900 text-lg">
+        <div className="bg-card p-3 md:p-4 rounded-lg border border-border/50">
+          <h2 className="text-sm md:text-base font-bold text-foreground mb-3 pb-2 border-b border-border/50">Datos de la Carga</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+            {/* Proveedor */}
+            <div className="p-2 md:p-3 rounded bg-muted/20 border border-border/50">
+              <p className="text-xs text-muted-foreground font-semibold mb-1">Proveedor</p>
+              <p className="font-semibold text-xs text-foreground mb-1">
                 {inspeccion.proveedor?.nombre || '-'}
               </p>
               {inspeccion.proveedor && (
-                <div className="mt-2 space-y-1">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Código:</span> {inspeccion.proveedor.codigo}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">País:</span> {inspeccion.proveedor.pais}
-                  </p>
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Código:</span>
+                    <span className="font-medium text-foreground">{inspeccion.proveedor.codigo}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">País:</span>
+                    <span className="font-medium text-foreground">{inspeccion.proveedor.pais}</span>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Fruta</p>
-              <p className="font-medium text-gray-900 text-lg">
+            <div className="p-2 md:p-3 rounded bg-muted/20 border border-border/50">
+              <p className="text-xs text-muted-foreground font-semibold mb-1">Fruta</p>
+              <p className="font-semibold text-xs text-foreground mb-1">
                 {inspeccion.fruta?.nombre || '-'}
               </p>
               {inspeccion.fruta && !isNormalUser && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Rango óptimo:</span>{' '}
-                    {inspeccion.fruta.tempMinima}°C - {inspeccion.fruta.tempMaxima}°C
-                  </p>
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Rango óptimo:</span>
+                    <span className="font-medium text-primary">{inspeccion.fruta.tempMinima}°C - {inspeccion.fruta.tempMaxima}°C</span>
+                  </div>
                 </div>
               )}
             </div>
 
+            {/* Línea Transportista */}
             {inspeccion.lineaTransportista && (
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Línea Transportista</p>
-                <p className="font-medium text-gray-900 text-lg">
+              <div className="p-2 md:p-3 rounded bg-muted/20 border border-border/50">
+                <p className="text-xs text-muted-foreground font-semibold mb-1">Línea Transportista</p>
+                <p className="font-semibold text-xs text-foreground">
                   {inspeccion.lineaTransportista}
                 </p>
               </div>
@@ -274,247 +282,281 @@ export default function DetalleInspeccionPage() {
           </div>
         </div>
 
-        {/* Cantidades */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Cantidades</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-600">Pallets</p>
-              <p className="text-3xl font-bold text-blue-600">{inspeccion.numeroPallets}</p>
+        <div className="bg-card p-3 md:p-4 rounded-lg border border-border/50">
+          <h2 className="text-sm md:text-base font-bold text-foreground mb-3 pb-2 border-b border-border/50">Cantidades</h2>
+          <div className="grid grid-cols-3 gap-2 md:gap-3">
+           
+            <div className="p-2 md:p-3 rounded bg-muted/20 border border-border/50 text-center">
+              <p className="text-xs text-muted-foreground font-semibold mb-1">Pallets</p>
+              <p className="text-2xl md:text-3xl font-bold text-foreground">{inspeccion.numeroPallets}</p>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-gray-600">Cajas</p>
-              <p className="text-3xl font-bold text-green-600">{inspeccion.numeroCajas}</p>
+
+            <div className="p-2 md:p-3 rounded bg-muted/20 border border-border/50 text-center">
+              <p className="text-xs text-muted-foreground font-semibold mb-1">Cajas</p>
+              <p className="text-2xl md:text-3xl font-bold text-foreground">{inspeccion.numeroCajas}</p>
             </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <p className="text-sm text-gray-600">Trancas</p>
-              <p className="text-3xl font-bold text-purple-600">{inspeccion.numeroTrancas}</p>
+
+            <div className="p-2 md:p-3 rounded bg-muted/20 border border-border/50 text-center">
+              <p className="text-xs text-muted-foreground font-semibold mb-1">Trancas</p>
+              <p className="text-2xl md:text-3xl font-bold text-foreground">{inspeccion.numeroTrancas}</p>
             </div>
           </div>
         </div>
 
-        {/* Control de Temperatura */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Control de Temperatura</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="border-l-4 border-blue-500 pl-4">
-              <p className="text-sm text-gray-500 mb-2">Termógrafo Origen</p>
-              <div className="flex items-center mb-1">
+        <div className="bg-card p-3 md:p-4 rounded-lg border border-border/50">
+          <h2 className="text-sm md:text-base font-bold text-foreground mb-3 pb-2 border-b border-border/50">Control de Temperatura</h2>
+          <div className="space-y-2 md:space-y-3">
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+              
+              <div className="p-2 md:p-3 rounded border border-border/50 bg-muted/20">
+                <p className="text-xs text-muted-foreground font-semibold mb-1">Termógrafo Origen</p>
                 {inspeccion.termografoOrigen ? (
-                  <span className="text-green-600 font-medium">✓ Presente</span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-foreground">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Presente
+                  </span>
                 ) : (
-                  <span className="text-red-600 font-medium">✗ Ausente</span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-foreground">
+                    <span className="w-2 h-2 bg-destructive rounded-full"></span>
+                    Ausente
+                  </span>
+                )}
+                {inspeccion.termografoOrigen && inspeccion.paletTermografoOrigen && (
+                  <div className="flex flex-wrap gap-1 mt-1 pt-1 border-t border-border/50">
+                    {Array.isArray(inspeccion.paletTermografoOrigen) ? (
+                      inspeccion.paletTermografoOrigen.map((palet) => (
+                        <span
+                          key={palet}
+                          className="text-xs bg-muted text-foreground px-1.5 py-0.5 rounded border border-border/50 font-semibold"
+                        >
+                          P#{palet}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs bg-muted text-foreground px-1.5 py-0.5 rounded border border-border/50 font-semibold">
+                        P#{inspeccion.paletTermografoOrigen}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
-              {inspeccion.termografoOrigen && inspeccion.paletTermografoOrigen && (
-                <div className="flex flex-wrap gap-2">
-                  {Array.isArray(inspeccion.paletTermografoOrigen) ? (
-                    inspeccion.paletTermografoOrigen.map((palet) => (
-                      <span
-                        key={palet}
-                        className="text-sm bg-blue-50 text-blue-900 px-2 py-1 rounded inline-block font-semibold"
-                      >
-                        Palet #{palet}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-sm bg-blue-50 text-blue-900 px-2 py-1 rounded inline-block font-semibold">
-                      Palet #{inspeccion.paletTermografoOrigen}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
 
-            <div className="border-l-4 border-green-500 pl-4">
-              <p className="text-sm text-gray-500 mb-2">Termógrafo Nacional</p>
-              <div className="flex items-center mb-1">
+              <div className="p-2 md:p-3 rounded border border-border/50 bg-muted/20">
+                <p className="text-xs text-muted-foreground font-semibold mb-1">Termógrafo Nacional</p>
                 {inspeccion.termografoNacional ? (
-                  <span className="text-green-600 font-medium">✓ Presente</span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-foreground">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Presente
+                  </span>
                 ) : (
-                  <span className="text-red-600 font-medium">✗ Ausente</span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-foreground">
+                    <span className="w-2 h-2 bg-destructive rounded-full"></span>
+                    Ausente
+                  </span>
+                )}
+                {inspeccion.termografoNacional && inspeccion.paletTermografoNacional && (
+                  <div className="flex flex-wrap gap-1 mt-1 pt-1 border-t border-border/50">
+                    {Array.isArray(inspeccion.paletTermografoNacional) ? (
+                      inspeccion.paletTermografoNacional.map((palet) => (
+                        <span
+                          key={palet}
+                          className="text-xs bg-muted text-foreground px-1.5 py-0.5 rounded border border-border/50 font-semibold"
+                        >
+                          P#{palet}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs bg-muted text-foreground px-1.5 py-0.5 rounded border border-border/50 font-semibold">
+                        P#{inspeccion.paletTermografoNacional}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
-              {inspeccion.termografoNacional && inspeccion.paletTermografoNacional && (
-                <div className="flex flex-wrap gap-2">
-                  {Array.isArray(inspeccion.paletTermografoNacional) ? (
-                    inspeccion.paletTermografoNacional.map((palet) => (
-                      <span
-                        key={palet}
-                        className="text-sm bg-green-50 text-green-900 px-2 py-1 rounded inline-block font-semibold"
-                      >
-                        Palet #{palet}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+              
+              <div className="p-2 md:p-3 rounded border border-border/50 bg-muted/20">
+                <p className="text-xs text-muted-foreground font-semibold mb-1">Temperatura Fruta</p>
+                <div className="flex items-end gap-2">
+                  <p className="text-2xl md:text-3xl font-bold text-foreground">
+                    {inspeccion.temperaturaFruta}°
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-0.5">C</p>
+                </div>
+                {!isNormalUser && tempEnRango !== null && (
+                  <div className="mt-1 pt-1 border-t border-border/50">
+                    {tempEnRango ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                        En rango
                       </span>
-                    ))
-                  ) : (
-                    <span className="text-sm bg-green-50 text-green-900 px-2 py-1 rounded inline-block font-semibold">
-                      Palet #{inspeccion.paletTermografoNacional}
-                    </span>
-                  )}
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-destructive">
+                        <span className="w-1.5 h-1.5 bg-destructive rounded-full"></span>
+                        Fuera rango
+                      </span>
+                    )}
+                  </div>
+                )}
+                {inspeccion.fruta && !isNormalUser && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {inspeccion.fruta.tempMinima}° - {inspeccion.fruta.tempMaxima}°C
+                  </p>
+                )}
+              </div>
+
+              {inspeccion.temperaturaCarga && (
+                <div className="p-2 md:p-3 rounded border border-border/50 bg-muted/20">
+                  <p className="text-xs text-muted-foreground font-semibold mb-1">Temperatura Carga</p>
+                  <div className="flex items-end gap-2">
+                    <p className="text-2xl md:text-3xl font-bold text-foreground">
+                      {inspeccion.temperaturaCarga}°
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-0.5">C</p>
+                  </div>
                 </div>
               )}
             </div>
-
-            <div className="border-l-4 border-orange-500 pl-4">
-              <p className="text-sm text-gray-500 mb-2">Temperatura de la Fruta</p>
-              <div className="flex items-center space-x-2">
-                <p className="text-2xl font-bold text-gray-900">
-                  {inspeccion.temperaturaFruta}°C
-                </p>
-                {!isNormalUser && tempEnRango !== null && (
-                  tempEnRango ? (
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
-                      ✓ En rango
-                    </span>
-                  ) : (
-                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded font-medium">
-                      ⚠️ Fuera de rango
-                    </span>
-                  )
-                )}
-              </div>
-              {inspeccion.fruta && !isNormalUser && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Rango óptimo: {inspeccion.fruta.tempMinima}°C - {inspeccion.fruta.tempMaxima}°C
-                </p>
-              )}
-            </div>
-
-            {inspeccion.temperaturaCarga && (
-              <div className="border-l-4 border-red-500 pl-4">
-                <p className="text-sm text-gray-500 mb-2">Temperatura de la Carga</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {inspeccion.temperaturaCarga}°C
-                </p>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Observaciones */}
         {inspeccion.observaciones && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Observaciones</h2>
-            <p className="text-gray-700 whitespace-pre-wrap">{inspeccion.observaciones}</p>
+          <div className="bg-card p-3 md:p-4 rounded-lg border border-border/50">
+            <h2 className="text-sm md:text-base font-bold text-foreground mb-2">Observaciones</h2>
+            <p className="text-xs text-foreground whitespace-pre-wrap">{inspeccion.observaciones}</p>
           </div>
         )}
 
-        {/* Firma de Transporte */}
         {inspeccion.firmaTransporte && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Firma de Transporte</h2>
+          <div className="bg-card p-3 md:p-4 rounded-lg border border-border/50">
+            <h2 className="text-sm md:text-base font-bold text-foreground mb-2">Firma de Transporte</h2>
             <div className="flex flex-col items-center">
-              <div className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
+              <div className="border border-border rounded p-2 bg-muted/30">
                 {inspeccion.firmaTransporte.startsWith('data:') || inspeccion.firmaTransporte.startsWith('http') ? (
                   <img
                     src={normalizeImageUrl(inspeccion.firmaTransporte) || inspeccion.firmaTransporte}
                     alt="Firma de Transporte"
-                    className="h-40 object-contain"
+                    className="h-24 md:h-32 object-contain"
                   />
                 ) : (
-                  <p className="text-gray-500 text-center text-sm">Firma registrada</p>
+                  <p className="text-muted-foreground text-center text-xs">Firma registrada</p>
                 )}
               </div>
-              <p className="text-sm text-gray-600 mt-3 text-center">
-                Firma del Responsable del Transporte
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Responsable del Transporte
               </p>
             </div>
           </div>
         )}
 
-        {/* Alertas */}
         {!isNormalUser && inspeccion.alertas && inspeccion.alertas.length > 0 && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
+          <div className="bg-card p-3 md:p-4 rounded-lg border border-border/50">
+            <h2 className="text-sm md:text-base font-bold text-foreground mb-2 pb-2 border-b border-border/50">
               Alertas ({inspeccion.alertas.length})
             </h2>
-            <div className="space-y-3">
-              {inspeccion.alertas.map((alerta) => (
-                <div
-                  key={alerta.id}
-                  className={`p-4 rounded border-l-4 ${
-                    alerta.criticidad === 'alta'
-                      ? 'border-red-500 bg-red-50'
-                      : alerta.criticidad === 'media'
-                      ? 'border-yellow-500 bg-yellow-50'
-                      : 'border-blue-500 bg-blue-50'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center space-x-2 mb-1">
-                        <span
-                          className={`text-xs px-2 py-1 rounded font-medium ${
-                            alerta.criticidad === 'alta'
-                              ? 'bg-red-200 text-red-800'
-                              : alerta.criticidad === 'media'
-                              ? 'bg-yellow-200 text-yellow-800'
-                              : 'bg-blue-200 text-blue-800'
-                          }`}
-                        >
-                          {alerta.criticidad.toUpperCase()}
-                        </span>
-                        <span className="text-sm font-medium text-gray-700">
-                          {alerta.tipoAlerta.replace(/_/g, ' ')}
-                        </span>
+            <div className="space-y-2">
+              {inspeccion.alertas.map((alerta) => {
+                const getCriticidadStyles = () => {
+                  switch (alerta.criticidad) {
+                    case 'alta':
+                      return {
+                        border: 'border-border',
+                        badge: 'bg-destructive/10 text-destructive'
+                      };
+                    case 'media':
+                      return {
+                        border: 'border-border',
+                        badge: 'bg-amber-500/10 text-amber-700'
+                      };
+                    default:
+                      return {
+                        border: 'border-border',
+                        badge: 'bg-primary/10 text-primary'
+                      };
+                  }
+                };
+
+                const styles = getCriticidadStyles();
+
+                return (
+                  <div
+                    key={alerta.id}
+                    className={`p-2 md:p-3 rounded border border-border/50 bg-muted/20 hover:bg-muted/30 transition-colors`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-1 mb-1">
+                          <span className={`text-xs px-2 py-0.5 rounded font-semibold ${styles.badge}`}>
+                            {alerta.criticidad.toUpperCase()}
+                          </span>
+                          <span className="text-xs font-semibold text-foreground">
+                            {alerta.tipoAlerta.replace(/_/g, ' ')}
+                          </span>
+                        </div>
+                        <p className="text-xs text-foreground mb-1 line-clamp-2">{alerta.descripcion}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(alerta.fechaCreacion).toLocaleDateString('es-ES')}
+                        </p>
                       </div>
-                      <p className="text-gray-800">{alerta.descripcion}</p>
-                      <p className="text-xs text-gray-500 mt-2">
-                        {new Date(alerta.fechaCreacion).toLocaleString('es-ES')}
-                      </p>
+                      {alerta.leida && (
+                        <span className="flex-shrink-0 text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded font-medium whitespace-nowrap">
+                          ✓
+                        </span>
+                      )}
                     </div>
-                    {alerta.leida && (
-                      <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
-                        ✓ Leída
-                      </span>
-                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* Fotos */}
         {inspeccion.fotos && inspeccion.fotos.length > 0 && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
+          <div className="bg-card p-3 md:p-4 rounded-lg border border-border/50">
+            <h2 className="text-sm md:text-base font-bold text-foreground mb-3 pb-2 border-b border-border/50">
               Fotos ({inspeccion.fotos.length})
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
               {inspeccion.fotos.map((foto) => (
-                <div key={foto.id} className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                  <div className="relative aspect-video bg-gray-100">
+                <div key={foto.id} className="group flex flex-col overflow-hidden rounded border border-border/50 bg-background hover:border-primary/30 transition-all">
+                  
+                  <div className="relative aspect-square bg-muted/30 overflow-hidden flex-shrink-0">
                     {foto.urlFoto ? (
                       <img
                         src={normalizeImageUrl(foto.urlFoto) || foto.urlFoto}
                         alt={foto.tipoFoto.replace(/_/g, ' ')}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <span className="text-gray-400 text-4xl">📷</span>
+                      <div className="flex items-center justify-center h-full bg-muted/50">
+                        <span className="text-muted-foreground text-3xl">📷</span>
+                      </div>
+                    )}
+
+                    {foto.esObligatoria && (
+                      <div className="absolute top-1 right-1">
+                        <span className="text-xs bg-destructive/90 text-white px-1.5 py-0.5 rounded font-semibold">
+                          Oblig.
+                        </span>
                       </div>
                     )}
                   </div>
-                  <div className="p-4">
-                    <p className="text-sm font-semibold text-gray-900 mb-1">
-                      {foto.tipoFoto.replace(/_/g, ' ').toUpperCase()}
-                    </p>
-                    {foto.descripcion && (
-                      <p className="text-xs text-gray-600 mb-2">{foto.descripcion}</p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      {foto.esObligatoria && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
-                          Obligatoria
-                        </span>
-                      )}
+
+                  <div className="flex flex-col flex-grow p-2 md:p-2.5">
+                    <h3 className="text-xs font-bold text-foreground mb-1 line-clamp-1">
+                      {foto.tipoFoto.replace(/_/g, ' ')}
+                    </h3>
+
+                    <div className="mt-auto pt-1 flex justify-center">
                       <button
                         onClick={() => handleOpenImageModal(normalizeImageUrl(foto.urlFoto) || foto.urlFoto, foto.tipoFoto.replace(/_/g, ' ').toUpperCase())}
-                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        className="p-1 rounded bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all text-xs"
+                        title="Ver"
                       >
-                        Ver imagen completa →
+                        <EyeIcon className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>
@@ -524,34 +566,32 @@ export default function DetalleInspeccionPage() {
           </div>
         )}
 
-        {/* Acciones */}
-        <div className="bg-gray-50 p-4 rounded-lg flex justify-between items-center">
-          <div className="text-sm text-gray-600">
-            <p>Última actualización: {new Date(inspeccion.fechaActualizacion).toLocaleString('es-ES')}</p>
+        <div className="bg-muted/20 p-2 md:p-3 rounded-lg border border-border/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div className="text-xs text-muted-foreground">
+            <p className="font-medium">Última actualización: <span className="text-foreground text-xs">{new Date(inspeccion.fechaActualizacion).toLocaleDateString('es-ES')}</span></p>
           </div>
-          <div className="space-x-3 flex">
+          <div className="flex gap-1 md:gap-2 flex-wrap w-full sm:w-auto">
             <Link
               href={`/inspecciones`}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 inline-block transition-colors"
+              className="flex-1 sm:flex-none px-2 md:px-3 py-1 md:py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground rounded text-xs font-medium inline-flex items-center justify-center transition-all"
             >
-              Volver a Lista
+              ← Lista
             </Link>
             {isAdmin && (
               <>
                 <button
                   onClick={handleDownloadPDF}
                   disabled={isGeneratingPDF}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed inline-flex items-center gap-2 transition-colors"
+                  className="flex-1 sm:flex-none px-2 md:px-3 py-1 md:py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded disabled:bg-primary/50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1 transition-all text-xs font-medium"
                 >
                   {isGeneratingPDF ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Generando...
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary-foreground"></div>
                     </>
                   ) : (
                     <>
-                      <DocumentArrowDownIcon className="h-5 w-5" />
-                      Descargar PDF
+                      <DocumentArrowDownIcon className="h-3 w-3" />
+                      <span className="hidden sm:inline">PDF</span>
                     </>
                   )}
                 </button>
@@ -560,9 +600,10 @@ export default function DetalleInspeccionPage() {
                     href={inspeccion.pdfGenerado}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 inline-block transition-colors"
+                    className="flex-1 sm:flex-none px-2 md:px-3 py-1 md:py-1.5 bg-green-500 hover:bg-green-600 text-white rounded inline-flex items-center justify-center gap-1 transition-all text-xs font-medium"
                   >
-                    📄 PDF del servidor
+                    <span>📄</span>
+                    <span className="hidden sm:inline">Servidor</span>
                   </a>
                 )}
               </>
@@ -571,7 +612,6 @@ export default function DetalleInspeccionPage() {
         </div>
       </div>
 
-      {/* Image Modal */}
       {selectedImage && (
         <ImageModal
           isOpen={isModalOpen}
@@ -581,7 +621,6 @@ export default function DetalleInspeccionPage() {
         />
       )}
 
-      {/* User Info Modal */}
       <UserInfoModal
         usuario={selectedUsuario}
         isOpen={showUserInfo}

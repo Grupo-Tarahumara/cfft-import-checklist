@@ -53,26 +53,25 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const { isCollapsed, toggleSidebar, isMobileOpen, toggleMobileSidebar } = useSidebar();
 
-  // Auto-expand Catálogos if any of its submenu items are active on initial load
+  
   const activeCatalogo = menuItems.find(item =>
     item.submenu?.some(sub => pathname === sub.href)
   );
 
-  // Keep Catálogos expanded if any submenu item is active (only on mount)
   useEffect(() => {
     if (activeCatalogo && expandedMenu === null) {
       setExpandedMenu(activeCatalogo.label);
     }
-  }, []); // Only run on mount
+  }, []); 
 
-  // Close mobile sidebar when route changes
+
   useEffect(() => {
     if (isMobileOpen) {
       toggleMobileSidebar();
     }
   }, [pathname]);
 
-  // Detect if we're on mobile
+ 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024);
@@ -85,7 +84,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Overlay - Click to close */}
+      
       <AnimatePresence>
         {isMobileOpen && (
           <motion.div
@@ -98,21 +97,21 @@ export default function Sidebar() {
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
+     
       <motion.aside
         animate={{
           width: isMobile ? '280px' : (isCollapsed ? '80px' : '16rem')
         }}
         transition={{ duration: 0.3 }}
-        className={`bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white h-screen shadow-2xl border-r border-slate-700/50 flex flex-col
+        className={`bg-background text-foreground h-screen shadow-lg border-r border-border flex flex-col
                    fixed left-0 top-0 z-50 transition-transform duration-300 ease-in-out
                    pt-16 lg:pt-0 lg:sticky lg:left-auto lg:top-0
                    ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
-        {/* Toggle Button - Desktop only */}
+        
         <button
           onClick={toggleSidebar}
-          className="hidden lg:block absolute -right-3 top-8 z-50 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+          className="hidden lg:block absolute -right-3 top-8 z-50 bg-primary hover:bg-primary/90 text-primary-foreground p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
         >
           {isCollapsed ? (
             <Bars3Icon className="w-4 h-4" />
@@ -122,12 +121,12 @@ export default function Sidebar() {
         </button>
 
       <nav className={`flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 lg:px-4 lg:py-6 scrollbar-hide ${isCollapsed ? 'lg:px-2 lg:py-4' : ''}`}>
-        {/* Logo y Header Section */}
-        <div className={`pb-3 lg:pb-4 border-b border-slate-700/50 mb-4 lg:mb-6 ${isCollapsed ? 'lg:mb-4' : ''}`}>
+        
+        <div className={`pb-3 lg:pb-4 border-b border-border mb-4 lg:mb-6 ${isCollapsed ? 'lg:mb-4' : ''}`}>
           <div className="flex flex-col items-center">
             <div className={`relative mb-3 lg:mb-4 ${isCollapsed ? 'lg:mb-2' : ''}`}>
-              <div className={`absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl blur-md opacity-30 ${isCollapsed ? 'lg:rounded-xl' : ''}`}></div>
-              <div className={`relative bg-gradient-to-br from-slate-800 to-slate-700 rounded-2xl shadow-xl border border-slate-600/50 transition-all duration-300 ${
+              <div className={`absolute inset-0 bg-gradient-to-r from-primary to-primary/80 rounded-2xl blur-md opacity-20 ${isCollapsed ? 'lg:rounded-xl' : ''}`}></div>
+              <div className={`relative bg-card rounded-2xl shadow-lg border border-border transition-all duration-300 ${
                 isCollapsed ? 'lg:p-2.5 lg:rounded-xl' : 'p-2 lg:p-4'
               }`}>
                 <Image
@@ -142,24 +141,22 @@ export default function Sidebar() {
               </div>
             </div>
             <div className={`text-center transition-all duration-300 ${isCollapsed ? 'lg:hidden' : 'mt-3 lg:mt-4'}`}>
-              <h1 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent mb-1">
+              <h1 className="text-lg lg:text-xl font-bold text-foreground mb-1">
                 CFFT Import
               </h1>
-              <p className="text-xs text-slate-400 font-medium">Sistema de Gestión</p>
+              <p className="text-xs text-muted-foreground font-medium">Sistema de Gestión</p>
             </div>
           </div>
         </div>
 
         <ul className="space-y-1.5">
           {menuItems.map((item, index) => {
-            // Filtrar items según el rol del usuario
             if (!user) {
               return null;
             }
             if (!isValidRole(user.rol)) {
               return null;
             }
-            // After isValidRole check, userRole is properly typed as 'admin' | 'user'
             const userRole: 'admin' | 'user' = user.rol;
             if (!item.roles.includes(userRole as 'admin')) {
               return null;
@@ -176,12 +173,12 @@ export default function Sidebar() {
                       onClick={() => {
                         setExpandedMenu(isExpanded ? null : item.label);
                       }}
-                      className={`w-full flex items-center rounded-xl transition-all duration-200 group ${
+                      className={`w-full flex items-center rounded-lg transition-all duration-200 group ${
                         (isMobile || !isCollapsed) ? 'justify-between px-4 py-3' : 'justify-center px-2 py-3'
                       } ${
                         hasActiveSubmenu || isExpanded
-                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
-                          : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                          ? 'bg-primary text-primary-foreground shadow-md'
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       }`}
                       whileHover={{ x: (isMobile || !isCollapsed) ? 4 : 0 }}
                       whileTap={{ scale: 0.98 }}
@@ -205,7 +202,6 @@ export default function Sidebar() {
                       )}
                     </motion.button>
 
-                    {/* Submenu icons when collapsed (desktop only) */}
                     <AnimatePresence>
                       {!isMobile && isCollapsed && isExpanded && (
                         <motion.div
@@ -213,7 +209,7 @@ export default function Sidebar() {
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="overflow-hidden mt-1.5 ml-1 pl-2 border-l-2 border-blue-500/50 space-y-1"
+                          className="overflow-hidden mt-1.5 ml-1 pl-2 border-l-2 border-primary/30 space-y-1"
                         >
                           {item.submenu.filter(subitem => user && subitem.roles.includes(userRole as 'admin')).map((subitem, subindex) => {
                             const isActive = pathname === subitem.href;
@@ -228,8 +224,8 @@ export default function Sidebar() {
                                   href={subitem.href}
                                   className={`flex items-center justify-center px-2 py-2.5 rounded-lg transition-all duration-200 ${
                                     isActive
-                                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
-                                      : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
+                                      ? 'bg-primary text-primary-foreground shadow-md'
+                                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                   }`}
                                   title={subitem.label}
                                 >
@@ -242,7 +238,6 @@ export default function Sidebar() {
                       )}
                     </AnimatePresence>
 
-                    {/* Submenu with text (mobile or desktop expanded) */}
                     <AnimatePresence>
                       {isExpanded && (isMobile || !isCollapsed) && (
                         <motion.ul
@@ -250,7 +245,7 @@ export default function Sidebar() {
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="ml-4 mt-1.5 space-y-1 overflow-hidden border-l-2 border-slate-700/50 pl-3"
+                          className="ml-4 mt-1.5 space-y-1 overflow-hidden border-l-2 border-border pl-3"
                         >
                           {item.submenu.filter(subitem => user && subitem.roles.includes(userRole as 'admin')).map((subitem, subindex) => {
                             const isActive = pathname === subitem.href;
@@ -266,8 +261,8 @@ export default function Sidebar() {
                                   href={subitem.href}
                                   className={`flex items-center px-4 py-2.5 rounded-lg transition-all duration-200 group ${
                                     isActive
-                                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
-                                      : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
+                                      ? 'bg-primary text-primary-foreground shadow-md'
+                                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                   }`}
                                 >
                                   <subitem.Icon className="w-4 h-4 mr-3" />
@@ -294,12 +289,12 @@ export default function Sidebar() {
                   >
                     <Link
                       href={item.href}
-                      className={`flex items-center rounded-xl transition-all duration-200 group relative ${
+                      className={`flex items-center rounded-lg transition-all duration-200 group relative ${
                         (isMobile || !isCollapsed) ? 'px-4 py-3' : 'justify-center px-2 py-3'
                       } ${
                         pathname === item.href
-                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
-                          : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                          ? 'bg-primary text-primary-foreground shadow-md'
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       }`}
                       title={(isMobile || !isCollapsed) ? '' : item.label}
                     >
@@ -328,19 +323,18 @@ export default function Sidebar() {
 
       </nav>
 
-      {/* User Section - Sticky at bottom */}
-      <div className={`border-t border-slate-700/50 bg-gradient-to-b from-slate-900 to-slate-800 ${isMobile ? 'p-6' : (isCollapsed ? 'p-3' : 'p-6')}`}>
-        {/* User Info */}
+      <div className={`border-t border-border bg-background ${isMobile ? 'p-6' : (isCollapsed ? 'p-3' : 'p-6')}`}>
+        
         {user && (
-          <div className={`bg-slate-800/50 rounded-xl border border-slate-700/50 ${isMobile ? 'p-4' : (isCollapsed ? 'p-2' : 'p-4')}`}>
+          <div className={`bg-card rounded-lg border border-border ${isMobile ? 'p-4' : (isCollapsed ? 'p-2' : 'p-4')}`}>
             {!isMobile && isCollapsed ? (
               <div className="flex flex-col items-center space-y-2">
-                <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center" title={user.username}>
-                  <UserCircleIcon className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center" title={user.username}>
+                  <UserCircleIcon className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <button
                   onClick={logout}
-                  className="w-9 h-9 flex items-center justify-center bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                  className="w-9 h-9 flex items-center justify-center bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
                   title="Cerrar Sesión"
                 >
                   <ArrowRightOnRectangleIcon className="w-4 h-4" />
@@ -349,17 +343,17 @@ export default function Sidebar() {
             ) : (
               <>
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center">
-                    <UserCircleIcon className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                    <UserCircleIcon className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{user.username}</p>
-                    <p className="text-xs text-slate-400">{user.rol === 'admin' ? 'Administrador' : 'Usuario'}</p>
+                    <p className="text-sm font-semibold text-foreground truncate">{user.username}</p>
+                    <p className="text-xs text-muted-foreground">{user.rol === 'admin' ? 'Administrador' : 'Usuario'}</p>
                   </div>
                 </div>
                 <button
                   onClick={logout}
-                  className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg font-medium text-sm"
+                  className="w-full flex items-center justify-center space-x-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 py-2.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg font-medium text-sm"
                 >
                   <ArrowRightOnRectangleIcon className="w-4 h-4" />
                   <span>Cerrar Sesión</span>
