@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
 
   // Configuración de imágenes para permitir dominios externos
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
