@@ -87,32 +87,32 @@ export default function DashboardPage() {
 
   const getColorClasses = (color: string) => {
     const colors = {
-      blue: 'from-blue-500 to-blue-600',
-      orange: 'from-orange-500 to-orange-600',
-      red: 'from-red-500 to-red-600'
+      blue: 'from-muted to-muted/80',
+      orange: 'from-muted/80 to-muted/60',
+      red: 'from-muted/90 to-muted/70'
     };
-    return colors[color as keyof typeof colors] || colors.blue;
+    return colors[color as keyof typeof colors] || 'from-muted to-muted/80';
   };
 
   const getCriticidadStyles = (criticidad: string) => {
     const styles = {
       alta: {
-        border: 'border-red-500',
-        bg: 'bg-red-50',
-        text: 'text-red-800',
-        badge: 'bg-red-100 text-red-800'
+        border: 'border-muted-foreground/30',
+        bg: 'bg-muted/30',
+        text: 'text-muted-foreground',
+        badge: 'bg-muted/50 text-muted-foreground'
       },
       media: {
-        border: 'border-yellow-500',
-        bg: 'bg-yellow-50',
-        text: 'text-yellow-800',
-        badge: 'bg-yellow-100 text-yellow-800'
+        border: 'border-muted-foreground/20',
+        bg: 'bg-muted/20',
+        text: 'text-muted-foreground',
+        badge: 'bg-muted/40 text-muted-foreground'
       },
       baja: {
-        border: 'border-blue-500',
-        bg: 'bg-blue-50',
-        text: 'text-blue-800',
-        badge: 'bg-blue-100 text-blue-800'
+        border: 'border-muted-foreground/15',
+        bg: 'bg-muted/15',
+        text: 'text-muted-foreground',
+        badge: 'bg-muted/30 text-muted-foreground'
       }
     };
     return styles[criticidad as keyof typeof styles] || styles.baja;
@@ -123,8 +123,8 @@ export default function DashboardPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg font-medium">Cargando datos del dashboard...</p>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+            <p className="text-muted-foreground text-lg font-medium">Cargando datos del dashboard...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -142,17 +142,17 @@ export default function DashboardPage() {
           className="flex items-center justify-between"
         >
           <div>
-            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Dashboard
             </h1>
-            <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-lg">
+            <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-lg">
               Resumen general de inspecciones y alertas del sistema
             </p>
           </div>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-gray-300 transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center space-x-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Refrescar</span>
@@ -178,16 +178,16 @@ export default function DashboardPage() {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="group"
             >
-              <div className="bg-white rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 border border-gray-100 group-hover:border-gray-200">
+              <div className="bg-card rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 md:p-6 border border-border group-hover:border-border">
                 <div className="flex items-center justify-between mb-3 md:mb-4">
                   <div className={`p-2 md:p-3 rounded-lg md:rounded-xl bg-gradient-to-r ${getColorClasses(stat.color)}`}>
-                    <stat.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
+                    <stat.icon className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{stat.value}</p>
-                  <p className="text-gray-600 text-xs md:text-sm font-medium">{stat.label}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-card-foreground mb-1">{stat.value}</p>
+                  <p className="text-muted-foreground text-xs md:text-sm font-medium">{stat.label}</p>
                 </div>
               </div>
             </motion.div>
@@ -200,24 +200,24 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+            className="bg-card rounded-xl md:rounded-2xl shadow-lg border border-border overflow-hidden"
           >
-            <div className="p-4 md:p-6 border-b border-gray-100">
+            <div className="p-4 md:p-6 border-b border-border">
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center space-x-2 md:space-x-3">
-                  <div className="p-2 bg-red-100 rounded-lg">
-                    <BellAlertIcon className="h-5 w-5 md:h-6 md:w-6 text-red-600" />
+                  <div className="p-2 bg-muted rounded-lg">
+                    <BellAlertIcon className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
                   </div>
                   <div>
-                    <h2 className="text-lg md:text-xl font-bold text-gray-900">Alertas Pendientes</h2>
-                    <p className="text-gray-600 text-xs md:text-sm">
+                    <h2 className="text-lg md:text-xl font-bold text-card-foreground">Alertas Pendientes</h2>
+                    <p className="text-muted-foreground text-xs md:text-sm">
                       {alertasNoLeidas.length} alertas requieren atención
                     </p>
                   </div>
                 </div>
                 <Link
                   href="/alertas"
-                  className="text-blue-600 hover:text-blue-700 text-sm font-semibold flex items-center space-x-1 transition-colors"
+                  className="text-muted-foreground hover:text-foreground text-sm font-semibold flex items-center space-x-1 transition-colors"
                 >
                   <span>Ver todas</span>
                   <span>→</span>
@@ -273,24 +273,24 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+          className="bg-card rounded-xl md:rounded-2xl shadow-lg border border-border overflow-hidden"
         >
-          <div className="p-4 md:p-6 border-b border-gray-100">
+          <div className="p-4 md:p-6 border-b border-border">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center space-x-2 md:space-x-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <ClipboardDocumentListIcon className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
+                <div className="p-2 bg-muted rounded-lg">
+                  <ClipboardDocumentListIcon className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
                 </div>
                 <div>
-                  <h2 className="text-lg md:text-xl font-bold text-gray-900">Últimas Inspecciones</h2>
-                  <p className="text-gray-600 text-xs md:text-sm">
+                  <h2 className="text-lg md:text-xl font-bold text-card-foreground">Últimas Inspecciones</h2>
+                  <p className="text-muted-foreground text-xs md:text-sm">
                     {inspecciones.length} inspecciones recientes
                   </p>
                 </div>
               </div>
               <Link
                 href="/inspecciones"
-                className="text-blue-600 hover:text-blue-700 text-sm font-semibold flex items-center space-x-1 transition-colors"
+                className="text-muted-foreground hover:text-foreground text-sm font-semibold flex items-center space-x-1 transition-colors"
               >
                 <span>Ver todas</span>
                 <span>→</span>
@@ -308,29 +308,29 @@ export default function DashboardPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className="p-3 md:p-4 rounded-lg md:rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 bg-gradient-to-r from-gray-50 to-white cursor-pointer hover:brightness-95"
+                  className="p-3 md:p-4 rounded-lg md:rounded-xl border border-border hover:border-border hover:shadow-md transition-all duration-200 bg-gradient-to-r from-card to-card/95 cursor-pointer"
                 >
                 <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
                   <div className="flex items-center space-x-2 md:space-x-3">
-                    <div className="p-1.5 md:p-2 bg-blue-100 rounded-lg">
-                      <TruckIcon className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                    <div className="p-1.5 md:p-2 bg-muted rounded-lg">
+                      <TruckIcon className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <p className="text-xs md:text-sm font-bold text-gray-900">
+                      <p className="text-xs md:text-sm font-bold text-card-foreground">
                         {inspeccion.numeroOrdenContenedor}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {inspeccion.proveedor?.nombre || '-'}
                       </p>
                     </div>
                   </div>
-                  <span className="inline-flex items-center px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <span className="inline-flex items-center px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
                     <CheckBadgeIcon className="h-3 w-3 mr-1" />
                     {inspeccion.estado}
                   </span>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 text-xs text-gray-600">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 text-xs text-muted-foreground">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                     <div className="flex items-center space-x-1">
                       <CalendarIcon className="h-3 w-3 md:h-4 md:w-4" />
@@ -343,12 +343,12 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     {inspeccion.tieneAlertas ? (
-                      <div className="flex items-center space-x-1 text-red-600">
+                      <div className="flex items-center space-x-1 text-muted-foreground">
                         <ExclamationTriangleIcon className="h-3 w-3 md:h-4 md:w-4" />
                         <span className="font-medium text-xs">Con alertas</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-1 text-green-600">
+                      <div className="flex items-center space-x-1 text-muted-foreground">
                         <CheckBadgeIcon className="h-3 w-3 md:h-4 md:w-4" />
                         <span className="font-medium text-xs">Sin alertas</span>
                       </div>
