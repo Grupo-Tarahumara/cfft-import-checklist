@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { XMarkIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 interface ImageModalProps {
@@ -73,12 +74,14 @@ export default function ImageModal({
           )}
 
          
-          <img
+          <Image
             src={imageUrl}
             alt={imageTitle}
+            fill
             className="max-w-full max-h-full w-auto h-auto object-contain p-4 md:p-6"
             onLoad={() => setIsLoading(false)}
             onError={() => setIsLoading(false)}
+            unoptimized
           />
         </div>
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import DashboardLayout from '@/components/DashboardLayout';
 import { UserInfoModal } from '@/components/UserInfoModal';
 import { authApi } from '@/lib/api-auth';
@@ -436,11 +437,15 @@ export default function DetalleInspeccionPage() {
             <div className="flex flex-col items-center">
               <div className="border border-border rounded p-2 bg-muted/30">
                 {inspeccion.firmaTransporte.startsWith('data:') || inspeccion.firmaTransporte.startsWith('http') ? (
-                  <img
-                    src={normalizeImageUrl(inspeccion.firmaTransporte) || inspeccion.firmaTransporte}
-                    alt="Firma de Transporte"
-                    className="h-24 md:h-32 object-contain"
-                  />
+                  <div className="relative h-24 md:h-32 w-full">
+                    <Image
+                      src={normalizeImageUrl(inspeccion.firmaTransporte) || inspeccion.firmaTransporte}
+                      alt="Firma de Transporte"
+                      fill
+                      className="object-contain"
+                      unoptimized
+                    />
+                  </div>
                 ) : (
                   <p className="text-muted-foreground text-center text-xs">Firma registrada</p>
                 )}
@@ -525,10 +530,12 @@ export default function DetalleInspeccionPage() {
                   
                   <div className="relative aspect-square bg-muted/30 overflow-hidden flex-shrink-0">
                     {foto.urlFoto ? (
-                      <img
+                      <Image
                         src={normalizeImageUrl(foto.urlFoto) || foto.urlFoto}
                         alt={foto.tipoFoto.replace(/_/g, ' ')}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        unoptimized
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full bg-muted/50">

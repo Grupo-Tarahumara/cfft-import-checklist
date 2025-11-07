@@ -84,21 +84,6 @@ export default function AlertasPage() {
     }
   };
 
-
-  const handleMarcarLeida = async (id: number) => {
-    try {
-      await authApi.patch(`/alertas/${id}/marcar-leida`, {});
-      setAlertas(prevAlertas =>
-        prevAlertas.map(alerta =>
-          alerta.id === id ? { ...alerta, leida: true } : alerta
-        )
-      );
-    } catch (error) {
-      console.error('Error marking alerta as read:', error);
-      alert('Error al marcar la alerta como leída');
-    }
-  };
-
   const handleArchivarLote = async (inspeccionId: number) => {
     try {
       await authApi.patch(`/alertas/inspeccion/${inspeccionId}/archivar-todas`, {});

@@ -12,13 +12,10 @@ import { toast } from 'sonner';
 import SignaturePad from '@/components/SignaturePad';
 import TruckPalletSelector from '@/components/TruckPalletSelector';
 import {
-  CalendarIcon,
   TruckIcon,
-  CubeIcon,
   UserIcon,
   MapPinIcon,
   SparklesIcon,
-  DocumentTextIcon,
   ArrowLeftIcon,
   CheckCircleIcon,
   PhotoIcon,

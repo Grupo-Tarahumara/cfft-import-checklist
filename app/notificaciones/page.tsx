@@ -134,32 +134,6 @@ export default function NotificacionesPage() {
     }
   };
 
-  const getMetodoIcon = (metodo: string) => {
-    switch (metodo) {
-      case 'email':
-        return '📧';
-      case 'sistema':
-        return '🔔';
-      case 'push':
-        return '📱';
-      default:
-        return '📬';
-    }
-  };
-
-  const getMetodoColor = (metodo: string) => {
-    switch (metodo) {
-      case 'email':
-        return 'bg-blue-100 text-blue-800';
-      case 'sistema':
-        return 'bg-purple-100 text-purple-800';
-      case 'push':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const groupedNotificaciones = () => {
     const grouped = new Map();
 

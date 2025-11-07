@@ -62,14 +62,14 @@ export default function Sidebar() {
     if (activeCatalogo && expandedMenu === null) {
       setExpandedMenu(activeCatalogo.label);
     }
-  }, []); 
+  }, [activeCatalogo, expandedMenu]);
 
 
   useEffect(() => {
     if (isMobileOpen) {
       toggleMobileSidebar();
     }
-  }, [pathname]);
+  }, [pathname, isMobileOpen, toggleMobileSidebar]);
 
  
   useEffect(() => {
