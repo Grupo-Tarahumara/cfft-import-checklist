@@ -19,13 +19,14 @@ WORKDIR /app
 # =========================
 FROM base AS deps
 
-COPY package.json package-lock.json* ./
+COPY package.json ./
 
 # SIEMPRE instalar TODAS las dependencias (incluyendo devDependencies)
 # Next.js requiere devDependencies para compilar (TypeScript, etc.)
 # El stage de producción final solo copiará el build, no las dependencias
+# Usando npm install en lugar de npm ci para evitar problemas con package-lock.json
 RUN echo "📦 Installing ALL dependencies for build..." && \
-    npm ci --legacy-peer-deps
+    npm install --legacy-peer-deps
 
 # =========================
 # 2. Builder (solo para producción)
