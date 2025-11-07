@@ -42,10 +42,6 @@ const menuItems = [
   },
 ];
 
-const isValidRole = (role: string): role is 'admin' | 'user' => {
-  return role === 'admin' || role === 'user';
-};
-
 export default function Sidebar() {
   const pathname = usePathname();
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
@@ -62,14 +58,14 @@ export default function Sidebar() {
     if (activeCatalogo && expandedMenu === null) {
       setExpandedMenu(activeCatalogo.label);
     }
-  }, [activeCatalogo, expandedMenu]);
+  }, []); // Only run on mount
 
-
+  // Close mobile sidebar when route changes
   useEffect(() => {
     if (isMobileOpen) {
       toggleMobileSidebar();
     }
-  }, [pathname, isMobileOpen, toggleMobileSidebar]);
+  }, [pathname]);
 
  
   useEffect(() => {
@@ -151,19 +147,13 @@ export default function Sidebar() {
 
         <ul className="space-y-1.5">
           {menuItems.map((item, index) => {
-            if (!user) {
-              return null;
-            }
-            if (!isValidRole(user.rol)) {
-              return null;
-            }
-            const userRole: 'admin' | 'user' = user.rol;
-            if (!item.roles.includes(userRole as 'admin')) {
+            // Filtrar items según el rol del usuario
+            if (!user || !item.roles.includes(user.rol)) {
               return null;
             }
 
             const isExpanded = expandedMenu === item.label;
-            const hasActiveSubmenu = item.submenu?.some(sub => pathname === sub.href && sub.roles.includes(userRole as 'admin'));
+            const hasActiveSubmenu = item.submenu?.some(sub => pathname === sub.href && user.rol && sub.roles.includes(user.rol));
 
             return (
               <li key={index}>
@@ -211,7 +201,7 @@ export default function Sidebar() {
                           transition={{ duration: 0.3 }}
                           className="overflow-hidden mt-1.5 ml-1 pl-2 border-l-2 border-primary/30 space-y-1"
                         >
-                          {item.submenu.filter(subitem => user && subitem.roles.includes(userRole as 'admin')).map((subitem, subindex) => {
+                          {item.submenu.filter(subitem => user && subitem.roles.includes(user.rol)).map((subitem, subindex) => {
                             const isActive = pathname === subitem.href;
                             return (
                               <motion.div
@@ -247,7 +237,7 @@ export default function Sidebar() {
                           transition={{ duration: 0.3 }}
                           className="ml-4 mt-1.5 space-y-1 overflow-hidden border-l-2 border-border pl-3"
                         >
-                          {item.submenu.filter(subitem => user && subitem.roles.includes(userRole as 'admin')).map((subitem, subindex) => {
+                          {item.submenu.filter(subitem => user && subitem.roles.includes(user.rol)).map((subitem, subindex) => {
                             const isActive = pathname === subitem.href;
 
                             return (

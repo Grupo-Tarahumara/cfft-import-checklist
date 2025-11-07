@@ -433,11 +433,11 @@ export default function DetalleInspeccionPage() {
 
         {inspeccion.firmaTransporte && (
           <div className="bg-card p-3 md:p-4 rounded-lg border border-border/50">
-            <h2 className="text-sm md:text-base font-bold text-foreground mb-2">Firma de Transporte</h2>
-            <div className="flex flex-col items-center">
-              <div className="border border-border rounded p-2 bg-muted/30">
+            <h2 className="text-sm md:text-base font-bold text-foreground mb-3 pb-2 border-b border-border/50">Firma de Transporte</h2>
+            <div className="flex flex-col items-center gap-3">
+              <div className="border-2 border-border rounded-lg p-3 bg-white/50 dark:bg-muted/30 w-full flex items-center justify-center min-h-40">
                 {inspeccion.firmaTransporte.startsWith('data:') || inspeccion.firmaTransporte.startsWith('http') ? (
-                  <div className="relative h-24 md:h-32 w-full">
+                  <div className="relative h-48 md:h-64 w-full max-w-md">
                     <Image
                       src={normalizeImageUrl(inspeccion.firmaTransporte) || inspeccion.firmaTransporte}
                       alt="Firma de Transporte"
@@ -447,11 +447,11 @@ export default function DetalleInspeccionPage() {
                     />
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-center text-xs">Firma registrada</p>
+                  <p className="text-muted-foreground text-center text-sm font-medium">Firma registrada</p>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                Responsable del Transporte
+              <p className="text-xs text-muted-foreground text-center font-semibold">
+                Firma - Responsable del Transporte
               </p>
             </div>
           </div>

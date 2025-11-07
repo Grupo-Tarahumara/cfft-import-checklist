@@ -8,33 +8,28 @@ interface SidebarContextType {
   shouldAnimate: boolean;
   isMobileOpen: boolean;
   toggleMobileSidebar: () => void;
-  isHydrated: boolean;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  // Hidrate after mount to avoid hydration mismatch
-  useEffect(() => {
-    setIsHydrated(true);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
     // Initialize from localStorage if available (only for desktop)
     if (typeof window !== 'undefined') {
       const savedState = localStorage.getItem('sidebarCollapsed');
-      setIsCollapsed(savedState === 'true');
+      return savedState === 'true';
     }
-  }, []);
+    return false;
+  });
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    if (typeof window !== 'undefined' && isHydrated) {
+    if (typeof window !== 'undefined') {
       localStorage.setItem('sidebarCollapsed', String(isCollapsed));
     }
-  }, [isCollapsed, isHydrated]);
+  }, [isCollapsed]);
 
   const toggleSidebar = () => {
     setShouldAnimate(true);
@@ -48,7 +43,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <SidebarContext.Provider value={{ isCollapsed, toggleSidebar, shouldAnimate, isMobileOpen, toggleMobileSidebar, isHydrated }}>
+    <SidebarContext.Provider value={{ isCollapsed, toggleSidebar, shouldAnimate, isMobileOpen, toggleMobileSidebar }}>
       {children}
     </SidebarContext.Provider>
   );
