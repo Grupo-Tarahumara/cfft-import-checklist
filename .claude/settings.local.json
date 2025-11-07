@@ -3,7 +3,17 @@
     "allow": [
       "Bash(powershell -Command \"Get-ChildItem -Path ''C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist\\app\\login'' -File\")",
       "Bash(nul)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(npm run build:*)",
+      "Bash(dir:*)",
+      "Bash(npx shadcn@latest add https://tweakcn.com/r/themes/cmeaq8ye9000a04jpet2j344p)",
+      "mcp__ide__getDiagnostics",
+      "Bash(Get-ChildItem \"C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist\\app\" -Recurse -Filter \"page.tsx\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(powershell -Command \"Get-ChildItem -Path ''C:\\Users\\becario1.sis\\Proyecto\\cfft-import-checklist\\app'' -Recurse -Filter ''page.tsx'' | Select-Object -ExpandProperty FullName\")",
+      "Bash(powershell -Command \"Stop-Process -Id 16684 -Force\")",
+      "Bash(timeout:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

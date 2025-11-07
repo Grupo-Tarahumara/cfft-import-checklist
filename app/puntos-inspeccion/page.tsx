@@ -52,7 +52,6 @@ export default function PuntosInspeccionPage() {
     e.preventDefault();
     const newErrors: { nombre?: string } = {};
 
-    // Check for duplicate nombre (case-insensitive)
     const duplicateNombre = puntos.some(
       p => p.nombre.toLowerCase() === formData.nombre.toLowerCase() && (!editingPunto || p.id !== editingPunto.id)
     );
@@ -113,7 +112,6 @@ export default function PuntosInspeccionPage() {
     setErrors({});
   };
 
-  // Pagination logic
   const totalPages = Math.ceil(puntos.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -125,10 +123,10 @@ export default function PuntosInspeccionPage() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600/20 border-t-blue-600 mx-auto"></div>
-              <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-4 border-blue-600/10"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary mx-auto"></div>
+              <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-4 border-primary/10"></div>
             </div>
-            <p className="mt-6 text-gray-600 text-lg font-medium">Cargando puntos de inspección...</p>
+            <p className="mt-6 text-muted-foreground text-lg font-medium">Cargando puntos de inspección...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -137,13 +135,13 @@ export default function PuntosInspeccionPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 md:space-y-8">
+      <div className="space-y-3 md:space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+          <div className="py-3 md:py-4">
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">
               Puntos de Inspección
             </h1>
-            <p className="text-sm md:text-lg text-gray-600 mt-2">
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">
               Administra las ubicaciones físicas donde se realizan las inspecciones
             </p>
           </div>
@@ -151,14 +149,14 @@ export default function PuntosInspeccionPage() {
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="group flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-gray-300 transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refrescar</span>
             </button>
             <button
               onClick={() => setShowForm(!showForm)}
-              className="group flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-700 text-white px-5 md:px-6 py-3 rounded-xl hover:shadow-2xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
+              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 md:px-6 py-2 md:py-2.5 rounded-lg transition-all duration-300 font-semibold text-sm"
             >
               <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {showForm ? (
@@ -172,12 +170,11 @@ export default function PuntosInspeccionPage() {
           </div>
         </div>
 
-        {/* Formulario */}
         {showForm && (
-          <div className="bg-white/70 backdrop-blur-xl p-4 md:p-8 rounded-xl md:rounded-3xl shadow-2xl border border-gray-200/60">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6 flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-purple-600 to-indigo-700 rounded-xl">
-                <svg className="h-5 w-5 md:h-6 md:w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="bg-card p-3 md:p-4 rounded-lg shadow-sm border border-border">
+            <h2 className="text-sm md:text-base font-bold text-foreground mb-3 md:mb-4 flex items-center space-x-3">
+              <div className="p-2 bg-primary rounded-xl">
+                <svg className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -187,7 +184,7 @@ export default function PuntosInspeccionPage() {
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-2">
                     Nombre del Punto
                   </label>
                   <input
@@ -197,17 +194,17 @@ export default function PuntosInspeccionPage() {
                     required
                     maxLength={40}
                     placeholder="Ej: Puerto Principal, Almacén Central"
-                    className={`w-full px-4 py-3 bg-white/50 backdrop-blur-sm border ${
-                      errors.nombre ? 'border-red-300' : 'border-gray-200'
-                    } rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200`}
+                    className={`w-full px-4 py-3 bg-muted/20 border ${
+                      errors.nombre ? 'border-destructive' : 'border-border'
+                    } rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200`}
                   />
                   {errors.nombre && (
-                    <p className="text-xs text-red-600 mt-1">{errors.nombre}</p>
+                    <p className="text-xs text-destructive mt-1">{errors.nombre}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-2">
                     Ubicación
                   </label>
                   <input
@@ -217,7 +214,7 @@ export default function PuntosInspeccionPage() {
                     required
                     maxLength={50}
                     placeholder="Ej: Av. Principal 123, Zona Industrial"
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-3 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                   />
                 </div>
 
@@ -227,16 +224,16 @@ export default function PuntosInspeccionPage() {
                     id="activo"
                     checked={formData.activo}
                     onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
-                    className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                    className="h-5 w-5 text-primary focus:ring-primary border-border rounded"
                   />
-                  <label htmlFor="activo" className="ml-3 block text-sm font-semibold text-gray-700">
+                  <label htmlFor="activo" className="ml-3 block text-xs font-semibold text-foreground">
                     Punto Activo
                   </label>
                 </div>
               </div>
 
-              <div className="bg-purple-50/50 backdrop-blur-sm border border-purple-200/50 rounded-xl p-4 text-sm text-purple-800 flex items-start space-x-3">
-                <svg className="w-5 h-5 text-purple-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-muted/50 border border-border rounded-xl p-4 text-sm text-muted-foreground flex items-start space-x-3">
+                <svg className="w-5 h-5 text-muted-foreground mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -247,13 +244,13 @@ export default function PuntosInspeccionPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-5 md:px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium text-sm md:text-base"
+                  className="px-5 md:px-6 py-3 bg-muted hover:bg-muted/80 text-muted-foreground border border-border rounded-xl transition-all duration-200 font-medium text-sm md:text-base"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 md:px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-700 text-white rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
+                  className="px-5 md:px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
                 >
                   {editingPunto ? 'Actualizar Punto' : 'Crear Punto'}
                 </button>
@@ -262,13 +259,12 @@ export default function PuntosInspeccionPage() {
           </div>
         )}
 
-        {/* Tabla de Puntos */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-xl md:rounded-3xl shadow-2xl border border-gray-200/60 overflow-hidden">
+        <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200/60">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100/50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/30">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -277,7 +273,7 @@ export default function PuntosInspeccionPage() {
                       <span>Nombre</span>
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -285,71 +281,66 @@ export default function PuntosInspeccionPage() {
                       <span>Ubicación</span>
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-right text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white/50 divide-y divide-gray-200/60">
+              <tbody className="divide-y divide-border">
                 {paginatedPuntos.map((punto) => (
-                  <tr key={punto.id} className="hover:bg-purple-50/30 transition-colors duration-200 group">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <tr key={punto.id} className="hover:bg-muted/10 transition-colors duration-200 group">
+                    <td className="px-6 py-3 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-xl flex items-center justify-center mr-3">
-                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center mr-3">
+                          <svg className="w-4 h-4 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
                         </div>
-                        <div className="text-sm font-semibold text-gray-900">
+                        <div className="text-sm font-semibold text-foreground">
                           {punto.nombre}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2 text-sm text-gray-700">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                        </svg>
-                        <span>{punto.ubicacion}</span>
-                      </div>
+                    <td className="px-6 py-3 text-sm text-muted-foreground">
+                      {punto.ubicacion}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-3 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           punto.activo
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-green-500/10 text-green-700'
+                            : 'bg-destructive/10 text-destructive'
                         }`}
                       >
-                        <span className={`w-2 h-2 rounded-full mr-2 ${
-                          punto.activo ? 'bg-green-500' : 'bg-red-500'
+                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                          punto.activo ? 'bg-green-600' : 'bg-destructive'
                         }`}></span>
                         {punto.activo ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex flex-col sm:flex-row items-center justify-end gap-1">
                         <button
                           onClick={() => handleEdit(punto)}
-                          className="inline-flex items-center justify-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200 text-xs md:text-sm"
+                          className="text-blue-600/60 hover:text-blue-600 transition-colors"
+                          title="Editar"
                         >
-                          <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                          <span>Editar</span>
                         </button>
                         <button
                           onClick={() => handleDelete(punto.id)}
-                          className="inline-flex items-center justify-center px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 text-xs md:text-sm"
+                          className="text-destructive hover:text-destructive/80 transition-colors"
+                          title="Desactivar"
                         >
-                          <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
-                          <span>Desactivar</span>
                         </button>
                       </div>
                     </td>
@@ -371,29 +362,28 @@ export default function PuntosInspeccionPage() {
             </div>
           )}
 
-          {/* Pagination Controls */}
           {puntos.length > 0 && (
-            <div className="px-6 py-4 border-t border-gray-200/60 flex items-center justify-between bg-white/50">
-              <div className="text-sm text-gray-600">
+            <div className="px-6 py-3 border-t border-border flex items-center justify-between bg-muted/10">
+              <div className="text-xs text-muted-foreground">
                 {startIndex + 1} a {Math.min(endIndex, puntos.length)} de {puntos.length}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground border border-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs"
                 >
                   ← Anterior
                 </button>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                      className={`px-2.5 py-1.5 rounded-lg font-medium transition-colors text-xs ${
                         currentPage === page
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted hover:bg-muted/80 text-muted-foreground border border-border'
                       }`}
                     >
                       {page}
@@ -403,7 +393,7 @@ export default function PuntosInspeccionPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground border border-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs"
                 >
                   Siguiente →
                 </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { XMarkIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 interface ImageModalProps {
@@ -38,71 +39,70 @@ export default function ImageModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
-      {/* Modal Container */}
-      <div className="relative w-full max-w-5xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-scaleIn">
-        {/* Header Premium */}
-        <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-              <EyeIcon className="h-6 w-6 text-white" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+     
+      <div className="relative w-full max-w-5xl max-h-[90vh] bg-card rounded-lg shadow-xl overflow-hidden flex flex-col border border-border animate-in fade-in zoom-in-95">
+       
+        <div className="bg-muted/50 border-b border-border px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <EyeIcon className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-bold text-white truncate">{imageTitle}</h2>
-              <p className="text-xs text-blue-100">Vista completa de la imagen</p>
+              <h2 className="text-base md:text-lg font-semibold text-foreground truncate">{imageTitle}</h2>
+              <p className="text-xs text-muted-foreground">Imagen de inspección en tamaño completo</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="flex-shrink-0 p-2 hover:bg-white/20 rounded-lg transition-all duration-200 hover:scale-110"
+            className="flex-shrink-0 p-2 hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg transition-all duration-200 ml-2"
             aria-label="Cerrar"
           >
-            <XMarkIcon className="h-6 w-6 text-white" />
+            <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Image Container con efecto */}
-        <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 overflow-auto relative min-h-96">
+    
+        <div className="flex-1 flex items-center justify-center bg-muted/20 overflow-auto relative min-h-96">
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10">
+            <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
               <div className="flex flex-col items-center gap-3">
-                <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                <p className="text-sm text-gray-600 font-medium">Cargando imagen...</p>
+                <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <p className="text-sm text-muted-foreground font-medium">Cargando imagen...</p>
               </div>
             </div>
           )}
 
-          {/* Using regular img tag for external URLs loaded dynamically */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+         
+          <Image
             src={imageUrl}
             alt={imageTitle}
-            className="max-w-full max-h-full w-auto h-auto object-contain drop-shadow-lg p-4"
+            fill
+            className="max-w-full max-h-full w-auto h-auto object-contain p-4 md:p-6"
             onLoad={() => setIsLoading(false)}
             onError={() => setIsLoading(false)}
+            unoptimized
           />
         </div>
 
-        {/* Footer Premium */}
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-t border-gray-200 flex items-center justify-between gap-4">
-          <div className="flex-1">
-            <p className="text-sm text-gray-700 font-medium">
-              Haz click en el icono X o fuera de la ventana para cerrar
-            </p>
-          </div>
+       
+        <div className="bg-muted/50 border-t border-border px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          <p className="text-xs md:text-sm text-muted-foreground text-center sm:text-left">
+            Presiona Esc o haz clic fuera para cerrar
+          </p>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 font-medium hover:shadow-lg hover:scale-105 active:scale-95"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-200 font-medium text-sm hover:shadow-md active:scale-95"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
-              <span>Descargar</span>
+              <span className="hidden sm:inline">Descargar</span>
             </button>
 
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-all duration-200 font-medium hover:shadow-md"
+              className="flex-1 sm:flex-none px-4 md:px-5 py-2 md:py-2.5 bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground rounded-lg transition-all duration-200 font-medium text-sm border border-border"
             >
               Cerrar
             </button>
@@ -110,7 +110,7 @@ export default function ImageModal({
         </div>
       </div>
 
-      {/* Cerrar al hacer click fuera */}
+      
       <div
         className="absolute inset-0 -z-10 cursor-pointer"
         onClick={onClose}

@@ -46,7 +46,6 @@ export default function NotificacionesPage() {
     } else if (filterArchivado === 'archivadas') {
       filtered = filtered.filter((n) => n.archivado);
     }
-    // 'todas' shows all notifications regardless of archivado status
 
     setFilteredNotificaciones(filtered);
     setCurrentPage(1);
@@ -85,12 +84,10 @@ export default function NotificacionesPage() {
 
   const handleMarcarEnviada = async (ids: number[]) => {
     try {
-      // Marcar todas las notificaciones como enviadas
       await Promise.all(
         ids.map(id => authApi.patch(`/notificaciones/${id}/marcar-enviada`, {}))
       );
 
-      // Actualizar el estado local sin cambiar de página
       setNotificaciones(prevNotificaciones =>
         prevNotificaciones.map(notif =>
           ids.includes(notif.id)
@@ -117,7 +114,6 @@ export default function NotificacionesPage() {
         ids.map(id => authApi.patch(`/notificaciones/${id}/archivar`, {}))
       );
 
-      // Actualizar localmente marcando como archivado
       setNotificaciones(prevNotificaciones =>
         prevNotificaciones.map(notif =>
           ids.includes(notif.id)
@@ -138,33 +134,6 @@ export default function NotificacionesPage() {
     }
   };
 
-  const getMetodoIcon = (metodo: string) => {
-    switch (metodo) {
-      case 'email':
-        return '📧';
-      case 'sistema':
-        return '🔔';
-      case 'push':
-        return '📱';
-      default:
-        return '📬';
-    }
-  };
-
-  const getMetodoColor = (metodo: string) => {
-    switch (metodo) {
-      case 'email':
-        return 'bg-blue-100 text-blue-800';
-      case 'sistema':
-        return 'bg-purple-100 text-purple-800';
-      case 'push':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  // Agrupar notificaciones por alertaId
   const groupedNotificaciones = () => {
     const grouped = new Map();
 
@@ -186,7 +155,6 @@ export default function NotificacionesPage() {
       group.metodos.push(notif.metodo);
       group.ids.push(notif.id);
 
-      // Si cualquier notificación del grupo no está enviada, marcar como no enviada
       if (!notif.enviada) {
         group.enviada = false;
         group.fechaEnvio = notif.fechaEnvio;
@@ -200,7 +168,10 @@ export default function NotificacionesPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+            <p className="text-muted-foreground text-lg font-medium">Cargando notificaciones...</p>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -214,32 +185,36 @@ export default function NotificacionesPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 md:space-y-8">
+      <div className="space-y-3 md:space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Gestión de Notificaciones</h1>
+          <div className="py-3 md:py-4">
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">Gestión de Notificaciones</h1>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">
+              Administra y monitorea todas las notificaciones del sistema
+            </p>
+          </div>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-gray-300 transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Refrescar</span>
           </button>
         </div>
 
-        {/* Filtros */}
-        <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="bg-card p-3 md:p-4 rounded-lg shadow-sm border border-border">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por Usuario
+              <label className="block text-xs font-semibold text-foreground mb-1">
+                Usuario
               </label>
               <select
                 value={filterUsuario}
                 onChange={(e) => setFilterUsuario(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-1.5 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground"
               >
-                <option value="">Todos los usuarios</option>
+                <option value="">Todos</option>
                 {usuarios.map((usuario) => (
                   <option key={usuario.id} value={usuario.id}>
                     {usuario.nombre}
@@ -249,15 +224,15 @@ export default function NotificacionesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por Método
+              <label className="block text-xs font-semibold text-foreground mb-1">
+                Método
               </label>
               <select
                 value={filterMetodo}
                 onChange={(e) => setFilterMetodo(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-1.5 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground"
               >
-                <option value="">Todos los métodos</option>
+                <option value="">Todos</option>
                 <option value="email">Email</option>
                 <option value="sistema">Sistema</option>
                 <option value="push">Push</option>
@@ -265,13 +240,13 @@ export default function NotificacionesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por Estado
+              <label className="block text-xs font-semibold text-foreground mb-1">
+                Estado
               </label>
               <select
                 value={filterEstado}
                 onChange={(e) => setFilterEstado(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-1.5 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground"
               >
                 <option value="">Todas</option>
                 <option value="pendientes">Pendientes</option>
@@ -280,13 +255,13 @@ export default function NotificacionesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por Estatus
+              <label className="block text-xs font-semibold text-foreground mb-1">
+                Estatus
               </label>
               <select
                 value={filterArchivado}
                 onChange={(e) => setFilterArchivado(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-1.5 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground"
               >
                 <option value="activas">Activas</option>
                 <option value="archivadas">Archivadas</option>
@@ -296,94 +271,97 @@ export default function NotificacionesPage() {
           </div>
         </div>
 
-        {/* Estadísticas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          <div className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
-            <p className="text-xs md:text-sm text-gray-500">Total</p>
-            <p className="text-xl md:text-2xl font-bold">{notificaciones.length}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3">
+          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-all duration-300 p-3 md:p-4 border border-border">
+            <p className="text-xs text-muted-foreground font-medium">Total</p>
+            <p className="text-lg md:text-xl font-bold text-foreground">{notificaciones.length}</p>
           </div>
-          <div className="bg-yellow-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
-            <p className="text-xs md:text-sm text-yellow-700">Pendientes</p>
-            <p className="text-xl md:text-2xl font-bold text-yellow-700">
+          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-all duration-300 p-3 md:p-4 border border-border">
+            <p className="text-xs text-amber-700 font-medium">Pendientes</p>
+            <p className="text-lg md:text-xl font-bold text-amber-700">
               {notificaciones.filter((n) => !n.enviada).length}
             </p>
           </div>
-          <div className="bg-green-50 p-4 md:p-6 rounded-xl md:rounded-2xl shadow">
-            <p className="text-xs md:text-sm text-green-700">Enviadas</p>
-            <p className="text-xl md:text-2xl font-bold text-green-700">
+          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-all duration-300 p-3 md:p-4 border border-border">
+            <p className="text-xs text-primary font-medium">Enviadas</p>
+            <p className="text-lg md:text-xl font-bold text-primary">
               {notificaciones.filter((n) => n.enviada).length}
             </p>
           </div>
         </div>
 
-        {/* Lista de Notificaciones */}
-        <div className="bg-white rounded-xl md:rounded-2xl shadow overflow-hidden">
+        <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted/30">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Usuario
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Métodos Emitidos
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Métodos
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Fecha Envío
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Alerta ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {paginatedNotificaciones.map((group) => (
-                <tr key={group.alertaId} className={`hover:bg-gray-50 ${!group.enviada ? 'bg-yellow-50' : ''}`}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <tr key={group.alertaId} className="hover:bg-muted/10 transition-colors">
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-foreground">
                     {group.usuario?.nombre || `Usuario #${group.usuarioId}`}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex flex-wrap gap-2">
+                  <td className="px-6 py-3 whitespace-nowrap">
+                    <div className="flex flex-wrap gap-1.5">
                       {group.metodos.map((metodo: string, idx: number) => (
-                        <span key={idx} className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded ${getMetodoColor(metodo)}`}>
-                          {getMetodoIcon(metodo)} {metodo.toUpperCase()}
+                        <span key={idx} className={`px-2 py-0.5 inline-flex text-xs leading-4 font-medium rounded ${
+                          metodo === 'email' ? 'bg-blue-500/10 text-blue-700' :
+                          metodo === 'sistema' ? 'bg-purple-500/10 text-purple-700' :
+                          metodo === 'push' ? 'bg-green-500/10 text-green-700' :
+                          'bg-muted/30 text-foreground'
+                        }`}>
+                          {metodo.toUpperCase()}
                         </span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-3 whitespace-nowrap">
                     <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      className={`px-2 py-0.5 inline-flex text-xs leading-4 font-medium rounded ${
                         group.enviada
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-primary/10 text-primary'
+                          : 'bg-amber-500/10 text-amber-700'
                       }`}
                     >
-                      {group.enviada ? '✓ Enviada' : '⏳ Pendiente'}
+                      {group.enviada ? 'Enviada' : 'Pendiente'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
                     {group.fechaEnvio
-                      ? new Date(group.fechaEnvio).toLocaleString('es-ES')
+                      ? new Date(group.fechaEnvio).toLocaleDateString('es-ES')
                       : '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
                     #{group.alertaId}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="px-6 py-3 whitespace-nowrap text-sm font-medium">
                     <div className="flex gap-2">
                       {!group.enviada && (
                         <button
                           onClick={() => {
                             handleMarcarEnviada(group.ids);
                           }}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-primary hover:text-primary/80 transition-colors"
                         >
                           Marcar
                         </button>
@@ -392,7 +370,7 @@ export default function NotificacionesPage() {
                         onClick={() => {
                           handleArchivar(group.ids);
                         }}
-                        className="text-gray-600 hover:text-gray-900"
+                        className="text-muted-foreground hover:text-foreground transition-colors"
                       >
                         Archivar
                       </button>
@@ -404,34 +382,33 @@ export default function NotificacionesPage() {
           </table>
 
           {grouped.length === 0 && (
-            <div className="text-center py-12 text-sm md:text-base text-gray-500">
-              No se encontraron notificaciones con los filtros seleccionados
+            <div className="text-center py-8 text-sm text-muted-foreground">
+              No se encontraron notificaciones
             </div>
           )}
 
-          {/* Pagination Controls */}
           {grouped.length > 0 && (
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-              <div className="text-sm text-gray-600">
+            <div className="px-6 py-3 border-t border-border flex items-center justify-between bg-muted/10">
+              <div className="text-xs text-muted-foreground">
                 {startIndex + 1} a {Math.min(endIndex, grouped.length)} de {grouped.length}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm border border-border"
                 >
                   ← Anterior
                 </button>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                      className={`px-2.5 py-1.5 rounded-lg font-medium transition-colors text-xs ${
                         currentPage === page
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground hover:bg-muted/80 border border-border'
                       }`}
                     >
                       {page}
@@ -441,7 +418,7 @@ export default function NotificacionesPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm border border-border"
                 >
                   Siguiente →
                 </button>

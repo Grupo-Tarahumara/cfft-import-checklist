@@ -64,7 +64,6 @@ export default function UsuariosPage() {
     e.preventDefault();
     const newErrors: { username?: string; nombre?: string } = {};
 
-    // Validate password match for new users
     if (!editingUsuario && formData.password !== confirmPassword) {
       alert('Las contraseñas no coinciden');
       return;
@@ -74,7 +73,6 @@ export default function UsuariosPage() {
       return;
     }
 
-    // Check for duplicate username (only for new users or when username changes)
     if (!editingUsuario || formData.username !== editingUsuario.username) {
       const duplicateUsername = usuarios.some(
         u => u.username === formData.username && (!editingUsuario || u.id !== editingUsuario.id)
@@ -84,7 +82,6 @@ export default function UsuariosPage() {
       }
     }
 
-    // Check for duplicate full name (only for new users)
     if (!editingUsuario) {
       const duplicateNombre = usuarios.some(
         u => u.nombre.toLowerCase() === formData.nombre.toLowerCase()
@@ -120,7 +117,7 @@ export default function UsuariosPage() {
       nombre: usuario.nombre,
       username: usuario.username,
       email: usuario.email,
-      password: '', // No pre-llenar la contraseña
+      password: '', 
       telefono: usuario.telefono || '',
       area: usuario.area,
       rol: usuario.rol,
@@ -160,7 +157,6 @@ export default function UsuariosPage() {
     setErrors({});
   };
 
-  // Pagination logic
   const totalPages = Math.ceil(usuarios.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -171,11 +167,8 @@ export default function UsuariosPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600/20 border-t-blue-600 mx-auto"></div>
-              <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-4 border-blue-600/10"></div>
-            </div>
-            <p className="mt-6 text-gray-600 text-lg font-medium">Cargando usuarios...</p>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+            <p className="text-muted-foreground text-lg font-medium">Cargando usuarios...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -185,13 +178,13 @@ export default function UsuariosPage() {
   return (
     <ProtectedRoute allowedRoles={['admin']}>
       <DashboardLayout>
-        <div className="space-y-6 md:space-y-8">
+        <div className="space-y-3 md:space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+          <div className="py-3 md:py-4">
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">
               Gestión de Usuarios
             </h1>
-            <p className="text-sm md:text-lg text-gray-600 mt-2">
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">
               Administra los usuarios del sistema y sus permisos
             </p>
           </div>
@@ -199,16 +192,16 @@ export default function UsuariosPage() {
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="group flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-gray-300 transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refrescar</span>
             </button>
             <button
               onClick={() => setShowForm(!showForm)}
-              className="group flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-5 md:px-6 py-3 rounded-xl hover:shadow-2xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
+              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 md:px-6 py-2 md:py-2.5 rounded-lg transition-all duration-300 font-semibold text-sm"
             >
-              <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {showForm ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -220,21 +213,15 @@ export default function UsuariosPage() {
           </div>
         </div>
 
-        {/* Formulario */}
         {showForm && (
-          <div className="bg-white/70 backdrop-blur-xl p-4 md:p-8 rounded-xl md:rounded-3xl shadow-2xl border border-gray-200/60">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6 flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl">
-                <svg className="h-5 w-5 md:h-6 md:w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <span>{editingUsuario ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</span>
+          <div className="bg-card p-3 md:p-4 rounded-lg shadow-sm border border-border">
+            <h2 className="text-sm md:text-base font-bold text-foreground mb-3 md:mb-4">
+              {editingUsuario ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Nombre Completo
                   </label>
                   <input
@@ -243,13 +230,13 @@ export default function UsuariosPage() {
                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value.slice(0, 40) })}
                     required
                     maxLength={40}
-                    className={`w-full px-4 py-3 bg-white/50 backdrop-blur-sm border ${
-                      errors.nombre ? 'border-red-300' : 'border-gray-200'
-                    } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                    className={`w-full px-3 py-1.5 bg-muted/20 border ${
+                      errors.nombre ? 'border-destructive/50' : 'border-border'
+                    } rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground`}
                     placeholder="Ej: Juan Pérez"
                   />
                   {errors.nombre && (
-                    <p className="text-xs text-red-600 mt-1">{errors.nombre}</p>
+                    <p className="text-xs text-destructive mt-0.5">{errors.nombre}</p>
                   )}
                 </div>
 
@@ -434,13 +421,12 @@ export default function UsuariosPage() {
           </div>
         )}
 
-        {/* Tabla de Usuarios */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-xl md:rounded-3xl shadow-2xl border border-gray-200/60 overflow-hidden">
+        <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200/60">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100/50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/30">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -448,7 +434,7 @@ export default function UsuariosPage() {
                       <span>Nombre</span>
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -456,7 +442,7 @@ export default function UsuariosPage() {
                       <span>Email</span>
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -464,7 +450,7 @@ export default function UsuariosPage() {
                       <span>Área</span>
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
@@ -472,7 +458,7 @@ export default function UsuariosPage() {
                       <span>Rol</span>
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Estado
                   </th>
                   <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">
@@ -480,86 +466,86 @@ export default function UsuariosPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white/50 divide-y divide-gray-200/60">
+              <tbody className="divide-y divide-border">
                 {paginatedUsuarios.map((usuario) => (
-                  <tr key={usuario.id} className="hover:bg-blue-50/30 transition-colors duration-200 group">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <tr key={usuario.id} className="hover:bg-muted/10 transition-colors duration-200">
+                    <td className="px-6 py-3 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center mr-3">
-                          <span className="text-white font-bold text-sm">
+                        <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center mr-3">
+                          <span className="text-primary-foreground font-bold text-xs">
                             {usuario.nombre.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <div className="text-sm font-semibold text-gray-900">
+                        <div className="text-sm font-semibold text-foreground">
                           {usuario.nombre}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
                       {usuario.email}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold bg-blue-100 text-blue-800">
+                    <td className="px-6 py-3 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted text-foreground">
                         {usuario.area}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-3 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           usuario.rol === 'admin'
-                            ? 'bg-purple-100 text-purple-800'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-muted text-foreground'
                         }`}
                       >
-                        {usuario.rol === 'admin' ? 'Administrador' : 'Usuario Normal'}
+                        {usuario.rol === 'admin' ? 'Admin' : 'Usuario'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-3 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           usuario.activo
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-green-500/10 text-green-700'
+                            : 'bg-destructive/10 text-destructive'
                         }`}
                       >
-                        <span className={`w-2 h-2 rounded-full mr-2 ${
-                          usuario.activo ? 'bg-green-500' : 'bg-red-500'
+                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                          usuario.activo ? 'bg-green-600' : 'bg-destructive'
                         }`}></span>
                         {usuario.activo ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex flex-col sm:flex-row items-center justify-end gap-1">
                         <button
                           onClick={() => {
                             setSelectedUsuario(usuario);
                             setShowUserInfo(true);
                           }}
-                          className="inline-flex items-center justify-center px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors duration-200 text-xs md:text-sm"
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                          title="Ver"
                         >
-                          <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
-                          <span>Ver</span>
                         </button>
                         <button
                           onClick={() => handleEdit(usuario)}
-                          className="inline-flex items-center justify-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200 text-xs md:text-sm"
+                          className="text-blue-600/60 hover:text-blue-600 transition-colors"
+                          title="Editar"
                         >
-                          <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                          <span>Editar</span>
                         </button>
                         <button
                           onClick={() => handleDelete(usuario.id)}
-                          className="inline-flex items-center justify-center px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 text-xs md:text-sm"
+                          className="text-destructive hover:text-destructive/80 transition-colors"
+                          title="Desactivar"
                         >
-                          <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
-                          <span>Desactivar</span>
                         </button>
                       </div>
                     </td>
@@ -569,29 +555,28 @@ export default function UsuariosPage() {
             </table>
           </div>
 
-          {/* Pagination Controls */}
           {usuarios.length > 0 && (
-            <div className="px-6 py-4 border-t border-gray-200/60 flex items-center justify-between bg-white/50">
-              <div className="text-sm text-gray-600">
+            <div className="px-6 py-3 border-t border-border flex items-center justify-between bg-muted/10">
+              <div className="text-xs text-muted-foreground">
                 {startIndex + 1} a {Math.min(endIndex, usuarios.length)} de {usuarios.length}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm border border-border"
                 >
                   ← Anterior
                 </button>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 rounded-lg font-medium transition-colors ${
+                      className={`px-2.5 py-1.5 rounded-lg font-medium transition-colors text-xs ${
                         currentPage === page
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground hover:bg-muted/80 border border-border'
                       }`}
                     >
                       {page}
@@ -601,7 +586,7 @@ export default function UsuariosPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm border border-border"
                 >
                   Siguiente →
                 </button>
