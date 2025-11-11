@@ -8,7 +8,7 @@ import { authApi } from '@/lib/api-auth';
 import { Usuario, CreateUsuarioDto } from '@/types';
 import { EyeIcon, EyeSlashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
-export default function UsuariosPage() {
+export default function UsuariosPage(): React.JSX.Element {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -34,10 +34,10 @@ export default function UsuariosPage() {
   });
 
   useEffect(() => {
-    loadUsuarios();
+    void loadUsuarios();
   }, []);
 
-  const loadUsuarios = async () => {
+  const loadUsuarios = async (): Promise<void> => {
     try {
       setLoading(true);
       const data = await authApi.get<Usuario[]>('/usuarios');
@@ -49,7 +49,7 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (): Promise<void> => {
     try {
       setRefreshing(true);
       await loadUsuarios();
@@ -60,7 +60,7 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     const newErrors: { username?: string; nombre?: string } = {};
 
@@ -111,7 +111,7 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleEdit = (usuario: Usuario) => {
+  const handleEdit = (usuario: Usuario): void => {
     setEditingUsuario(usuario);
     setFormData({
       nombre: usuario.nombre,
@@ -126,7 +126,7 @@ export default function UsuariosPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number): Promise<void> => {
     if (!confirm('¿Estás seguro de que deseas desactivar este usuario?')) return;
 
     try {
@@ -138,7 +138,7 @@ export default function UsuariosPage() {
     }
   };
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     setFormData({
       nombre: '',
       username: '',
@@ -167,8 +167,8 @@ export default function UsuariosPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-            <p className="text-muted-foreground text-lg font-medium">Cargando usuarios...</p>
+            <div className="animate-spin rounded-full h-12 w-12 md:h-14 md:w-14 border-4 border-primary border-t-transparent mx-auto mb-3"></div>
+            <p className="text-muted-foreground text-sm md:text-base font-medium">Cargando usuarios...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -178,9 +178,9 @@ export default function UsuariosPage() {
   return (
     <ProtectedRoute allowedRoles={['admin']}>
       <DashboardLayout>
-        <div className="space-y-3 md:space-y-4">
+        <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="py-3 md:py-4">
+          <div>
             <h1 className="text-xl md:text-2xl font-bold text-foreground">
               Gestión de Usuarios
             </h1>
@@ -190,18 +190,18 @@ export default function UsuariosPage() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleRefresh}
+              onClick={() => { void handleRefresh() }}
               disabled={refreshing}
-              className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-muted-foreground px-3 py-1.5 rounded border border-border transition-colors font-medium text-xs disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <ArrowPathIcon className={`h-3 w-3 md:h-4 md:w-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refrescar</span>
             </button>
             <button
               onClick={() => setShowForm(!showForm)}
-              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 md:px-6 py-2 md:py-2.5 rounded-lg transition-all duration-300 font-semibold text-sm"
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded transition-colors font-medium text-xs"
             >
-              <svg className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-3 w-3 md:h-4 md:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {showForm ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -214,14 +214,14 @@ export default function UsuariosPage() {
         </div>
 
         {showForm && (
-          <div className="bg-card p-3 md:p-4 rounded-lg shadow-sm border border-border">
-            <h2 className="text-sm md:text-base font-bold text-foreground mb-3 md:mb-4">
+          <div className="bg-card p-3 md:p-4 rounded border border-border/50">
+            <h2 className="text-sm md:text-base font-bold text-foreground mb-3">
               {editingUsuario ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+            <form onSubmit={handleSubmit} className="space-y-2 md:space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-1">
+                  <label className="block text-xs font-medium text-foreground mb-1.5">
                     Nombre Completo
                   </label>
                   <input
@@ -230,9 +230,9 @@ export default function UsuariosPage() {
                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value.slice(0, 40) })}
                     required
                     maxLength={40}
-                    className={`w-full px-3 py-1.5 bg-muted/20 border ${
+                    className={`w-full px-3 py-1.5 bg-background border ${
                       errors.nombre ? 'border-destructive/50' : 'border-border'
-                    } rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground`}
+                    } rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground`}
                     placeholder="Ej: Juan Pérez"
                   />
                   {errors.nombre && (
@@ -241,7 +241,7 @@ export default function UsuariosPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-foreground mb-1.5">
                     Nombre de Usuario
                   </label>
                   <input
@@ -251,18 +251,18 @@ export default function UsuariosPage() {
                     required
                     disabled={!!editingUsuario}
                     maxLength={20}
-                    className={`w-full px-4 py-3 bg-white/50 backdrop-blur-sm border ${
-                      errors.username ? 'border-red-300' : 'border-gray-200'
-                    } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                    className={`w-full px-3 py-1.5 bg-background border ${
+                      errors.username ? 'border-destructive/50' : 'border-border'
+                    } rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground disabled:bg-muted disabled:cursor-not-allowed`}
                     placeholder="usuario_login"
                   />
                   {errors.username && (
-                    <p className="text-xs text-red-600 mt-1">{errors.username}</p>
+                    <p className="text-xs text-destructive mt-0.5">{errors.username}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-foreground mb-1.5">
                     Correo Electrónico
                   </label>
                   <input
@@ -271,13 +271,13 @@ export default function UsuariosPage() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value.slice(0, 40) })}
                     required
                     maxLength={40}
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
                     placeholder="usuario@ejemplo.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-foreground mb-1.5">
                     {editingUsuario ? 'Nueva Contraseña (dejar vacío para no cambiar)' : 'Contraseña'}
                   </label>
                   <div className="relative">
@@ -287,20 +287,20 @@ export default function UsuariosPage() {
                       onChange={(e) => setFormData({ ...formData, password: e.target.value.slice(0, 20) })}
                       required={!editingUsuario}
                       maxLength={20}
-                      className={`w-full px-4 py-3 pr-10 bg-white/50 backdrop-blur-sm border ${
-                        errors.password ? 'border-red-300' : 'border-gray-200'
-                      } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                      className={`w-full px-3 py-1.5 pr-10 bg-background border ${
+                        errors.password ? 'border-destructive/50' : 'border-border'
+                      } rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground`}
                       placeholder="••••••••"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                      className="absolute right-3 top-1.5 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {showPassword ? (
-                        <EyeSlashIcon className="w-5 h-5" />
+                        <EyeSlashIcon className="w-4 h-4" />
                       ) : (
-                        <EyeIcon className="w-5 h-5" />
+                        <EyeIcon className="w-4 h-4" />
                       )}
                     </button>
                   </div>
@@ -308,7 +308,7 @@ export default function UsuariosPage() {
 
                 {!editingUsuario && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-xs font-medium text-foreground mb-1.5">
                       Confirmar Contraseña
                     </label>
                     <div className="relative">
@@ -318,33 +318,33 @@ export default function UsuariosPage() {
                         onChange={(e) => setConfirmPassword(e.target.value.slice(0, 20))}
                         required={!editingUsuario}
                         maxLength={20}
-                        className={`w-full px-4 py-3 pr-10 bg-white/50 backdrop-blur-sm border ${
+                        className={`w-full px-3 py-1.5 pr-10 bg-background border ${
                           confirmPassword && confirmPassword !== formData.password
-                            ? 'border-red-300'
-                            : 'border-gray-200'
-                        } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                            ? 'border-destructive/50'
+                            : 'border-border'
+                        } rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground`}
                         placeholder="••••••••"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                        className="absolute right-3 top-1.5 text-muted-foreground hover:text-foreground transition-colors"
                       >
                         {showConfirmPassword ? (
-                          <EyeSlashIcon className="w-5 h-5" />
+                          <EyeSlashIcon className="w-4 h-4" />
                         ) : (
-                          <EyeIcon className="w-5 h-5" />
+                          <EyeIcon className="w-4 h-4" />
                         )}
                       </button>
                     </div>
                     {confirmPassword && confirmPassword !== formData.password && (
-                      <p className="text-xs text-red-600 mt-1">Las contraseñas no coinciden</p>
+                      <p className="text-xs text-destructive mt-0.5">Las contraseñas no coinciden</p>
                     )}
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-foreground mb-1.5">
                     Teléfono
                   </label>
                   <input
@@ -352,20 +352,20 @@ export default function UsuariosPage() {
                     value={formData.telefono}
                     onChange={(e) => setFormData({ ...formData, telefono: e.target.value.slice(0, 12) })}
                     maxLength={12}
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
                     placeholder="+56 9 1234 5678"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-foreground mb-1.5">
                     Área de Trabajo
                   </label>
                   <select
                     value={formData.area}
                     onChange={(e) => setFormData({ ...formData, area: e.target.value })}
                     required
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
                   >
                     <option value="Comercio Exterior">Comercio Exterior</option>
                     <option value="Logística Nacional">Logística Nacional</option>
@@ -374,45 +374,45 @@ export default function UsuariosPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-foreground mb-1.5">
                     Rol
                   </label>
                   <select
                     value={formData.rol || 'user'}
                     onChange={(e) => setFormData({ ...formData, rol: e.target.value as 'admin' | 'user' })}
                     required
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
                   >
                     <option value="user">Usuario Normal</option>
                     <option value="admin">Administrador</option>
                   </select>
                 </div>
 
-                <div className="flex items-center pt-8">
+                <div className="flex items-center pt-6">
                   <input
                     type="checkbox"
                     id="activo"
                     checked={formData.activo}
                     onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
-                    className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                   />
-                  <label htmlFor="activo" className="ml-3 block text-sm font-semibold text-gray-700">
+                  <label htmlFor="activo" className="ml-2 block text-xs font-medium text-foreground">
                     Usuario Activo
                   </label>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row justify-end gap-2 pt-3">
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-5 md:px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium text-sm md:text-base"
+                  className="px-3 py-1.5 border border-border rounded text-foreground hover:bg-muted transition-colors font-medium text-xs"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 md:px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
+                  className="px-3 py-1.5 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors font-medium text-xs"
                 >
                   {editingUsuario ? 'Actualizar Usuario' : 'Crear Usuario'}
                 </button>
@@ -421,12 +421,12 @@ export default function UsuariosPage() {
           </div>
         )}
 
-        <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
+        <div className="bg-card rounded border border-border/50 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/30">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -434,62 +434,62 @@ export default function UsuariosPage() {
                       <span>Nombre</span>
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <div className="flex items-center space-x-1.5">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                       <span>Email</span>
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <div className="flex items-center space-x-1.5">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                       <span>Área</span>
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <div className="flex items-center space-x-1.5">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                       </svg>
                       <span>Rol</span>
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-3 md:px-4 py-2 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {paginatedUsuarios.map((usuario) => (
-                  <tr key={usuario.id} className="hover:bg-muted/10 transition-colors duration-200">
-                    <td className="px-6 py-3 whitespace-nowrap">
+                  <tr key={usuario.id} className="hover:bg-muted/50 transition-colors">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center mr-3">
+                        <div className="w-8 h-8 bg-primary rounded flex items-center justify-center mr-2">
                           <span className="text-primary-foreground font-bold text-xs">
                             {usuario.nombre.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <div className="text-sm font-semibold text-foreground">
+                        <div className="text-xs font-semibold text-foreground">
                           {usuario.nombre}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">
                       {usuario.email}
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted text-foreground">
                         {usuario.area}
                       </span>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           usuario.rol === 'admin'
@@ -500,22 +500,22 @@ export default function UsuariosPage() {
                         {usuario.rol === 'admin' ? 'Admin' : 'Usuario'}
                       </span>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
                           usuario.activo
-                            ? 'bg-green-500/10 text-green-700'
-                            : 'bg-destructive/10 text-destructive'
+                            ? 'bg-primary/10 text-primary border-primary/20'
+                            : 'bg-destructive/10 text-destructive border-destructive/20'
                         }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                          usuario.activo ? 'bg-green-600' : 'bg-destructive'
+                          usuario.activo ? 'bg-primary' : 'bg-destructive'
                         }`}></span>
                         {usuario.activo ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex flex-col sm:flex-row items-center justify-end gap-1">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap text-right text-xs font-medium">
+                      <div className="flex flex-col sm:flex-row items-center justify-end gap-1.5">
                         <button
                           onClick={() => {
                             setSelectedUsuario(usuario);
@@ -531,7 +531,7 @@ export default function UsuariosPage() {
                         </button>
                         <button
                           onClick={() => handleEdit(usuario)}
-                          className="text-blue-600/60 hover:text-blue-600 transition-colors"
+                          className="text-primary hover:text-primary/80 transition-colors"
                           title="Editar"
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -556,15 +556,15 @@ export default function UsuariosPage() {
           </div>
 
           {usuarios.length > 0 && (
-            <div className="px-6 py-3 border-t border-border flex items-center justify-between bg-muted/10">
+            <div className="px-3 md:px-4 py-2.5 border-t border-border flex items-center justify-between bg-muted/30">
               <div className="text-xs text-muted-foreground">
                 {startIndex + 1} a {Math.min(endIndex, usuarios.length)} de {usuarios.length}
               </div>
-              <div className="flex gap-1">
+              <div className="flex gap-1.5">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm border border-border"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs border border-border"
                 >
                   ← Anterior
                 </button>
@@ -573,7 +573,7 @@ export default function UsuariosPage() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-2.5 py-1.5 rounded-lg font-medium transition-colors text-xs ${
+                      className={`px-2.5 py-1.5 rounded font-medium transition-colors text-xs ${
                         currentPage === page
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-muted-foreground hover:bg-muted/80 border border-border'
@@ -586,7 +586,7 @@ export default function UsuariosPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm border border-border"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs border border-border"
                 >
                   Siguiente →
                 </button>

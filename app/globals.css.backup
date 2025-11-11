@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  /* POS Tarahumara Theme - Light Mode */
+  --color-background: oklch(0.9749 0.0025 228.7838);
+  --color-foreground: oklch(0.3211 0 0);
+  --color-card: oklch(1.0000 0 0);
+  --color-card-foreground: oklch(0.3211 0 0);
+  --color-popover: oklch(1.0000 0 0);
+  --color-popover-foreground: oklch(0.3211 0 0);
+  --color-primary: oklch(0.6297 0.2227 20.9661);
+  --color-primary-foreground: oklch(1.0000 0 0);
+  --color-secondary: oklch(1.0000 0 0);
+  --color-secondary-foreground: oklch(0.4837 0.0297 218.3601);
+  --color-muted: oklch(1.0000 0 0);
+  --color-muted-foreground: oklch(0.5884 0.0252 229.3905);
+  --color-accent: oklch(0.9592 0.0174 210.1893);
+  --color-accent-foreground: oklch(0.4893 0.1142 244.8868);
+  --color-destructive: oklch(0.6747 0.2255 5.7366);
+  --color-destructive-foreground: oklch(1.0000 0 0);
+  --color-border: oklch(0.9400 0.0043 197.0837);
+  --color-input: oklch(1.0000 0 0);
+  --color-ring: oklch(0.6297 0.2227 20.9661);
+  --radius-lg: 0.75rem;
+  --font-sans: Inter, sans-serif;
+  --font-serif: Source Serif 4, serif;
+  --font-mono: JetBrains Mono, monospace;
+}
+
+/* POS Tarahumara Theme - Dark Mode (Auto-detect) */
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-background: oklch(0.2923 0.0306 228.2347);
+    --color-foreground: oklch(0.9219 0 0);
+    --color-card: oklch(0.3423 0.0293 237.1168);
+    --color-card-foreground: oklch(0.9219 0 0);
+    --color-popover: oklch(0.3164 0.0247 236.7691);
+    --color-popover-foreground: oklch(0.9219 0 0);
+    --color-primary: oklch(0.6297 0.2227 20.9661);
+    --color-primary-foreground: oklch(1.0000 0 0);
+    --color-secondary: oklch(0.3382 0.0262 233.1842);
+    --color-secondary-foreground: oklch(0.9219 0 0);
+    --color-muted: oklch(0.3382 0.0262 233.1842);
+    --color-muted-foreground: oklch(0.7155 0 0);
+    --color-accent: oklch(0.3897 0.0546 238.6880);
+    --color-accent-foreground: oklch(0.9496 0.0369 217.9702);
+    --color-destructive: oklch(0.6747 0.2255 5.7366);
+    --color-destructive-foreground: oklch(1.0000 0 0);
+    --color-border: oklch(0.4179 0.0293 239.1501);
+    --color-input: oklch(0.4179 0.0293 239.1501);
+    --color-ring: oklch(0.6297 0.2227 20.9661);
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+    font-family: Inter, sans-serif;
+    letter-spacing: 0em;
+  }
+}

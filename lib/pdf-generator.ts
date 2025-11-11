@@ -314,20 +314,36 @@ export async function generateInspectionPDF(
             const imgBase64 = await imageUrlToBase64(foto.urlFoto);
 
             if (imgBase64) {
-              const imgWidth = Math.min(contentWidth - 20, 140);
-              const imgHeight = Math.min((imgWidth * 3) / 4, 80);
+              // Obtener dimensiones originales de la imagen
+              const imgDimensions = await getImageDimensions(imgBase64);
 
-              checkNewPage(imgHeight + 5);
+              // Calcular escala para que quepa en el ancho disponible manteniendo aspecto
+              const maxWidth = contentWidth - 20;
+              let imgWidth = imgDimensions.width;
+              let imgHeight = imgDimensions.height;
+
+              // Escalar si la imagen es más ancha que el espacio disponible
+              if (imgWidth > maxWidth) {
+                const scale = maxWidth / imgWidth;
+                imgWidth = maxWidth;
+                imgHeight = imgHeight * scale;
+              }
+
+              // Convertir píxeles a mm (aproximadamente 0.264583 mm/px)
+              const mmWidth = imgWidth * 0.264583;
+              const mmHeight = imgHeight * 0.264583;
+
+              checkNewPage(mmHeight + 5);
 
               // Marco
               pdf.setDrawColor(200, 200, 200);
               pdf.setLineWidth(0.5);
-              pdf.rect(margin + 5, yPosition, imgWidth, imgHeight);
+              pdf.rect(margin + 5, yPosition, mmWidth, mmHeight);
 
               // Imagen
-              pdf.addImage(imgBase64, 'JPEG', margin + 5, yPosition, imgWidth, imgHeight);
+              pdf.addImage(imgBase64, 'JPEG', margin + 5, yPosition, mmWidth, mmHeight);
 
-              yPosition += imgHeight + 8;
+              yPosition += mmHeight + 8;
             }
           } catch {
             // Imagen no disponible
@@ -369,6 +385,20 @@ export async function generateInspectionPDF(
     console.error('Error generando PDF:', error);
     throw error;
   }
+}
+
+/**
+ * Obtiene las dimensiones de una imagen desde su base64
+ */
+async function getImageDimensions(base64: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      resolve({ width: img.width, height: img.height });
+    };
+    img.onerror = reject;
+    img.src = base64;
+  });
 }
 
 /**

@@ -21,7 +21,7 @@ import {
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
-export default function InspeccionesPage() {
+export default function InspeccionesPage(): React.JSX.Element {
   const { user } = useAuth();
   const isNormalUser = user?.rol === 'user';
 
@@ -41,7 +41,7 @@ export default function InspeccionesPage() {
   };
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, []);
 
   useEffect(() => {
@@ -68,10 +68,10 @@ export default function InspeccionesPage() {
     }
 
     setFilteredInspecciones(filtered);
-    setCurrentPage(1); 
+    setCurrentPage(1);
   }, [searchTerm, filterProveedor, filterAlertas, inspecciones]);
 
-  const loadData = async () => {
+  const loadData = async (): Promise<void> => {
     try {
       setLoading(true);
       const [inspeccionesData, proveedoresData] = await Promise.all([
@@ -87,7 +87,7 @@ export default function InspeccionesPage() {
     }
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (): Promise<void> => {
     try {
       setRefreshing(true);
       await loadData();
@@ -98,8 +98,7 @@ export default function InspeccionesPage() {
     }
   };
 
-
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number): Promise<void> => {
     if (!confirm('¿Estás seguro de que deseas eliminar esta inspección?')) return;
 
     try {
@@ -111,13 +110,13 @@ export default function InspeccionesPage() {
     }
   };
 
-  const getStatusColor = (estado: string) => {
+  const getStatusColor = (estado: string): string => {
     switch (estado?.toLowerCase()) {
       case 'completado':
       case 'aprobado':
         return 'bg-primary/15 text-primary border border-primary/20';
       case 'pendiente':
-        return 'bg-amber-500/15 text-amber-700 border border-amber-500/20';
+        return 'bg-muted text-muted-foreground border border-border';
       case 'rechazado':
         return 'bg-destructive/15 text-destructive border border-destructive/20';
       default:
@@ -145,25 +144,25 @@ export default function InspeccionesPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-3 md:space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="py-3 md:py-4">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
             <h1 className="text-xl md:text-2xl font-bold text-foreground">Gestión de Inspecciones</h1>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">Monitorea y gestiona todas las inspecciones de calidad</p>
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleRefresh}
+              onClick={() => { void handleRefresh() }}
               disabled={refreshing}
-              className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-muted-foreground px-3 py-1.5 rounded border border-border transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               title="Refrescar inspecciones"
             >
-              <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <ArrowPathIcon className={`h-3 w-3 md:h-4 md:w-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refrescar</span>
             </button>
             <Link
               href="/inspecciones/nueva"
-              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 md:px-6 py-2 md:py-2.5 rounded-lg transition-all duration-300 font-semibold text-sm"
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-3 md:px-4 py-1.5 rounded transition-colors text-xs font-semibold"
             >
               <PlusIcon className="h-4 w-4 md:h-5 md:w-5" />
               <span>Nueva Inspección</span>
@@ -171,43 +170,43 @@ export default function InspeccionesPage() {
           </div>
         </div>
 
-        <div className={`grid gap-3 ${isNormalUser ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
-          <div className="bg-card rounded-lg p-4 shadow-sm border border-border">
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-muted/50 rounded-md">
-                <CubeIcon className="w-5 h-5 text-muted-foreground" />
+        <div className={`grid gap-2 md:gap-3 ${isNormalUser ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
+          <div className="bg-card rounded border border-border/50 p-3 md:p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-muted/50 rounded">
+                <CubeIcon className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground">Total Inspecciones</p>
-                <p className="text-2xl font-bold text-foreground">{filteredInspecciones.length}</p>
+                <p className="text-xs text-muted-foreground">Total Inspecciones</p>
+                <p className="text-xl md:text-2xl font-bold text-foreground">{filteredInspecciones.length}</p>
               </div>
             </div>
           </div>
 
           {!isNormalUser && (
             <>
-              <div className="bg-card rounded-lg p-4 shadow-sm border border-border">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 bg-muted/50 rounded-md">
-                    <ExclamationTriangleIcon className="w-5 h-5 text-destructive/70" />
+              <div className="bg-card rounded border border-border/50 p-3 md:p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-muted/50 rounded">
+                    <ExclamationTriangleIcon className="w-4 h-4 md:w-5 md:h-5 text-destructive" />
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground">Con Alertas</p>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xs text-muted-foreground">Con Alertas</p>
+                    <p className="text-xl md:text-2xl font-bold text-foreground">
                       {filteredInspecciones.filter((i) => i.tieneAlertas).length}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-card rounded-lg p-4 shadow-sm border border-border">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 bg-muted/50 rounded-md">
-                    <CheckCircleIcon className="w-5 h-5 text-primary/70" />
+              <div className="bg-card rounded border border-border/50 p-3 md:p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-muted/50 rounded">
+                    <CheckCircleIcon className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground">Sin Problemas</p>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xs text-muted-foreground">Sin Problemas</p>
+                    <p className="text-xl md:text-2xl font-bold text-foreground">
                       {filteredInspecciones.filter((i) => !i.tieneAlertas).length}
                     </p>
                   </div>
@@ -217,25 +216,25 @@ export default function InspeccionesPage() {
           )}
         </div>
 
-        <div className="bg-card rounded-lg p-4 shadow-sm border border-border">
-          <div className="flex items-center gap-2 mb-4">
-            <FunnelIcon className="w-5 h-5 text-muted-foreground" />
-            <h2 className="text-base font-semibold text-foreground">Filtros y Búsqueda</h2>
+        <div className="bg-card rounded border border-border/50 p-3 md:p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <FunnelIcon className="w-4 h-4 text-muted-foreground" />
+            <h2 className="text-sm md:text-base font-bold text-foreground">Filtros y Búsqueda</h2>
           </div>
 
-          <div className={`grid gap-4 ${isNormalUser ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
+          <div className={`grid gap-2 md:gap-3 ${isNormalUser ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-xs font-medium text-foreground mb-1.5">
                 Buscar por Contenedor
               </label>
               <div className="relative">
-                <MagnifyingGlassIcon className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <MagnifyingGlassIcon className="w-4 h-4 text-muted-foreground absolute left-2.5 top-1/2 transform -translate-y-1/2" />
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => { setSearchTerm(e.target.value) }}
                   placeholder="Número de orden/contenedor..."
-                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-muted/20 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-foreground placeholder:text-muted-foreground"
+                  className="w-full pl-9 pr-3 py-1.5 border border-border rounded bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             </div>
@@ -243,13 +242,13 @@ export default function InspeccionesPage() {
             {!isNormalUser && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
+                  <label className="block text-xs font-medium text-foreground mb-1.5">
                     Filtrar por Proveedor
                   </label>
                   <select
                     value={filterProveedor}
-                    onChange={(e) => setFilterProveedor(e.target.value)}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-muted/20 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-foreground"
+                    onChange={(e) => { setFilterProveedor(e.target.value) }}
+                    className="w-full px-3 py-1.5 border border-border rounded bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
                   >
                     <option value="">Todos los proveedores</option>
                     {proveedores.map((prov) => (
@@ -261,13 +260,13 @@ export default function InspeccionesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
+                  <label className="block text-xs font-medium text-foreground mb-1.5">
                     Filtrar por Alertas
                   </label>
                   <select
                     value={filterAlertas}
-                    onChange={(e) => setFilterAlertas(e.target.value)}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-muted/20 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-foreground"
+                    onChange={(e) => { setFilterAlertas(e.target.value) }}
+                    className="w-full px-3 py-1.5 border border-border rounded bg-background focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
                   >
                     <option value="">Todas las inspecciones</option>
                     <option value="con">Con alertas</option>
@@ -279,47 +278,47 @@ export default function InspeccionesPage() {
           </div>
         </div>
 
-        <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
+        <div className="bg-card rounded border border-border/50 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/30">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Nº Inspección
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    <div className="flex items-center gap-2">
-                      <CalendarIcon className="w-4 h-4" />
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <div className="flex items-center gap-1.5">
+                      <CalendarIcon className="w-3 h-3" />
                       Fecha
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Contenedor
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    <div className="flex items-center gap-2">
-                      <TruckIcon className="w-4 h-4" />
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <div className="flex items-center gap-1.5">
+                      <TruckIcon className="w-3 h-3" />
                       Proveedor
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Fruta
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    <div className="flex items-center gap-2">
-                      <FireIcon className="w-4 h-4" />
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <div className="flex items-center gap-1.5">
+                      <FireIcon className="w-3 h-3" />
                       Temperatura
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Estado
                   </th>
                   {!isNormalUser && (
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Alertas
                     </th>
                   )}
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
@@ -328,78 +327,78 @@ export default function InspeccionesPage() {
                 {paginatedInspecciones.map((inspeccion) => (
                   <tr
                     key={inspeccion.id}
-                    className="hover:bg-muted/40 transition-colors duration-150"
+                    className="hover:bg-muted/50 transition-colors"
                   >
-                    <td className="px-6 py-3 whitespace-nowrap">
-                      <div className="text-sm font-semibold text-foreground bg-primary/10 px-3 py-1 rounded-md border border-primary/20 inline-block">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
+                      <div className="text-xs font-semibold text-foreground bg-primary/10 px-2 py-0.5 rounded border border-primary/20 inline-block">
                         #{inspeccion.id}
                       </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
-                      <div className="text-sm font-medium text-foreground">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
+                      <div className="text-xs font-medium text-foreground">
                         {new Date(inspeccion.fecha).toLocaleDateString('es-ES')}
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-xs text-muted-foreground">
                         {new Date(inspeccion.fecha).toLocaleTimeString('es-ES', {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}
                       </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
-                      <div className="text-sm font-semibold text-foreground bg-muted/50 px-3 py-1 rounded-md border border-border">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
+                      <div className="text-xs font-semibold text-foreground bg-muted px-2 py-0.5 rounded border border-border inline-block">
                         {inspeccion.numeroOrdenContenedor}
                       </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
-                      <div className="text-sm text-foreground font-medium">
-                        {inspeccion.proveedor?.nombre || '-'}
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
+                      <div className="text-xs text-foreground font-medium">
+                        {(inspeccion.proveedor?.nombre !== '' && inspeccion.proveedor?.nombre != null) ? inspeccion.proveedor.nombre : '-'}
                       </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
-                      <div className="text-sm text-foreground">
-                        {inspeccion.fruta?.nombre || '-'}
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
+                      <div className="text-xs text-foreground">
+                        {(inspeccion.fruta?.nombre !== '' && inspeccion.fruta?.nombre != null) ? inspeccion.fruta.nombre : '-'}
                       </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm font-semibold text-foreground">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <div className="text-xs font-semibold text-foreground">
                           <div>{inspeccion.temperaturaFruta}°C</div>
                           <div className="text-xs text-muted-foreground">{celsiusToFahrenheit(Number(inspeccion.temperaturaFruta)).toFixed(2)}°F</div>
                         </div>
                         {!isNormalUser && inspeccion.temperaturaFruta > 8 && (
-                          <ExclamationTriangleIcon className="w-4 h-4 text-destructive/70" />
+                          <ExclamationTriangleIcon className="w-3.5 h-3.5 text-destructive" />
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(inspeccion.estado)}`}>
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(inspeccion.estado)}`}>
                         {inspeccion.estado}
                       </span>
                     </td>
                     {!isNormalUser && (
-                      <td className="px-6 py-3 whitespace-nowrap">
+                      <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
                         {inspeccion.tieneAlertas ? (
-                          <ExclamationTriangleIcon className="w-5 h-5 text-destructive/80" title="Con Alertas" />
+                          <ExclamationTriangleIcon className="w-4 h-4 text-destructive" title="Con Alertas" />
                         ) : (
-                          <CheckCircleIcon className="w-5 h-5 text-muted-foreground" title="Sin Alertas" />
+                          <CheckCircleIcon className="w-4 h-4 text-muted-foreground" title="Sin Alertas" />
                         )}
                       </td>
                     )}
-                    <td className="px-6 py-3 whitespace-nowrap">
+                    <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/inspecciones/${inspeccion.id}`}
                           title="Ver inspección"
                         >
-                          <EyeIcon className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
+                          <EyeIcon className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
                         </Link>
                         {!isNormalUser && (
                           <button
-                            onClick={() => handleDelete(inspeccion.id)}
+                            onClick={() => { void handleDelete(inspeccion.id) }}
                             title="Eliminar inspección"
                           >
-                            <TrashIcon className="w-5 h-5 text-destructive/80 hover:text-destructive transition-colors" />
+                            <TrashIcon className="w-4 h-4 text-destructive hover:text-destructive/80 transition-colors" />
                           </button>
                         )}
                       </div>
@@ -411,11 +410,11 @@ export default function InspeccionesPage() {
           </div>
 
           {filteredInspecciones.length === 0 && (
-            <div className="text-center py-16">
-              <CubeIcon className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">No se encontraron inspecciones</h3>
-              <p className="text-muted-foreground max-w-sm mx-auto">
-                {searchTerm || filterProveedor
+            <div className="text-center py-12">
+              <CubeIcon className="w-12 h-12 md:w-14 md:h-14 text-muted-foreground/30 mx-auto mb-3" />
+              <h3 className="text-sm md:text-base font-bold text-foreground mb-1.5">No se encontraron inspecciones</h3>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                {searchTerm !== '' || filterProveedor !== ''
                   ? 'Intenta ajustar los filtros para ver más resultados.'
                   : 'Comienza creando tu primera inspección.'
                 }
@@ -424,15 +423,15 @@ export default function InspeccionesPage() {
           )}
 
           {filteredInspecciones.length > 0 && (
-            <div className="px-6 py-3 border-t border-border flex items-center justify-between bg-muted/10">
+            <div className="px-3 md:px-4 py-2.5 border-t border-border flex items-center justify-between bg-muted/30">
               <div className="text-xs text-muted-foreground">
                 {startIndex + 1} a {Math.min(endIndex, filteredInspecciones.length)} de {filteredInspecciones.length}
               </div>
-              <div className="flex gap-1">
+              <div className="flex gap-1.5">
                 <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  onClick={() => { setCurrentPage(prev => Math.max(prev - 1, 1)) }}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground border border-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground border border-border rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs"
                 >
                   ← Anterior
                 </button>
@@ -440,8 +439,8 @@ export default function InspeccionesPage() {
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                     <button
                       key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-2.5 py-1.5 rounded-lg font-medium transition-colors text-xs ${
+                      onClick={() => { setCurrentPage(page) }}
+                      className={`px-2.5 py-1.5 rounded font-medium transition-colors text-xs ${
                         currentPage === page
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted hover:bg-muted/80 text-muted-foreground border border-border'
@@ -452,9 +451,9 @@ export default function InspeccionesPage() {
                   ))}
                 </div>
                 <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  onClick={() => { setCurrentPage(prev => Math.min(prev + 1, totalPages)) }}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground border border-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground border border-border rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs"
                 >
                   Siguiente →
                 </button>

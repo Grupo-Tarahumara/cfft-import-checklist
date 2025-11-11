@@ -142,26 +142,26 @@ export default function TruckPalletSelector({
 
   return (
     <div className="w-full">
-      <div className="mb-6">
-        <p className="text-sm text-gray-600 mb-4">
+      <div className="mb-4">
+        <p className="text-xs text-muted-foreground mb-3">
           Selecciona primero el tipo de termógrafo y luego haz clic en su ubicación en el camión
         </p>
       </div>
 
       {/* Botones de selección de modo */}
-      <div className="grid grid-cols-2 gap-3 mb-8">
+      <div className="grid grid-cols-2 gap-2 md:gap-3 mb-6">
         <button
           type="button"
           onClick={() => termografoOrigenEnabled && setSelectionMode(selectionMode === 'origen' ? null : 'origen')}
           disabled={!termografoOrigenEnabled}
-          className={`py-3 px-4 rounded-lg font-semibold transition-all ${
+          className={`py-2.5 px-3 rounded font-semibold transition-all text-xs ${
             !termografoOrigenEnabled
-              ? 'bg-gray-200 text-gray-400 border-2 border-gray-300 cursor-not-allowed opacity-60'
+              ? 'bg-muted text-muted-foreground border-2 border-border cursor-not-allowed opacity-60'
               : selectionMode === 'origen'
-              ? 'bg-blue-500 text-white ring-2 ring-blue-300'
+              ? 'bg-blue-200 text-blue-800 ring-2 ring-blue-300'
               : termografoOrigenSelected.length > 0
-              ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 hover:bg-blue-200 cursor-pointer'
-              : 'bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200 cursor-pointer'
+              ? 'bg-blue-100 text-blue-700 border-2 border-blue-200 hover:bg-blue-150 cursor-pointer'
+              : 'bg-blue-50 text-blue-600 border-2 border-blue-100 hover:bg-blue-100 cursor-pointer'
           }`}
         >
           {termografoOrigenSelected.length > 0 ? (
@@ -177,14 +177,14 @@ export default function TruckPalletSelector({
           type="button"
           onClick={() => termografoNacionalEnabled && setSelectionMode(selectionMode === 'nacional' ? null : 'nacional')}
           disabled={!termografoNacionalEnabled}
-          className={`py-3 px-4 rounded-lg font-semibold transition-all ${
+          className={`py-2.5 px-3 rounded font-semibold transition-all text-xs ${
             !termografoNacionalEnabled
-              ? 'bg-gray-200 text-gray-400 border-2 border-gray-300 cursor-not-allowed opacity-60'
+              ? 'bg-muted text-muted-foreground border-2 border-border cursor-not-allowed opacity-60'
               : selectionMode === 'nacional'
-              ? 'bg-red-500 text-white ring-2 ring-red-300'
+              ? 'bg-red-200 text-red-800 ring-2 ring-red-300'
               : termografoNacionalSelected.length > 0
-              ? 'bg-red-100 text-red-700 border-2 border-red-300 hover:bg-red-200 cursor-pointer'
-              : 'bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200 cursor-pointer'
+              ? 'bg-red-100 text-red-700 border-2 border-red-200 hover:bg-red-150 cursor-pointer'
+              : 'bg-red-50 text-red-600 border-2 border-red-100 hover:bg-red-100 cursor-pointer'
           }`}
         >
           {termografoNacionalSelected.length > 0 ? (
@@ -423,26 +423,26 @@ export default function TruckPalletSelector({
         </div>
 
         {/* Información adicional */}
-        <div className="mt-6 text-center text-xs text-gray-600 font-semibold">
+        <div className="mt-4 text-center text-xs text-muted-foreground font-semibold">
           VISTA SUPERIOR DEL CAMIÓN
         </div>
       </div>
 
-      
+
 
       {/* Leyenda de colores */}
-      <div className="mt-4 flex gap-6 justify-center text-xs flex-wrap">
+      <div className="mt-3 flex gap-4 md:gap-6 justify-center text-xs flex-wrap">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-blue-500 rounded"></div>
-          <span className="text-gray-700">Termógrafo Origen</span>
+          <div className="w-4 h-4 bg-blue-500 rounded border border-border/50"></div>
+          <span className="text-foreground font-medium">Termógrafo Origen</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-500 rounded"></div>
-          <span className="text-gray-700">Termógrafo Nacional</span>
+          <div className="w-4 h-4 bg-red-500 rounded border border-border/50"></div>
+          <span className="text-foreground font-medium">Termógrafo Nacional</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ background: 'linear-gradient(135deg, #3b82f6 49%, #ef4444 51%)' }}></div>
-          <span className="text-gray-700">Ambos</span>
+          <div className="w-4 h-4 rounded border border-border/50" style={{ background: 'linear-gradient(135deg, #3b82f6 49%, #ef4444 51%)' }}></div>
+          <span className="text-foreground font-medium">Ambos</span>
         </div>
       </div>
     </div>

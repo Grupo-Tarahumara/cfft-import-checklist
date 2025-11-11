@@ -124,7 +124,7 @@ export default function SignaturePad({ onChange, value }: SignaturePadProps) {
 
   return (
     <div className="w-full">
-      <div ref={containerRef} className="w-full border-2 border-indigo-300 rounded-xl overflow-hidden bg-white">
+      <div ref={containerRef} className="w-full border-2 border-border/50 rounded overflow-hidden bg-background">
         <canvas
           ref={canvasRef}
           onMouseDown={startDrawing}
@@ -144,15 +144,15 @@ export default function SignaturePad({ onChange, value }: SignaturePadProps) {
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 mt-3">
+      <div className="flex flex-col sm:flex-row gap-2 mt-3">
         <button
           type="button"
           onClick={saveSignature}
           disabled={!hasSignature}
-          className={`flex-1 px-4 py-3 sm:py-2 rounded-lg font-medium transition-all text-sm sm:text-base ${
+          className={`flex-1 px-3 py-1.5 rounded font-medium transition-all text-xs ${
             hasSignature
-              ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+              : 'bg-muted text-muted-foreground cursor-not-allowed'
           }`}
         >
           Guardar Firma
@@ -160,16 +160,16 @@ export default function SignaturePad({ onChange, value }: SignaturePadProps) {
         <button
           type="button"
           onClick={clearSignature}
-          className="px-4 py-3 sm:py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
+          className="px-3 py-1.5 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded font-medium transition-all flex items-center justify-center gap-2 text-xs"
         >
-          <XMarkIcon className="h-4 w-4" />
+          <XMarkIcon className="h-3 w-3" />
           <span>Limpiar</span>
         </button>
       </div>
 
       {value && (
-        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-sm text-green-800 font-medium">✓ Firma guardada</p>
+        <div className="mt-2 p-2 bg-primary/10 border border-primary/20 rounded">
+          <p className="text-xs text-primary font-medium">✓ Firma guardada</p>
         </div>
       )}
     </div>
