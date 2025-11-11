@@ -177,8 +177,8 @@ export default function NotificacionesPage(): React.JSX.Element {
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-            <p className="text-muted-foreground text-lg font-medium">Cargando notificaciones...</p>
+            <div className="animate-spin rounded-full h-12 w-12 md:h-14 md:w-14 border-4 border-primary border-t-transparent mx-auto mb-3"></div>
+            <p className="text-muted-foreground text-sm md:text-base font-medium">Cargando notificaciones...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -193,9 +193,9 @@ export default function NotificacionesPage(): React.JSX.Element {
 
   return (
     <DashboardLayout>
-      <div className="space-y-3 md:space-y-4">
+      <div className="space-y-4 md:space-y-6">
         <div className="flex items-center justify-between">
-          <div className="py-3 md:py-4">
+          <div>
             <h1 className="text-xl md:text-2xl font-bold text-foreground">Gestión de Notificaciones</h1>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">
               Administra y monitorea todas las notificaciones del sistema
@@ -204,23 +204,23 @@ export default function NotificacionesPage(): React.JSX.Element {
           <button
             onClick={() => { void handleRefresh() }}
             disabled={refreshing}
-            className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-muted-foreground px-3 py-1.5 rounded border border-border transition-colors font-medium text-xs disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon className={`h-3 w-3 md:h-4 md:w-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Refrescar</span>
           </button>
         </div>
 
-        <div className="bg-card p-3 md:p-4 rounded-lg shadow-sm border border-border">
+        <div className="bg-card p-3 md:p-4 rounded border border-border/50">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
             <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">
+              <label className="block text-xs font-medium text-foreground mb-1.5">
                 Usuario
               </label>
               <select
                 value={filterUsuario}
                 onChange={(e) => setFilterUsuario(e.target.value)}
-                className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
               >
                 <option value="">Todos</option>
                 {usuarios.map((usuario) => (
@@ -232,13 +232,13 @@ export default function NotificacionesPage(): React.JSX.Element {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">
+              <label className="block text-xs font-medium text-foreground mb-1.5">
                 Método
               </label>
               <select
                 value={filterMetodo}
                 onChange={(e) => setFilterMetodo(e.target.value)}
-                className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
               >
                 <option value="">Todos</option>
                 <option value="email">Email</option>
@@ -248,13 +248,13 @@ export default function NotificacionesPage(): React.JSX.Element {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">
+              <label className="block text-xs font-medium text-foreground mb-1.5">
                 Estado
               </label>
               <select
                 value={filterEstado}
                 onChange={(e) => setFilterEstado(e.target.value)}
-                className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
               >
                 <option value="">Todas</option>
                 <option value="pendientes">Pendientes</option>
@@ -263,13 +263,13 @@ export default function NotificacionesPage(): React.JSX.Element {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">
+              <label className="block text-xs font-medium text-foreground mb-1.5">
                 Estatus
               </label>
               <select
                 value={filterArchivado}
                 onChange={(e) => setFilterArchivado(e.target.value)}
-                className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
               >
                 <option value="activas">Activas</option>
                 <option value="archivadas">Archivadas</option>
@@ -280,57 +280,57 @@ export default function NotificacionesPage(): React.JSX.Element {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3">
-          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 md:p-4 border border-border">
+          <div className="bg-card rounded hover:shadow-md transition-shadow p-3 md:p-4 border border-border/50">
             <p className="text-xs text-muted-foreground font-medium">Total</p>
-            <p className="text-lg md:text-xl font-bold text-foreground">{notificaciones.length}</p>
+            <p className="text-xl md:text-2xl font-bold text-foreground">{notificaciones.length}</p>
           </div>
-          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 md:p-4 border border-border">
+          <div className="bg-card rounded hover:shadow-md transition-shadow p-3 md:p-4 border border-border/50">
             <p className="text-xs text-muted-foreground font-medium">Pendientes</p>
-            <p className="text-lg md:text-xl font-bold text-muted-foreground">
+            <p className="text-xl md:text-2xl font-bold text-muted-foreground">
               {notificaciones.filter((n) => !n.enviada).length}
             </p>
           </div>
-          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 md:p-4 border border-border">
+          <div className="bg-card rounded hover:shadow-md transition-shadow p-3 md:p-4 border border-border/50">
             <p className="text-xs text-primary font-medium">Enviadas</p>
-            <p className="text-lg md:text-xl font-bold text-primary">
+            <p className="text-xl md:text-2xl font-bold text-primary">
               {notificaciones.filter((n) => n.enviada).length}
             </p>
           </div>
         </div>
 
-        <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
+        <div className="bg-card rounded border border-border/50 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Usuario
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Métodos
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Fecha Envío
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Alerta ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <th className="px-3 md:px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {paginatedNotificaciones.map((group) => (
-                <tr key={group.alertaId} className="hover:bg-muted/10 transition-colors">
-                  <td className="px-6 py-3 whitespace-nowrap text-sm text-foreground">
+                <tr key={group.alertaId} className="hover:bg-muted/50 transition-colors">
+                  <td className="px-3 md:px-4 py-2.5 whitespace-nowrap text-xs text-foreground">
                     {group.usuario?.nombre || `Usuario #${group.usuarioId}`}
                   </td>
-                  <td className="px-6 py-3 whitespace-nowrap">
-                    <div className="flex flex-wrap gap-1.5">
+                  <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
+                    <div className="flex flex-wrap gap-1">
                       {group.metodos.map((metodo: string, idx: number) => (
                         <span key={idx} className="px-2 py-0.5 inline-flex text-xs leading-4 font-medium rounded bg-muted text-foreground border border-border">
                           {metodo.toUpperCase()}
@@ -338,7 +338,7 @@ export default function NotificacionesPage(): React.JSX.Element {
                       ))}
                     </div>
                   </td>
-                  <td className="px-6 py-3 whitespace-nowrap">
+                  <td className="px-3 md:px-4 py-2.5 whitespace-nowrap">
                     <span
                       className={`px-2 py-0.5 inline-flex text-xs leading-4 font-medium rounded border ${
                         group.enviada
@@ -349,15 +349,15 @@ export default function NotificacionesPage(): React.JSX.Element {
                       {group.enviada ? 'Enviada' : 'Pendiente'}
                     </span>
                   </td>
-                  <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
+                  <td className="px-3 md:px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">
                     {group.fechaEnvio
                       ? new Date(group.fechaEnvio).toLocaleDateString('es-ES')
                       : '-'}
                   </td>
-                  <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground">
+                  <td className="px-3 md:px-4 py-2.5 whitespace-nowrap text-xs text-muted-foreground">
                     #{group.alertaId}
                   </td>
-                  <td className="px-6 py-3 whitespace-nowrap text-sm font-medium">
+                  <td className="px-3 md:px-4 py-2.5 whitespace-nowrap text-xs font-medium">
                     <div className="flex gap-2">
                       {!group.enviada && (
                         <button
@@ -385,21 +385,21 @@ export default function NotificacionesPage(): React.JSX.Element {
           </table>
 
           {grouped.length === 0 && (
-            <div className="text-center py-8 text-sm text-muted-foreground">
+            <div className="text-center py-12 text-xs md:text-sm text-muted-foreground">
               No se encontraron notificaciones
             </div>
           )}
 
           {grouped.length > 0 && (
-            <div className="px-6 py-3 border-t border-border flex items-center justify-between bg-muted/10">
+            <div className="px-3 md:px-4 py-2.5 border-t border-border flex items-center justify-between bg-muted/30">
               <div className="text-xs text-muted-foreground">
                 {startIndex + 1} a {Math.min(endIndex, grouped.length)} de {grouped.length}
               </div>
-              <div className="flex gap-1">
+              <div className="flex gap-1.5">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm border border-border"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs border border-border"
                 >
                   ← Anterior
                 </button>
@@ -408,7 +408,7 @@ export default function NotificacionesPage(): React.JSX.Element {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-2.5 py-1.5 rounded-lg font-medium transition-colors text-xs ${
+                      className={`px-2.5 py-1.5 rounded font-medium transition-colors text-xs ${
                         currentPage === page
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-muted-foreground hover:bg-muted/80 border border-border'
@@ -421,7 +421,7 @@ export default function NotificacionesPage(): React.JSX.Element {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm border border-border"
+                  className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-muted-foreground rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-xs border border-border"
                 >
                   Siguiente →
                 </button>

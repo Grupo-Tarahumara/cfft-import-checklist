@@ -9,17 +9,17 @@ interface UserInfoModalProps {
   onClose: () => void;
 }
 
-export function UserInfoModal({ usuario, isOpen, onClose }: UserInfoModalProps) {
+export function UserInfoModal({ usuario, isOpen, onClose }: UserInfoModalProps): React.JSX.Element | null {
   if (!isOpen || !usuario) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-border animate-in fade-in zoom-in-95">
-        
-        <div className="bg-gradient-to-r from-primary to-primary/80 px-5 md:px-6 py-4 md:py-5 flex items-center justify-between flex-shrink-0">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+      <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-border">
+
+        <div className="bg-primary px-5 md:px-6 py-4 md:py-5 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <span className="text-lg font-bold text-primary">
+            <div className="w-10 h-10 rounded-lg bg-primary-foreground/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-lg font-bold text-primary-foreground">
                 {usuario.nombre.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -48,13 +48,13 @@ export function UserInfoModal({ usuario, isOpen, onClose }: UserInfoModalProps) 
               <div className="flex items-center gap-2">
                 {usuario.activo ? (
                   <>
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                    <span className="text-sm font-semibold text-green-700">Activo</span>
+                    <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
+                    <span className="text-sm font-semibold text-primary">Activo</span>
                   </>
                 ) : (
                   <>
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                    <span className="text-sm font-semibold text-red-700">Inactivo</span>
+                    <div className="w-2.5 h-2.5 rounded-full bg-destructive"></div>
+                    <span className="text-sm font-semibold text-destructive">Inactivo</span>
                   </>
                 )}
               </div>

@@ -97,19 +97,19 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Bienvenido. Aquí está el resumen de tu sistema</p>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">Bienvenido. Aquí está el resumen de tu sistema</p>
           </div>
           <button
             onClick={() => { void handleRefresh() }}
             disabled={refreshing}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg border border-border transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded border border-border transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon className={`h-3 w-3 md:h-4 md:w-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Refrescar</span>
           </button>
         </div>
@@ -118,16 +118,16 @@ export default function DashboardPage() {
         <NotificationPermission />
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
           {stats.map((stat) => (
-            <div key={stat.label} className="rounded-lg border border-border bg-card p-6 hover:shadow-lg transition-shadow">
+            <div key={stat.label} className="rounded border border-border/50 bg-card p-3 md:p-4 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                  <p className="text-xl md:text-2xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
                 </div>
-                <div className="p-3 rounded-lg bg-muted">
-                  <stat.icon className="h-6 w-6 text-muted-foreground" />
+                <div className="p-2 rounded bg-muted/50">
+                  <stat.icon className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                 </div>
               </div>
             </div>
@@ -135,39 +135,39 @@ export default function DashboardPage() {
         </div>
 
         {/* Alertas No Leídas e Inspecciones */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-3">
           {/* Alertas No Leídas */}
           {alertasNoLeidas.length > 0 && (
-            <div className="rounded-lg border border-border bg-card overflow-hidden">
-              <div className="p-4 border-b border-border">
+            <div className="rounded border border-border/50 bg-card overflow-hidden">
+              <div className="p-3 md:p-4 border-b border-border/50">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-muted">
-                      <BellAlertIcon className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <div className="p-1.5 md:p-2 rounded bg-muted/50">
+                      <BellAlertIcon className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h2 className="font-semibold text-foreground">Alertas Pendientes</h2>
-                      <p className="text-sm text-muted-foreground">{alertasNoLeidas.length} alertas requieren atención</p>
+                      <h2 className="text-sm md:text-base font-semibold text-foreground">Alertas Pendientes</h2>
+                      <p className="text-xs text-muted-foreground">{alertasNoLeidas.length} alertas requieren atención</p>
                     </div>
                   </div>
-                  <Link href="/alertas" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                  <Link href="/alertas" className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">
                     Ver todas →
                   </Link>
                 </div>
               </div>
 
-              <div className="p-4 space-y-3">
+              <div className="p-3 md:p-4 space-y-2">
                 {alertasNoLeidas.slice(0, 4).map((alerta) => (
                   <Link key={alerta.id} href={`/inspecciones/${alerta.inspeccionId}`}>
-                    <div className="p-4 rounded-lg border border-border hover:bg-muted transition-colors cursor-pointer">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="font-medium text-foreground">{alerta.tipoAlerta}</p>
-                        <span className={`text-xs px-2 py-1 rounded font-medium whitespace-nowrap ${getCriticidadBadge(alerta.criticidad)}`}>
+                    <div className="p-3 rounded border border-border/50 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <p className="text-sm font-medium text-foreground">{alerta.tipoAlerta}</p>
+                        <span className={`text-xs px-2 py-0.5 rounded font-medium whitespace-nowrap ${getCriticidadBadge(alerta.criticidad)}`}>
                           {alerta.criticidad.toUpperCase()}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{alerta.descripcion}</p>
-                      <div className="flex gap-3 text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground mb-1.5 line-clamp-2">{alerta.descripcion}</p>
+                      <div className="flex gap-2 text-xs text-muted-foreground">
                         <span>{new Date(alerta.fechaCreacion).toLocaleDateString('es-ES')}</span>
                         <span>•</span>
                         <span>ID: {alerta.inspeccionId}</span>
@@ -180,56 +180,56 @@ export default function DashboardPage() {
           )}
 
           {/* Últimas Inspecciones */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
-            <div className="p-4 border-b border-border">
+          <div className="rounded border border-border/50 bg-card overflow-hidden">
+            <div className="p-3 md:p-4 border-b border-border/50">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-muted">
-                    <ClipboardDocumentListIcon className="h-5 w-5 text-muted-foreground" />
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="p-1.5 md:p-2 rounded bg-muted/50">
+                    <ClipboardDocumentListIcon className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-foreground">Últimas Inspecciones</h2>
-                    <p className="text-sm text-muted-foreground">{inspecciones.length} inspecciones recientes</p>
+                    <h2 className="text-sm md:text-base font-semibold text-foreground">Últimas Inspecciones</h2>
+                    <p className="text-xs text-muted-foreground">{inspecciones.length} inspecciones recientes</p>
                   </div>
                 </div>
-                <Link href="/inspecciones" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                <Link href="/inspecciones" className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">
                   Ver todas →
                 </Link>
               </div>
             </div>
 
-            <div className="p-4 space-y-3">
+            <div className="p-3 md:p-4 space-y-2">
               {inspecciones.slice(0, 4).map((inspeccion) => (
                 <Link key={inspeccion.id} href={`/inspecciones/${inspeccion.id}`}>
-                  <div className="p-4 rounded-lg border border-border hover:bg-muted transition-colors cursor-pointer">
-                    <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="p-3 rounded border border-border/50 hover:bg-muted/50 transition-colors cursor-pointer">
+                    <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="p-2 bg-muted rounded-lg">
-                          <TruckIcon className="h-4 w-4 text-muted-foreground" />
+                        <div className="p-1.5 bg-muted/50 rounded">
+                          <TruckIcon className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-foreground truncate">{inspeccion.numeroOrdenContenedor}</p>
-                          <p className="text-sm text-muted-foreground truncate">
+                          <p className="text-sm font-bold text-foreground truncate">{inspeccion.numeroOrdenContenedor}</p>
+                          <p className="text-xs text-muted-foreground truncate">
                             {(inspeccion.proveedor?.nombre !== '' && inspeccion.proveedor?.nombre != null) ? inspeccion.proveedor.nombre : '-'}
                           </p>
                         </div>
                       </div>
                       <div className="flex-shrink-0">
                         {inspeccion.tieneAlertas ? (
-                          <ExclamationTriangleIcon className="h-5 w-5 text-destructive" />
+                          <ExclamationTriangleIcon className="h-4 w-4 md:h-5 md:w-5 text-destructive" />
                         ) : (
-                          <CheckBadgeIcon className="h-5 w-5 text-primary" />
+                          <CheckBadgeIcon className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <div className="flex items-center gap-1">
-                        <CalendarIcon className="h-4 w-4" />
+                        <CalendarIcon className="h-3 w-3" />
                         <span>{new Date(inspeccion.fecha).toLocaleDateString('es-ES')}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <BuildingStorefrontIcon className="h-4 w-4" />
+                        <BuildingStorefrontIcon className="h-3 w-3" />
                         <span className="truncate">
                           {(inspeccion.fruta?.nombre !== '' && inspeccion.fruta?.nombre != null) ? inspeccion.fruta.nombre : '-'}
                         </span>

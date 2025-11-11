@@ -167,8 +167,8 @@ export default function DetalleInspeccionPage (): React.JSX.Element {
             {/* Estado */}
             <div className='space-y-1'>
               <p className='text-xs text-muted-foreground font-semibold'>Estado</p>
-              <span className='inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/10 text-green-700 rounded text-xs font-semibold border border-green-500/20'>
-                <span className='w-1.5 h-1.5 bg-green-500 rounded-full' />
+              <span className='inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-semibold border border-primary/20'>
+                <span className='w-1.5 h-1.5 bg-primary rounded-full' />
                 {inspeccion.estado}
               </span>
             </div>
@@ -185,8 +185,8 @@ export default function DetalleInspeccionPage (): React.JSX.Element {
                     </span>
                     )
                   : (
-                    <span className='inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/10 text-green-700 rounded text-xs font-semibold border border-green-500/20'>
-                      <span className='w-1.5 h-1.5 bg-green-500 rounded-full' />
+                    <span className='inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-semibold border border-primary/20'>
+                      <span className='w-1.5 h-1.5 bg-primary rounded-full' />
                       No
                     </span>
                     )}
@@ -318,7 +318,7 @@ export default function DetalleInspeccionPage (): React.JSX.Element {
                 {inspeccion.termografoOrigen
                   ? (
                     <span className='inline-flex items-center gap-1 text-xs font-bold text-foreground'>
-                      <span className='w-2 h-2 bg-green-500 rounded-full animate-pulse' />
+                      <span className='w-2 h-2 bg-primary rounded-full animate-pulse' />
                       Presente
                     </span>
                     )
@@ -355,7 +355,7 @@ export default function DetalleInspeccionPage (): React.JSX.Element {
                 {inspeccion.termografoNacional
                   ? (
                     <span className='inline-flex items-center gap-1 text-xs font-bold text-foreground'>
-                      <span className='w-2 h-2 bg-green-500 rounded-full animate-pulse' />
+                      <span className='w-2 h-2 bg-primary rounded-full animate-pulse' />
                       Presente
                     </span>
                     )
@@ -402,8 +402,8 @@ export default function DetalleInspeccionPage (): React.JSX.Element {
                   <div className='mt-1 pt-1 border-t border-border/50'>
                     {tempEnRango
                       ? (
-                        <span className='inline-flex items-center gap-1 text-xs font-semibold text-green-700'>
-                          <span className='w-1.5 h-1.5 bg-green-500 rounded-full' />
+                        <span className='inline-flex items-center gap-1 text-xs font-semibold text-primary'>
+                          <span className='w-1.5 h-1.5 bg-primary rounded-full' />
                           En rango
                         </span>
                         )
@@ -499,12 +499,12 @@ export default function DetalleInspeccionPage (): React.JSX.Element {
                     case 'media':
                       return {
                         border: 'border-border',
-                        badge: 'bg-amber-500/10 text-amber-700'
+                        badge: 'bg-primary/10 text-primary'
                       }
                     default:
                       return {
                         border: 'border-border',
-                        badge: 'bg-primary/10 text-primary'
+                        badge: 'bg-muted text-muted-foreground'
                       }
                   }
                 }
@@ -636,7 +636,7 @@ export default function DetalleInspeccionPage (): React.JSX.Element {
                     href={inspeccion.pdfGenerado}
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='flex-1 sm:flex-none px-2 md:px-3 py-1 md:py-1.5 bg-green-500 hover:bg-green-600 text-white rounded inline-flex items-center justify-center gap-1 transition-all text-xs font-medium'
+                    className='flex-1 sm:flex-none px-2 md:px-3 py-1 md:py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded inline-flex items-center justify-center gap-1 transition-colors text-xs font-medium'
                   >
                     <span>📄</span>
                     <span className='hidden sm:inline'>Servidor</span>

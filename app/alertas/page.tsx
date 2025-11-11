@@ -198,8 +198,8 @@ export default function AlertasPage(): React.JSX.Element {
       <DashboardLayout>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-            <p className="text-muted-foreground text-lg font-medium">Cargando alertas...</p>
+            <div className="animate-spin rounded-full h-12 w-12 md:h-14 md:w-14 border-4 border-primary border-t-transparent mx-auto mb-3"></div>
+            <p className="text-muted-foreground text-sm md:text-base font-medium">Cargando alertas...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -208,46 +208,46 @@ export default function AlertasPage(): React.JSX.Element {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Gestión de Alertas</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">Gestión de Alertas</h1>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">
               Monitorea y gestiona las alertas del sistema en tiempo real
             </p>
           </div>
           <button
             onClick={() => { void handleRefresh() }}
             disabled={refreshing}
-            className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 py-2 rounded-lg border border-border transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-muted-foreground px-3 py-1.5 rounded border border-border transition-colors font-medium text-xs disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon className={`h-3 w-3 md:h-4 md:w-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Refrescar</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
           {stats.map((stat) => (
-            <div key={stat.label} className="bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-border flex items-center gap-4 justify-between">
+            <div key={stat.label} className="bg-card rounded border border-border/50 hover:shadow-md transition-shadow p-3 md:p-4 flex items-center gap-3 justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+                <p className="text-xl md:text-2xl font-bold text-foreground">{stat.value}</p>
+                <p className="text-xs text-muted-foreground font-medium">{stat.label}</p>
               </div>
-              <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
+              <stat.icon className={`h-4 w-4 md:h-5 md:w-5 ${stat.iconColor}`} />
             </div>
           ))}
         </div>
 
-        <div className="bg-card p-6 rounded-lg shadow-sm border border-border">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <FunnelIcon className="h-5 w-5 text-primary" />
+        <div className="bg-card p-3 md:p-4 rounded border border-border/50">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-1.5 bg-primary/10 rounded">
+              <FunnelIcon className="h-4 w-4 text-primary" />
             </div>
-            <h2 className="text-lg font-bold text-foreground">Filtros</h2>
+            <h2 className="text-sm md:text-base font-bold text-foreground">Filtros</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-3">
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
+              <label className="block text-xs font-medium text-foreground mb-1.5">
                 Número de Inspección
               </label>
               <input
@@ -255,18 +255,18 @@ export default function AlertasPage(): React.JSX.Element {
                 value={searchInspeccionId}
                 onChange={(e) => { setSearchInspeccionId(e.target.value) }}
                 placeholder="Ej: 123"
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-foreground placeholder:text-muted-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
+              <label className="block text-xs font-medium text-foreground mb-1.5">
                 Criticidad
               </label>
               <select
                 value={filterCriticidad}
                 onChange={(e) => { setFilterCriticidad(e.target.value) }}
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
               >
                 <option value="">Todas</option>
                 <option value="alta">Alta</option>
@@ -276,13 +276,13 @@ export default function AlertasPage(): React.JSX.Element {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
+              <label className="block text-xs font-medium text-foreground mb-1.5">
                 Estado de Lectura
               </label>
               <select
                 value={filterLeida}
                 onChange={(e) => { setFilterLeida(e.target.value) }}
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
               >
                 <option value="">Todas</option>
                 <option value="no_leidas">No leídas</option>
@@ -291,13 +291,13 @@ export default function AlertasPage(): React.JSX.Element {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
+              <label className="block text-xs font-medium text-foreground mb-1.5">
                 Archivo
               </label>
               <select
                 value={filterArchivado}
                 onChange={(e) => { setFilterArchivado(e.target.value) }}
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-xs text-foreground"
               >
                 <option value="">Alertas Activas</option>
                 <option value="archivadas">Archivadas</option>
@@ -307,7 +307,7 @@ export default function AlertasPage(): React.JSX.Element {
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-2 md:space-y-3">
           {groupAlertasByInspeccion(filteredAlertas).map((alertasGrupo) => {
             const criticidadMasAlta = alertasGrupo.reduce((max, alerta) => {
               const orden = { alta: 3, media: 2, baja: 1 };
@@ -323,39 +323,39 @@ export default function AlertasPage(): React.JSX.Element {
             return (
               <div
                 key={`inspeccion-${primeraAlerta.inspeccionId}`}
-                className={`bg-card p-6 rounded-lg border-l-4 ${styles.border} hover:shadow-lg transition-shadow border border-border ${
+                className={`bg-card p-3 md:p-4 rounded border-l-4 ${styles.border} hover:shadow-lg transition-shadow border border-border/50 ${
                   todasLeidas ? 'opacity-70' : ''
                 }`}
               >
-                <div className="flex flex-col sm:flex-row items-start gap-4 sm:justify-between">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:justify-between">
                   <div className="flex-1 w-full sm:w-auto">
-                    <div className="flex flex-wrap items-center gap-2 mb-3">
-                      <div className={`p-2 rounded-lg ${styles.badge}`}>
-                        <IconComponent className="h-5 w-5" />
+                    <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                      <div className={`p-1.5 rounded ${styles.badge}`}>
+                        <IconComponent className="h-4 w-4" />
                       </div>
-                      <span className={`text-sm px-3 py-1 rounded-lg font-semibold ${styles.badge}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded font-semibold ${styles.badge}`}>
                         {criticidadMasAlta.toUpperCase()}
                       </span>
-                      <span className="text-sm font-medium text-muted-foreground">
+                      <span className="text-xs font-medium text-muted-foreground">
                         {alertasGrupo.length} {alertasGrupo.length === 1 ? 'alerta' : 'alertas'}
                       </span>
                       {todasLeidas && (
-                        <span className="flex items-center text-sm bg-primary/10 text-primary px-3 py-1 rounded-lg font-medium">
-                          <CheckCircleIcon className="h-4 w-4 mr-1" />
+                        <span className="flex items-center text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-medium">
+                          <CheckCircleIcon className="h-3 w-3 mr-1" />
                           Leídas
                         </span>
                       )}
                     </div>
 
-                    <div className="space-y-2 mb-3">
+                    <div className="space-y-1.5 mb-2">
                       {alertasGrupo.map((alerta) => (
-                        <div key={alerta.id} className="flex items-start gap-2">
-                          <span className={`inline-block w-2 h-2 rounded-full mt-2 ${
+                        <div key={alerta.id} className="flex items-start gap-1.5">
+                          <span className={`inline-block w-1.5 h-1.5 rounded-full mt-1.5 ${
                             alerta.criticidad === 'alta' ? 'bg-destructive' :
                             alerta.criticidad === 'media' ? 'bg-primary' : 'bg-muted-foreground'
                           }`}></span>
                           <div className="flex-1">
-                            <p className="text-foreground text-sm">
+                            <p className="text-foreground text-xs">
                               <span className="font-medium">{alerta.tipoAlerta.replace(/_/g, ' ')}:</span> {alerta.descripcion}
                             </p>
                           </div>
@@ -363,16 +363,16 @@ export default function AlertasPage(): React.JSX.Element {
                       ))}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                       <div className="flex items-center gap-1">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <span>{new Date(primeraAlerta.fechaCreacion).toLocaleDateString('es-ES')}</span>
                       </div>
                       <span>•</span>
                       <div className="flex items-center gap-1">
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <span>ID: {primeraAlerta.inspeccionId}</span>
@@ -380,13 +380,13 @@ export default function AlertasPage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                  <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
                     <a
                       href={`/inspecciones/${primeraAlerta.inspeccionId}`}
-                      className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 py-2 rounded-lg transition-colors font-semibold border border-border"
+                      className="flex items-center gap-1.5 bg-muted hover:bg-muted/80 text-muted-foreground px-3 py-1.5 rounded transition-colors font-medium border border-border text-xs"
                       title="Ver inspección"
                     >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
@@ -395,20 +395,20 @@ export default function AlertasPage(): React.JSX.Element {
                     {algunaNoLeida && (
                       <button
                         onClick={() => { void handleMarcarTodasLeidas(primeraAlerta.inspeccionId) }}
-                        className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-colors font-semibold"
+                        className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded transition-colors font-medium text-xs"
                         title="Marcar como leídas"
                       >
-                        <CheckCircleIcon className="h-4 w-4" />
+                        <CheckCircleIcon className="h-3 w-3" />
                         <span>Leídas</span>
                       </button>
                     )}
                     {!filterArchivado || filterArchivado === 'no_archivadas' ? (
                       <button
                         onClick={() => { void handleArchivarLote(primeraAlerta.inspeccionId) }}
-                        className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 py-2 rounded-lg transition-colors font-semibold border border-border"
+                        className="flex items-center gap-1.5 bg-muted hover:bg-muted/80 text-muted-foreground px-3 py-1.5 rounded transition-colors font-medium border border-border text-xs"
                         title="Archivar lote"
                       >
-                        <ArchiveBoxIcon className="h-4 w-4" />
+                        <ArchiveBoxIcon className="h-3 w-3" />
                         <span>Archivar</span>
                       </button>
                     ) : null}
@@ -419,9 +419,9 @@ export default function AlertasPage(): React.JSX.Element {
           })}
 
           {filteredAlertas.length === 0 && (
-            <div className="text-center py-16 bg-card rounded-lg border border-border">
-              <BellAlertIcon className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-muted-foreground font-medium">
+            <div className="text-center py-12 bg-card rounded border border-border/50">
+              <BellAlertIcon className="h-12 w-12 md:h-14 md:w-14 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-xs md:text-sm text-muted-foreground font-medium">
                 No se encontraron alertas
               </p>
             </div>

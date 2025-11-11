@@ -18,7 +18,11 @@
       "Bash(npx ts-standard:*)",
       "WebFetch(domain:tweakcn.com)",
       "Bash(rd /s /q .next)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(app/globals.css)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []
