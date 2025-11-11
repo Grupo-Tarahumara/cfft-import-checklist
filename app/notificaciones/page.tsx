@@ -7,7 +7,7 @@ import { Notificacion, Usuario } from '@/types';
 import { toast } from 'sonner';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
-export default function NotificacionesPage() {
+export default function NotificacionesPage(): React.JSX.Element {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [filteredNotificaciones, setFilteredNotificaciones] = useState<Notificacion[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -21,7 +21,7 @@ export default function NotificacionesPage() {
   const itemsPerPage = 30;
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, []);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function NotificacionesPage() {
     setCurrentPage(1);
   }, [filterUsuario, filterMetodo, filterEstado, filterArchivado, notificaciones]);
 
-  const loadData = async () => {
+  const loadData = async (): Promise<void> => {
     try {
       setLoading(true);
       const [notifData, usuariosData] = await Promise.all([
@@ -70,7 +70,7 @@ export default function NotificacionesPage() {
     }
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (): Promise<void> => {
     try {
       setRefreshing(true);
       await loadData();
@@ -82,7 +82,7 @@ export default function NotificacionesPage() {
   };
 
 
-  const handleMarcarEnviada = async (ids: number[]) => {
+  const handleMarcarEnviada = async (ids: number[]): Promise<void> => {
     try {
       await Promise.all(
         ids.map(id => authApi.patch(`/notificaciones/${id}/marcar-enviada`, {}))
@@ -108,7 +108,7 @@ export default function NotificacionesPage() {
     }
   };
 
-  const handleArchivar = async (ids: number[]) => {
+  const handleArchivar = async (ids: number[]): Promise<void> => {
     try {
       await Promise.all(
         ids.map(id => authApi.patch(`/notificaciones/${id}/archivar`, {}))
@@ -134,7 +134,15 @@ export default function NotificacionesPage() {
     }
   };
 
-  const groupedNotificaciones = () => {
+  const groupedNotificaciones = (): Array<{
+    alertaId: number;
+    usuarioId: number;
+    usuario?: Usuario;
+    metodos: string[];
+    fechaEnvio: string | null;
+    enviada: boolean;
+    ids: number[];
+  }> => {
     const grouped = new Map();
 
     filteredNotificaciones.forEach((notif) => {
@@ -194,9 +202,9 @@ export default function NotificacionesPage() {
             </p>
           </div>
           <button
-            onClick={handleRefresh}
+            onClick={() => { void handleRefresh() }}
             disabled={refreshing}
-            className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Refrescar</span>
@@ -212,7 +220,7 @@ export default function NotificacionesPage() {
               <select
                 value={filterUsuario}
                 onChange={(e) => setFilterUsuario(e.target.value)}
-                className="w-full px-3 py-1.5 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
               >
                 <option value="">Todos</option>
                 {usuarios.map((usuario) => (
@@ -230,7 +238,7 @@ export default function NotificacionesPage() {
               <select
                 value={filterMetodo}
                 onChange={(e) => setFilterMetodo(e.target.value)}
-                className="w-full px-3 py-1.5 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
               >
                 <option value="">Todos</option>
                 <option value="email">Email</option>
@@ -246,7 +254,7 @@ export default function NotificacionesPage() {
               <select
                 value={filterEstado}
                 onChange={(e) => setFilterEstado(e.target.value)}
-                className="w-full px-3 py-1.5 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
               >
                 <option value="">Todas</option>
                 <option value="pendientes">Pendientes</option>
@@ -261,7 +269,7 @@ export default function NotificacionesPage() {
               <select
                 value={filterArchivado}
                 onChange={(e) => setFilterArchivado(e.target.value)}
-                className="w-full px-3 py-1.5 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground"
+                className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
               >
                 <option value="activas">Activas</option>
                 <option value="archivadas">Archivadas</option>
@@ -272,17 +280,17 @@ export default function NotificacionesPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3">
-          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-all duration-300 p-3 md:p-4 border border-border">
+          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 md:p-4 border border-border">
             <p className="text-xs text-muted-foreground font-medium">Total</p>
             <p className="text-lg md:text-xl font-bold text-foreground">{notificaciones.length}</p>
           </div>
-          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-all duration-300 p-3 md:p-4 border border-border">
-            <p className="text-xs text-amber-700 font-medium">Pendientes</p>
-            <p className="text-lg md:text-xl font-bold text-amber-700">
+          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 md:p-4 border border-border">
+            <p className="text-xs text-muted-foreground font-medium">Pendientes</p>
+            <p className="text-lg md:text-xl font-bold text-muted-foreground">
               {notificaciones.filter((n) => !n.enviada).length}
             </p>
           </div>
-          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-all duration-300 p-3 md:p-4 border border-border">
+          <div className="bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 md:p-4 border border-border">
             <p className="text-xs text-primary font-medium">Enviadas</p>
             <p className="text-lg md:text-xl font-bold text-primary">
               {notificaciones.filter((n) => n.enviada).length}
@@ -293,7 +301,7 @@ export default function NotificacionesPage() {
         <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
-            <thead className="bg-muted/30">
+            <thead className="bg-muted">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Usuario
@@ -324,12 +332,7 @@ export default function NotificacionesPage() {
                   <td className="px-6 py-3 whitespace-nowrap">
                     <div className="flex flex-wrap gap-1.5">
                       {group.metodos.map((metodo: string, idx: number) => (
-                        <span key={idx} className={`px-2 py-0.5 inline-flex text-xs leading-4 font-medium rounded ${
-                          metodo === 'email' ? 'bg-blue-500/10 text-blue-700' :
-                          metodo === 'sistema' ? 'bg-purple-500/10 text-purple-700' :
-                          metodo === 'push' ? 'bg-green-500/10 text-green-700' :
-                          'bg-muted/30 text-foreground'
-                        }`}>
+                        <span key={idx} className="px-2 py-0.5 inline-flex text-xs leading-4 font-medium rounded bg-muted text-foreground border border-border">
                           {metodo.toUpperCase()}
                         </span>
                       ))}
@@ -337,10 +340,10 @@ export default function NotificacionesPage() {
                   </td>
                   <td className="px-6 py-3 whitespace-nowrap">
                     <span
-                      className={`px-2 py-0.5 inline-flex text-xs leading-4 font-medium rounded ${
+                      className={`px-2 py-0.5 inline-flex text-xs leading-4 font-medium rounded border ${
                         group.enviada
-                          ? 'bg-primary/10 text-primary'
-                          : 'bg-amber-500/10 text-amber-700'
+                          ? 'bg-primary/10 text-primary border-primary/20'
+                          : 'bg-muted text-muted-foreground border-border'
                       }`}
                     >
                       {group.enviada ? 'Enviada' : 'Pendiente'}
@@ -359,7 +362,7 @@ export default function NotificacionesPage() {
                       {!group.enviada && (
                         <button
                           onClick={() => {
-                            handleMarcarEnviada(group.ids);
+                            void handleMarcarEnviada(group.ids);
                           }}
                           className="text-primary hover:text-primary/80 transition-colors"
                         >
@@ -368,7 +371,7 @@ export default function NotificacionesPage() {
                       )}
                       <button
                         onClick={() => {
-                          handleArchivar(group.ids);
+                          void handleArchivar(group.ids);
                         }}
                         className="text-muted-foreground hover:text-foreground transition-colors"
                       >

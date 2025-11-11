@@ -8,7 +8,7 @@ import { authApi } from '@/lib/api-auth';
 import { Usuario, CreateUsuarioDto } from '@/types';
 import { EyeIcon, EyeSlashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
-export default function UsuariosPage() {
+export default function UsuariosPage(): React.JSX.Element {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -34,10 +34,10 @@ export default function UsuariosPage() {
   });
 
   useEffect(() => {
-    loadUsuarios();
+    void loadUsuarios();
   }, []);
 
-  const loadUsuarios = async () => {
+  const loadUsuarios = async (): Promise<void> => {
     try {
       setLoading(true);
       const data = await authApi.get<Usuario[]>('/usuarios');
@@ -49,7 +49,7 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (): Promise<void> => {
     try {
       setRefreshing(true);
       await loadUsuarios();
@@ -60,7 +60,7 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     const newErrors: { username?: string; nombre?: string } = {};
 
@@ -111,7 +111,7 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleEdit = (usuario: Usuario) => {
+  const handleEdit = (usuario: Usuario): void => {
     setEditingUsuario(usuario);
     setFormData({
       nombre: usuario.nombre,
@@ -126,7 +126,7 @@ export default function UsuariosPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number): Promise<void> => {
     if (!confirm('¿Estás seguro de que deseas desactivar este usuario?')) return;
 
     try {
@@ -138,7 +138,7 @@ export default function UsuariosPage() {
     }
   };
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     setFormData({
       nombre: '',
       username: '',
@@ -190,16 +190,16 @@ export default function UsuariosPage() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleRefresh}
+              onClick={() => { void handleRefresh() }}
               disabled={refreshing}
-              className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refrescar</span>
             </button>
             <button
               onClick={() => setShowForm(!showForm)}
-              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 md:px-6 py-2 md:py-2.5 rounded-lg transition-all duration-300 font-semibold text-sm"
+              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 md:px-6 py-2 md:py-2.5 rounded-lg transition-colors font-semibold text-sm"
             >
               <svg className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {showForm ? (
@@ -230,9 +230,9 @@ export default function UsuariosPage() {
                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value.slice(0, 40) })}
                     required
                     maxLength={40}
-                    className={`w-full px-3 py-1.5 bg-muted/20 border ${
+                    className={`w-full px-3 py-1.5 bg-background border ${
                       errors.nombre ? 'border-destructive/50' : 'border-border'
-                    } rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-sm text-foreground`}
+                    } rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground`}
                     placeholder="Ej: Juan Pérez"
                   />
                   {errors.nombre && (
@@ -241,7 +241,7 @@ export default function UsuariosPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Nombre de Usuario
                   </label>
                   <input
@@ -251,18 +251,18 @@ export default function UsuariosPage() {
                     required
                     disabled={!!editingUsuario}
                     maxLength={20}
-                    className={`w-full px-4 py-3 bg-white/50 backdrop-blur-sm border ${
-                      errors.username ? 'border-red-300' : 'border-gray-200'
-                    } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                    className={`w-full px-3 py-1.5 bg-background border ${
+                      errors.username ? 'border-destructive/50' : 'border-border'
+                    } rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground disabled:bg-muted disabled:cursor-not-allowed`}
                     placeholder="usuario_login"
                   />
                   {errors.username && (
-                    <p className="text-xs text-red-600 mt-1">{errors.username}</p>
+                    <p className="text-xs text-destructive mt-0.5">{errors.username}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Correo Electrónico
                   </label>
                   <input
@@ -271,13 +271,13 @@ export default function UsuariosPage() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value.slice(0, 40) })}
                     required
                     maxLength={40}
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
                     placeholder="usuario@ejemplo.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     {editingUsuario ? 'Nueva Contraseña (dejar vacío para no cambiar)' : 'Contraseña'}
                   </label>
                   <div className="relative">
@@ -287,15 +287,15 @@ export default function UsuariosPage() {
                       onChange={(e) => setFormData({ ...formData, password: e.target.value.slice(0, 20) })}
                       required={!editingUsuario}
                       maxLength={20}
-                      className={`w-full px-4 py-3 pr-10 bg-white/50 backdrop-blur-sm border ${
-                        errors.password ? 'border-red-300' : 'border-gray-200'
-                      } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                      className={`w-full px-3 py-1.5 pr-10 bg-background border ${
+                        errors.password ? 'border-destructive/50' : 'border-border'
+                      } rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground`}
                       placeholder="••••••••"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                      className="absolute right-3 top-1.5 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {showPassword ? (
                         <EyeSlashIcon className="w-5 h-5" />
@@ -308,7 +308,7 @@ export default function UsuariosPage() {
 
                 {!editingUsuario && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-xs font-semibold text-foreground mb-1">
                       Confirmar Contraseña
                     </label>
                     <div className="relative">
@@ -318,17 +318,17 @@ export default function UsuariosPage() {
                         onChange={(e) => setConfirmPassword(e.target.value.slice(0, 20))}
                         required={!editingUsuario}
                         maxLength={20}
-                        className={`w-full px-4 py-3 pr-10 bg-white/50 backdrop-blur-sm border ${
+                        className={`w-full px-3 py-1.5 pr-10 bg-background border ${
                           confirmPassword && confirmPassword !== formData.password
-                            ? 'border-red-300'
-                            : 'border-gray-200'
-                        } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                            ? 'border-destructive/50'
+                            : 'border-border'
+                        } rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground`}
                         placeholder="••••••••"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                        className="absolute right-3 top-1.5 text-muted-foreground hover:text-foreground transition-colors"
                       >
                         {showConfirmPassword ? (
                           <EyeSlashIcon className="w-5 h-5" />
@@ -338,13 +338,13 @@ export default function UsuariosPage() {
                       </button>
                     </div>
                     {confirmPassword && confirmPassword !== formData.password && (
-                      <p className="text-xs text-red-600 mt-1">Las contraseñas no coinciden</p>
+                      <p className="text-xs text-destructive mt-0.5">Las contraseñas no coinciden</p>
                     )}
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Teléfono
                   </label>
                   <input
@@ -352,20 +352,20 @@ export default function UsuariosPage() {
                     value={formData.telefono}
                     onChange={(e) => setFormData({ ...formData, telefono: e.target.value.slice(0, 12) })}
                     maxLength={12}
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
                     placeholder="+56 9 1234 5678"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Área de Trabajo
                   </label>
                   <select
                     value={formData.area}
                     onChange={(e) => setFormData({ ...formData, area: e.target.value })}
                     required
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
                   >
                     <option value="Comercio Exterior">Comercio Exterior</option>
                     <option value="Logística Nacional">Logística Nacional</option>
@@ -374,14 +374,14 @@ export default function UsuariosPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Rol
                   </label>
                   <select
                     value={formData.rol || 'user'}
                     onChange={(e) => setFormData({ ...formData, rol: e.target.value as 'admin' | 'user' })}
                     required
-                    className="w-full px-4 py-3 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
                   >
                     <option value="user">Usuario Normal</option>
                     <option value="admin">Administrador</option>
@@ -394,9 +394,9 @@ export default function UsuariosPage() {
                     id="activo"
                     checked={formData.activo}
                     onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
-                    className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-5 w-5 text-primary focus:ring-primary border-border rounded"
                   />
-                  <label htmlFor="activo" className="ml-3 block text-sm font-semibold text-gray-700">
+                  <label htmlFor="activo" className="ml-3 block text-xs font-semibold text-foreground">
                     Usuario Activo
                   </label>
                 </div>
@@ -406,13 +406,13 @@ export default function UsuariosPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-5 md:px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium text-sm md:text-base"
+                  className="px-5 md:px-6 py-2 md:py-2.5 border border-border rounded-lg text-foreground hover:bg-muted transition-colors font-medium text-sm"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 md:px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
+                  className="px-5 md:px-6 py-2 md:py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold text-sm"
                 >
                   {editingUsuario ? 'Actualizar Usuario' : 'Crear Usuario'}
                 </button>
@@ -424,7 +424,7 @@ export default function UsuariosPage() {
         <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/30">
+              <thead className="bg-muted">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
@@ -461,14 +461,14 @@ export default function UsuariosPage() {
                   <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {paginatedUsuarios.map((usuario) => (
-                  <tr key={usuario.id} className="hover:bg-muted/10 transition-colors duration-200">
+                  <tr key={usuario.id} className="hover:bg-muted/10 transition-colors">
                     <td className="px-6 py-3 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center mr-3">
@@ -502,14 +502,14 @@ export default function UsuariosPage() {
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
                           usuario.activo
-                            ? 'bg-green-500/10 text-green-700'
-                            : 'bg-destructive/10 text-destructive'
+                            ? 'bg-primary/10 text-primary border-primary/20'
+                            : 'bg-destructive/10 text-destructive border-destructive/20'
                         }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                          usuario.activo ? 'bg-green-600' : 'bg-destructive'
+                          usuario.activo ? 'bg-primary' : 'bg-destructive'
                         }`}></span>
                         {usuario.activo ? 'Activo' : 'Inactivo'}
                       </span>
@@ -531,7 +531,7 @@ export default function UsuariosPage() {
                         </button>
                         <button
                           onClick={() => handleEdit(usuario)}
-                          className="text-blue-600/60 hover:text-blue-600 transition-colors"
+                          className="text-primary hover:text-primary/80 transition-colors"
                           title="Editar"
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -6,7 +6,7 @@ import { authApi } from '@/lib/api-auth';
 import { PuntoInspeccion, CreatePuntoInspeccionDto } from '@/types';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
-export default function PuntosInspeccionPage() {
+export default function PuntosInspeccionPage(): React.JSX.Element {
   const [puntos, setPuntos] = useState<PuntoInspeccion[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -22,10 +22,10 @@ export default function PuntosInspeccionPage() {
   });
 
   useEffect(() => {
-    loadPuntos();
+    void loadPuntos();
   }, []);
 
-  const loadPuntos = async () => {
+  const loadPuntos = async (): Promise<void> => {
     try {
       setLoading(true);
       const data = await authApi.get<PuntoInspeccion[]>('/puntos-inspeccion');
@@ -37,7 +37,7 @@ export default function PuntosInspeccionPage() {
     }
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (): Promise<void> => {
     try {
       setRefreshing(true);
       await loadPuntos();
@@ -48,7 +48,7 @@ export default function PuntosInspeccionPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     const newErrors: { nombre?: string } = {};
 
@@ -79,7 +79,7 @@ export default function PuntosInspeccionPage() {
     }
   };
 
-  const handleEdit = (punto: PuntoInspeccion) => {
+  const handleEdit = (punto: PuntoInspeccion): void => {
     setEditingPunto(punto);
     setFormData({
       nombre: punto.nombre,
@@ -89,7 +89,7 @@ export default function PuntosInspeccionPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number): Promise<void> => {
     if (!confirm('¿Estás seguro de que deseas desactivar este punto de inspección?')) return;
 
     try {
@@ -101,7 +101,7 @@ export default function PuntosInspeccionPage() {
     }
   };
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     setFormData({
       nombre: '',
       ubicacion: '',
@@ -122,11 +122,8 @@ export default function PuntosInspeccionPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary mx-auto"></div>
-              <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-4 border-primary/10"></div>
-            </div>
-            <p className="mt-6 text-muted-foreground text-lg font-medium">Cargando puntos de inspección...</p>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+            <p className="text-muted-foreground text-lg font-medium">Cargando puntos de inspección...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -147,16 +144,16 @@ export default function PuntosInspeccionPage() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleRefresh}
+              onClick={() => { void handleRefresh() }}
               disabled={refreshing}
-              className="group flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refrescar</span>
             </button>
             <button
               onClick={() => setShowForm(!showForm)}
-              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 md:px-6 py-2 md:py-2.5 rounded-lg transition-all duration-300 font-semibold text-sm"
+              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 md:px-6 py-2 md:py-2.5 rounded-lg transition-colors font-semibold text-sm"
             >
               <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {showForm ? (
@@ -172,19 +169,13 @@ export default function PuntosInspeccionPage() {
 
         {showForm && (
           <div className="bg-card p-3 md:p-4 rounded-lg shadow-sm border border-border">
-            <h2 className="text-sm md:text-base font-bold text-foreground mb-3 md:mb-4 flex items-center space-x-3">
-              <div className="p-2 bg-primary rounded-xl">
-                <svg className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <span>{editingPunto ? 'Editar Punto de Inspección' : 'Crear Nuevo Punto de Inspección'}</span>
+            <h2 className="text-sm md:text-base font-bold text-foreground mb-3 md:mb-4">
+              {editingPunto ? 'Editar Punto de Inspección' : 'Crear Nuevo Punto de Inspección'}
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Nombre del Punto
                   </label>
                   <input
@@ -194,17 +185,17 @@ export default function PuntosInspeccionPage() {
                     required
                     maxLength={40}
                     placeholder="Ej: Puerto Principal, Almacén Central"
-                    className={`w-full px-4 py-3 bg-muted/20 border ${
-                      errors.nombre ? 'border-destructive' : 'border-border'
-                    } rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200`}
+                    className={`w-full px-3 py-1.5 bg-background border ${
+                      errors.nombre ? 'border-destructive/50' : 'border-border'
+                    } rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground`}
                   />
                   {errors.nombre && (
-                    <p className="text-xs text-destructive mt-1">{errors.nombre}</p>
+                    <p className="text-xs text-destructive mt-0.5">{errors.nombre}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Ubicación
                   </label>
                   <input
@@ -214,7 +205,7 @@ export default function PuntosInspeccionPage() {
                     required
                     maxLength={50}
                     placeholder="Ej: Av. Principal 123, Zona Industrial"
-                    className="w-full px-4 py-3 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
                   />
                 </div>
 
@@ -244,13 +235,13 @@ export default function PuntosInspeccionPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-5 md:px-6 py-3 bg-muted hover:bg-muted/80 text-muted-foreground border border-border rounded-xl transition-all duration-200 font-medium text-sm md:text-base"
+                  className="px-5 md:px-6 py-2 md:py-2.5 border border-border rounded-lg text-foreground hover:bg-muted transition-colors font-medium text-sm"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 md:px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
+                  className="px-5 md:px-6 py-2 md:py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold text-sm"
                 >
                   {editingPunto ? 'Actualizar Punto' : 'Crear Punto'}
                 </button>
@@ -262,7 +253,7 @@ export default function PuntosInspeccionPage() {
         <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/30">
+              <thead className="bg-muted">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
@@ -291,7 +282,7 @@ export default function PuntosInspeccionPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {paginatedPuntos.map((punto) => (
-                  <tr key={punto.id} className="hover:bg-muted/10 transition-colors duration-200 group">
+                  <tr key={punto.id} className="hover:bg-muted/10 transition-colors">
                     <td className="px-6 py-3 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center mr-3">
@@ -310,14 +301,14 @@ export default function PuntosInspeccionPage() {
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
                           punto.activo
-                            ? 'bg-green-500/10 text-green-700'
-                            : 'bg-destructive/10 text-destructive'
+                            ? 'bg-primary/10 text-primary border-primary/20'
+                            : 'bg-destructive/10 text-destructive border-destructive/20'
                         }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                          punto.activo ? 'bg-green-600' : 'bg-destructive'
+                          punto.activo ? 'bg-primary' : 'bg-destructive'
                         }`}></span>
                         {punto.activo ? 'Activo' : 'Inactivo'}
                       </span>
@@ -326,7 +317,7 @@ export default function PuntosInspeccionPage() {
                       <div className="flex flex-col sm:flex-row items-center justify-end gap-1">
                         <button
                           onClick={() => handleEdit(punto)}
-                          className="text-blue-600/60 hover:text-blue-600 transition-colors"
+                          className="text-primary hover:text-primary/80 transition-colors"
                           title="Editar"
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -351,12 +342,12 @@ export default function PuntosInspeccionPage() {
           </div>
 
           {puntos.length === 0 && (
-            <div className="text-center py-16 bg-white/50">
-              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center py-16 bg-muted">
+              <svg className="w-16 h-16 text-muted-foreground mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <p className="text-gray-500 text-lg font-medium">
+              <p className="text-muted-foreground text-lg font-medium">
                 No hay puntos de inspección registrados
               </p>
             </div>

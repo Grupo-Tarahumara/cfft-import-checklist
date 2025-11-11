@@ -6,7 +6,7 @@ import { authApi } from '@/lib/api-auth';
 import { Proveedor, CreateProveedorDto } from '@/types';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
-export default function ProveedoresPage() {
+export default function ProveedoresPage(): React.JSX.Element {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -23,10 +23,10 @@ export default function ProveedoresPage() {
   });
 
   useEffect(() => {
-    loadProveedores();
+    void loadProveedores();
   }, []);
 
-  const loadProveedores = async () => {
+  const loadProveedores = async (): Promise<void> => {
     try {
       setLoading(true);
       const data = await authApi.get<Proveedor[]>('/proveedores');
@@ -38,7 +38,7 @@ export default function ProveedoresPage() {
     }
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (): Promise<void> => {
     try {
       setRefreshing(true);
       await loadProveedores();
@@ -49,7 +49,7 @@ export default function ProveedoresPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     const newErrors: { nombre?: string } = {};
 
@@ -80,7 +80,7 @@ export default function ProveedoresPage() {
     }
   };
 
-  const handleEdit = (proveedor: Proveedor) => {
+  const handleEdit = (proveedor: Proveedor): void => {
     setEditingProveedor(proveedor);
     setFormData({
       nombre: proveedor.nombre,
@@ -91,7 +91,7 @@ export default function ProveedoresPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number): Promise<void> => {
     if (!confirm('¿Estás seguro de que deseas desactivar este proveedor?')) return;
 
     try {
@@ -103,7 +103,7 @@ export default function ProveedoresPage() {
     }
   };
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     setFormData({
       nombre: '',
       codigo: '',
@@ -125,11 +125,8 @@ export default function ProveedoresPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary mx-auto"></div>
-              <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-4 border-primary/10"></div>
-            </div>
-            <p className="mt-6 text-muted-foreground text-lg font-medium">Cargando proveedores...</p>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+            <p className="text-muted-foreground text-lg font-medium">Cargando proveedores...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -150,16 +147,16 @@ export default function ProveedoresPage() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleRefresh}
+              onClick={() => { void handleRefresh() }}
               disabled={refreshing}
-              className="group flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center space-x-2 bg-muted hover:bg-muted/80 text-muted-foreground px-4 md:px-5 py-2 md:py-2.5 rounded-lg border border-border transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refrescar</span>
             </button>
             <button
               onClick={() => setShowForm(!showForm)}
-              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 md:px-6 py-2 md:py-2.5 rounded-lg transition-all duration-300 font-semibold text-sm"
+              className="flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 md:px-6 py-2 md:py-2.5 rounded-lg transition-colors font-semibold text-sm"
             >
             <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {showForm ? (
@@ -175,18 +172,13 @@ export default function ProveedoresPage() {
 
         {showForm && (
           <div className="bg-card p-3 md:p-4 rounded-lg shadow-sm border border-border">
-            <h2 className="text-sm md:text-base font-bold text-foreground mb-3 md:mb-4 flex items-center space-x-3">
-              <div className="p-2 bg-primary rounded-xl">
-                <svg className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <span>{editingProveedor ? 'Editar Proveedor' : 'Crear Nuevo Proveedor'}</span>
+            <h2 className="text-sm md:text-base font-bold text-foreground mb-3 md:mb-4">
+              {editingProveedor ? 'Editar Proveedor' : 'Crear Nuevo Proveedor'}
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Nombre del Proveedor
                   </label>
                   <input
@@ -195,18 +187,18 @@ export default function ProveedoresPage() {
                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value.slice(0, 40) })}
                     required
                     maxLength={40}
-                    className={`w-full px-4 py-3 bg-muted/20 border ${
-                      errors.nombre ? 'border-destructive' : 'border-border'
-                    } rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200`}
+                    className={`w-full px-3 py-1.5 bg-background border ${
+                      errors.nombre ? 'border-destructive/50' : 'border-border'
+                    } rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground`}
                     placeholder="Ej: Frutas del Valle S.A."
                   />
                   {errors.nombre && (
-                    <p className="text-xs text-destructive mt-1">{errors.nombre}</p>
+                    <p className="text-xs text-destructive mt-0.5">{errors.nombre}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Código
                   </label>
                   <input
@@ -215,13 +207,13 @@ export default function ProveedoresPage() {
                     onChange={(e) => setFormData({ ...formData, codigo: e.target.value.slice(0, 30) })}
                     required
                     maxLength={30}
-                    className="w-full px-4 py-3 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
                     placeholder="Ej: FDV001"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-foreground mb-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     País de Origen
                   </label>
                   <input
@@ -230,7 +222,7 @@ export default function ProveedoresPage() {
                     onChange={(e) => setFormData({ ...formData, pais: e.target.value.slice(0, 30) })}
                     required
                     maxLength={30}
-                    className="w-full px-4 py-3 bg-muted/20 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                    className="w-full px-3 py-1.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm text-foreground"
                     placeholder="Ej: Chile"
                   />
                 </div>
@@ -253,13 +245,13 @@ export default function ProveedoresPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-5 md:px-6 py-3 bg-muted hover:bg-muted/80 text-muted-foreground border border-border rounded-xl transition-all duration-200 font-medium text-sm md:text-base"
+                  className="px-5 md:px-6 py-2 md:py-2.5 border border-border rounded-lg text-foreground hover:bg-muted transition-colors font-medium text-sm"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 md:px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl hover:shadow-xl transition-all duration-300 shadow-lg font-semibold text-sm md:text-base"
+                  className="px-5 md:px-6 py-2 md:py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold text-sm"
                 >
                   {editingProveedor ? 'Actualizar Proveedor' : 'Crear Proveedor'}
                 </button>
@@ -271,7 +263,7 @@ export default function ProveedoresPage() {
         <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/30">
+              <thead className="bg-muted">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
@@ -307,7 +299,7 @@ export default function ProveedoresPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {paginatedProveedores.map((proveedor) => (
-                  <tr key={proveedor.id} className="hover:bg-muted/10 transition-colors duration-200 group">
+                  <tr key={proveedor.id} className="hover:bg-muted/10 transition-colors">
                     <td className="px-6 py-3 whitespace-nowrap">
                       <span className="inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold bg-muted text-muted-foreground">
                         {proveedor.codigo}
@@ -330,14 +322,14 @@ export default function ProveedoresPage() {
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
                           proveedor.activo
-                            ? 'bg-green-500/10 text-green-700'
-                            : 'bg-destructive/10 text-destructive'
+                            ? 'bg-primary/10 text-primary border-primary/20'
+                            : 'bg-destructive/10 text-destructive border-destructive/20'
                         }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                          proveedor.activo ? 'bg-green-600' : 'bg-destructive'
+                          proveedor.activo ? 'bg-primary' : 'bg-destructive'
                         }`}></span>
                         {proveedor.activo ? 'Activo' : 'Inactivo'}
                       </span>
@@ -346,7 +338,7 @@ export default function ProveedoresPage() {
                       <div className="flex flex-col sm:flex-row items-center justify-end gap-1">
                         <button
                           onClick={() => handleEdit(proveedor)}
-                          className="text-blue-600/60 hover:text-blue-600 transition-colors"
+                          className="text-primary hover:text-primary/80 transition-colors"
                           title="Editar"
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
