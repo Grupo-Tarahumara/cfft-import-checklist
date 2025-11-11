@@ -64,7 +64,7 @@ export default function Sidebar() {
     if (isMobileOpen) {
       toggleMobileSidebar();
     }
-  }, [pathname, isMobileOpen, toggleMobileSidebar]);
+  }, [pathname]);
 
 
   useEffect(() => {

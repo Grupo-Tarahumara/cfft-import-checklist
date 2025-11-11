@@ -22,7 +22,8 @@
       "Bash(app/globals.css)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(temp_sexta_sidebar.txt)"
     ],
     "deny": [],
     "ask": []

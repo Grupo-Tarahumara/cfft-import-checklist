@@ -20,6 +20,7 @@ import {
   PhotoIcon,
   PlusIcon,
   XMarkIcon,
+  CameraIcon,
 } from '@heroicons/react/24/outline';
 
 export default function NuevaInspeccionPage(): React.JSX.Element {
@@ -37,6 +38,11 @@ export default function NuevaInspeccionPage(): React.JSX.Element {
   const [fotosOpcionales, setFotosOpcionales] = useState<File[]>([]);
 
   const [unidadTemperatura, setUnidadTemperatura] = useState<'celsius' | 'fahrenheit'>('celsius');
+
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState<number | null>(null);
+  const [isOptionalPhoto, setIsOptionalPhoto] = useState(false);
 
 
   const [formData, setFormData] = useState<CreateInspeccionDto>({
@@ -114,6 +120,21 @@ export default function NuevaInspeccionPage(): React.JSX.Element {
     });
   }, [formData.termografoOrigen, formData.termografoNacional]);
 
+  useEffect(() => {
+    const video = document.getElementById('camera-video') as HTMLVideoElement;
+    if (video && cameraStream) {
+      video.srcObject = cameraStream;
+    }
+  }, [cameraStream]);
+
+  useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [cameraStream]);
+
   const loadCatalogs = async (): Promise<void> => {
     try {
       setLoading(true);
@@ -155,6 +176,59 @@ export default function NuevaInspeccionPage(): React.JSX.Element {
   const handleRemoveFotoOpcional = (index: number): void => {
     const newFotos = fotosOpcionales.filter((_, i) => i !== index);
     setFotosOpcionales(newFotos);
+  };
+
+  const openCamera = async (index: number, optional = false): Promise<void> => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+        audio: false
+      });
+      setCameraStream(stream);
+      setCurrentPhotoIndex(index);
+      setIsOptionalPhoto(optional);
+      setShowCamera(true);
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      toast.error('Error al acceder a la cámara', {
+        description: 'Por favor, verifica los permisos de la cámara',
+      });
+    }
+  };
+
+  const closeCamera = (): void => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setShowCamera(false);
+    setCurrentPhotoIndex(null);
+    setIsOptionalPhoto(false);
+  };
+
+  const capturePhoto = (): void => {
+    const video = document.getElementById('camera-video') as HTMLVideoElement;
+    if (!video) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0);
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const file = new File([blob], `foto-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        if (isOptionalPhoto) {
+          handleAddFotoOpcional(file);
+        } else if (currentPhotoIndex !== null) {
+          handleFotoRequeridaChange(currentPhotoIndex, file);
+        }
+        closeCamera();
+      }
+    }, 'image/jpeg', 0.95);
   };
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
@@ -752,20 +826,14 @@ export default function NuevaInspeccionPage(): React.JSX.Element {
                         </button>
                       </div>
                     ) : (
-                      <label className="flex flex-col items-center justify-center w-full h-32 md:h-40 border-2 border-dashed border-border/50 rounded cursor-pointer bg-muted/20 hover:bg-muted/40 transition-colors">
-                        <PhotoIcon className="h-8 w-8 md:h-10 md:w-10 text-muted-foreground mb-1 md:mb-2" />
-                        <span className="text-xs text-muted-foreground">Seleccionar foto</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              handleFotoRequeridaChange(item!.index, e.target.files[0]);
-                            }
-                          }}
-                          className="hidden"
-                        />
-                      </label>
+                      <button
+                        type="button"
+                        onClick={() => { void openCamera(item!.index) }}
+                        className="flex flex-col items-center justify-center w-full h-32 md:h-40 border-2 border-dashed border-border/50 rounded cursor-pointer bg-muted/20 hover:bg-muted/40 transition-colors"
+                      >
+                        <CameraIcon className="h-8 w-8 md:h-10 md:w-10 text-muted-foreground mb-1 md:mb-2" />
+                        <span className="text-xs text-muted-foreground">Tomar foto</span>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -779,22 +847,14 @@ export default function NuevaInspeccionPage(): React.JSX.Element {
                 <h2 className="text-sm md:text-base font-bold text-foreground">Fotografías Opcionales</h2>
                 <p className="text-xs text-muted-foreground">Incidencias, daños u otras observaciones visuales</p>
               </div>
-              <label className="cursor-pointer">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-muted hover:bg-muted/80 rounded transition-colors border border-border/50 text-xs font-semibold text-foreground">
-                  <PlusIcon className="h-4 w-4" />
-                  <span>Añadir foto</span>
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      handleAddFotoOpcional(e.target.files[0]);
-                    }
-                  }}
-                  className="hidden"
-                />
-              </label>
+              <button
+                type="button"
+                onClick={() => { void openCamera(-1, true) }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-muted hover:bg-muted/80 rounded transition-colors border border-border/50 text-xs font-semibold text-foreground"
+              >
+                <CameraIcon className="h-4 w-4" />
+                <span>Tomar foto</span>
+              </button>
             </div>
 
             {fotosOpcionales.length > 0 && (
@@ -872,6 +932,52 @@ export default function NuevaInspeccionPage(): React.JSX.Element {
             </button>
           </div>
         </form>
+
+        {showCamera && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+            <div className="relative w-full max-w-2xl mx-4">
+              <div className="bg-card rounded border border-border/50 overflow-hidden">
+                <div className="flex items-center justify-between p-3 border-b border-border/50">
+                  <h3 className="text-sm font-bold text-foreground">Capturar Fotografía</h3>
+                  <button
+                    onClick={closeCamera}
+                    className="p-1.5 hover:bg-muted rounded transition-colors"
+                    type="button"
+                  >
+                    <XMarkIcon className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </div>
+
+                <div className="relative bg-black">
+                  <video
+                    id="camera-video"
+                    autoPlay
+                    playsInline
+                    className="w-full h-auto"
+                  />
+                </div>
+
+                <div className="flex items-center justify-center gap-3 p-4 bg-muted/20">
+                  <button
+                    onClick={closeCamera}
+                    type="button"
+                    className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded transition-colors text-xs font-semibold"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={capturePhoto}
+                    type="button"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded transition-colors text-xs font-semibold"
+                  >
+                    <CameraIcon className="h-4 w-4" />
+                    <span>Capturar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
